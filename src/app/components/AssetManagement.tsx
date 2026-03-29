@@ -1,0 +1,889 @@
+import { useState } from "react";
+import {
+  Package,
+  Plus,
+  Filter,
+  Download,
+  FileText,
+  X,
+  Upload,
+  Search,
+  Edit2,
+  Eye,
+  Trash2,
+  Calendar,
+  User,
+  AlertCircle,
+  ChevronDown,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
+
+export function AssetManagement() {
+  const [activeTab, setActiveTab] = useState("inventory");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+
+  const assets = [
+    {
+      id: "AST-001",
+      name: "Rice Mill Machine",
+      type: "Equipment",
+      serialNumber: "RMM-2024-001",
+      acquisitionDate: "2024-01-15",
+      acquisitionMethod: "Donated by PEARL",
+      value: "$12,000",
+      location: "Main Storage Facility",
+      custodian: "Sok Pisey",
+      condition: "Good",
+      pearlFunded: true,
+      status: "Verified",
+      image:
+        "https://images.unsplash.com/photo-1581092160562-40aa08e78837?auto=format&fit=crop&w=128&h=128&q=80",
+    },
+    {
+      id: "AST-002",
+      name: "Delivery Truck",
+      type: "Vehicle",
+      serialNumber: "DT-2023-045",
+      acquisitionDate: "2023-08-20",
+      acquisitionMethod: "Own Funds",
+      value: "$28,000",
+      location: "Vehicle Depot",
+      custodian: "Lim Dara",
+      condition: "Fair",
+      pearlFunded: false,
+      status: "Verified",
+      image:
+        "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=128&h=128&q=80",
+    },
+    {
+      id: "AST-003",
+      name: "Water Pump System",
+      type: "Equipment",
+      serialNumber: "WPS-2024-012",
+      acquisitionDate: "2024-03-10",
+      acquisitionMethod: "Donated by PEARL",
+      value: "$3,500",
+      location: "North Field",
+      custodian: "Chea Sokha",
+      condition: "Good",
+      pearlFunded: true,
+      status: "Pending Verification",
+      image:
+        "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=128&h=128&q=80",
+    },
+  ];
+
+  const usageLogs = [
+    {
+      id: "UL-001",
+      assetName: "Rice Mill Machine",
+      dateOfUse: "2024-03-25",
+      user: "Sok Pisey",
+      duration: "4 hours",
+      purpose: "Processing harvest from North Field",
+    },
+  ];
+
+  const disposalRequests = [
+    {
+      id: "DR-001",
+      assetName: "Old Harvester",
+      justification: "Equipment is beyond repair and no longer functional",
+      disposalMethod: "Scrap",
+      submittedDate: "2024-03-20",
+      status: "Pending Approval",
+    },
+  ];
+
+  return (
+    <div className="space-y-6 min-w-0 max-w-full">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Asset Management</h1>
+          <p className="text-gray-600 mt-1">
+            Digital lifecycle management for all cooperative assets
+          </p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors shadow-md"
+        >
+          <Plus className="w-5 h-5" />
+          Register New Asset
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="border-b border-gray-200">
+          <div className="flex overflow-x-auto">
+            {[
+              { id: "inventory", label: "Asset Inventory" },
+              { id: "usage-log", label: "Usage Log" },
+              { id: "disposal", label: "Disposal Request" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? "text-[#032EA1] border-b-2 border-[#032EA1]"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="p-6">
+          {/* Asset Inventory Tab */}
+          {activeTab === "inventory" && (
+            <div className="space-y-6">
+              {/* Filters and Actions */}
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search assets..."
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  />
+                </div>
+                <div className="flex gap-2 items-center">
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <Filter className="w-4 h-4" />
+                    Filter
+                  </button>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setExportMenuOpen((o) => !o)}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export
+                      <ChevronDown className="w-4 h-4 opacity-90" />
+                    </button>
+                    {exportMenuOpen && (
+                      <>
+                        <button
+                          type="button"
+                          aria-hidden
+                          className="fixed inset-0 z-10 cursor-default bg-transparent"
+                          onClick={() => setExportMenuOpen(false)}
+                        />
+                        <div className="absolute right-0 top-full mt-1 w-44 rounded-lg border border-gray-200 bg-white shadow-lg z-20 py-1">
+                          <button
+                            type="button"
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setExportMenuOpen(false)}
+                          >
+                            Export as PDF
+                          </button>
+                          <button
+                            type="button"
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setExportMenuOpen(false)}
+                          >
+                            Export as Excel
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* PEARL Funded Filter */}
+              <div className="flex items-center gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="pearl-filter"
+                  className="w-4 h-4 text-[#032EA1] border-gray-300 rounded focus:ring-[#032EA1]"
+                />
+                <label htmlFor="pearl-filter" className="text-sm text-blue-900">
+                  Show only PEARL project funded/donated assets (for FAO/GCF reporting)
+                </label>
+              </div>
+
+              {/* Assets Table */}
+              <div className="w-full min-w-0 rounded-2xl border border-gray-200/80 bg-white shadow-[0_4px_24px_-4px_rgba(3,46,161,0.08),0_2px_8px_-2px_rgba(0,0,0,0.06)] overflow-hidden">
+                <div className="w-full min-w-0 overflow-hidden">
+                  <table className="w-full table-fixed border-collapse text-left">
+                    <colgroup>
+                      <col className="w-[11%]" />
+                      <col className="w-[24%]" />
+                      <col className="w-[13%]" />
+                      <col className="w-[15%]" />
+                      <col className="w-[9%]" />
+                      <col className="w-[10%]" />
+                      <col className="w-[11%]" />
+                      <col className="w-[7%]" />
+                    </colgroup>
+                    <thead>
+                      <tr className="bg-gradient-to-r from-[#032EA1]/[0.07] via-[#032EA1]/[0.04] to-transparent border-b border-[#032EA1]/15">
+                        <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                          Asset ID
+                        </th>
+                        <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                          Asset
+                        </th>
+                        <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                          Type
+                        </th>
+                        <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                          Acquisition
+                        </th>
+                        <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1] text-right">
+                          Value
+                        </th>
+                        <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                          Condition
+                        </th>
+                        <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                          Status
+                        </th>
+                        <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1] text-center">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {assets.map((asset, rowIdx) => (
+                        <tr
+                          key={asset.id}
+                          className={`group transition-colors ${
+                            rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60"
+                          } hover:bg-[#032EA1]/[0.04]`}
+                        >
+                          <td className="px-2 sm:px-3 py-2.5 align-middle whitespace-nowrap min-w-[5.5rem]">
+                            <span className="inline-flex font-mono text-[10px] sm:text-xs font-semibold text-[#032EA1] bg-[#032EA1]/8 px-2 py-0.5 rounded-md border border-[#032EA1]/10 whitespace-nowrap">
+                              {asset.id}
+                            </span>
+                          </td>
+                          <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                            <div className="flex items-start gap-2 min-w-0">
+                              <img
+                                src={asset.image}
+                                alt={asset.name}
+                                loading="lazy"
+                                decoding="async"
+                                className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-lg object-cover ring-2 ring-white shadow-md ring-offset-1 ring-offset-white group-hover:ring-[#032EA1]/20 transition-shadow"
+                              />
+                              <div className="min-w-0 flex flex-col gap-1">
+                                <span
+                                  className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug line-clamp-2"
+                                  title={asset.name}
+                                >
+                                  {asset.name}
+                                </span>
+                                {asset.pearlFunded && (
+                                  <span className="inline-flex w-fit items-center px-1.5 py-0.5 bg-sky-100 text-sky-800 text-[10px] font-semibold rounded border border-sky-200/80">
+                                    PEARL
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                            <span className="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-2 py-1 text-[11px] font-medium text-gray-800 border border-gray-200/90 whitespace-normal">
+                              <Package className="w-3.5 h-3.5 shrink-0 opacity-70" aria-hidden />
+                              <span>{asset.type}</span>
+                            </span>
+                          </td>
+                          <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                            <span
+                              className="block text-xs text-gray-700 leading-snug line-clamp-2"
+                              title={asset.acquisitionMethod}
+                            >
+                              {asset.acquisitionMethod}
+                            </span>
+                          </td>
+                          <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0 text-right">
+                            <span className="text-xs sm:text-sm font-semibold text-gray-900 tabular-nums">
+                              {asset.value}
+                            </span>
+                          </td>
+                          <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                            <span
+                              className={`inline-flex max-w-full items-center px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full border ${
+                                asset.condition === "Good"
+                                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                  : asset.condition === "Fair"
+                                    ? "bg-blue-50 text-blue-800 border-blue-200"
+                                    : "bg-orange-50 text-orange-800 border-orange-200"
+                              }`}
+                            >
+                              {asset.condition}
+                            </span>
+                          </td>
+                          <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                            {asset.status === "Verified" ? (
+                              <span className="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 bg-emerald-500 text-white rounded-full text-[10px] sm:text-xs font-semibold shadow-sm">
+                                <CheckCircle className="w-3 h-3 shrink-0" aria-hidden />
+                                <span className="truncate">Verified</span>
+                              </span>
+                            ) : (
+                              <span
+                                className="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 bg-amber-100 text-amber-900 rounded-full text-[10px] sm:text-xs font-semibold border border-amber-200 max-w-full"
+                                title="Pending Verification"
+                              >
+                                <Clock className="w-3 h-3 shrink-0" aria-hidden />
+                                <span className="truncate">Pending verification</span>
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                            <div className="flex items-center justify-center gap-0.5">
+                              <button
+                                type="button"
+                                className="p-1.5 rounded-lg text-gray-500 hover:text-[#032EA1] hover:bg-[#032EA1]/10 transition-colors"
+                                aria-label="View asset"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                type="button"
+                                className="p-1.5 rounded-lg text-gray-500 hover:text-[#032EA1] hover:bg-[#032EA1]/10 transition-colors"
+                                aria-label="Edit asset"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Verification Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-blue-900">
+                    <strong>Note:</strong> Newly registered assets must be verified by the
+                    Commune Officer before being marked as "Verified" in the system. Assets
+                    pending verification will only be displayed in the inventory after
+                    approval.
+                  </p>
+                </div>
+              </div>
+
+              {/* Update Condition Section */}
+              <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                <h4 className="font-semibold text-gray-900 mb-4">
+                  Update Asset Condition
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Asset
+                    </label>
+                    <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white">
+                      <option value="">Choose an asset</option>
+                      {assets.map((asset) => (
+                        <option key={asset.id} value={asset.id}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Condition Rating
+                    </label>
+                    <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white">
+                      <option value="">Select condition</option>
+                      <option value="good">Good</option>
+                      <option value="fair">Fair</option>
+                      <option value="poor">Poor</option>
+                      <option value="out-of-service">Out of Service</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Date Assessed
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Upload Photos (Optional)
+                    </label>
+                    <button className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      Choose Files
+                    </button>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Notes
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Add any notes about the asset condition..."
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none"
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium shadow-sm"
+                  >
+                    Update Condition
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Usage Log Tab */}
+          {activeTab === "usage-log" && (
+            <div className="space-y-6">
+              <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                <h4 className="font-semibold text-gray-900 mb-4">
+                  Record Asset Usage
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Asset <span className="text-red-500">*</span>
+                    </label>
+                    <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white">
+                      <option value="">Select asset</option>
+                      {assets.map((asset) => (
+                        <option key={asset.id} value={asset.id}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Date of Use <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      User (Member Name or Group) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter member name or group"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Duration <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., 4 hours"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Purpose <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Describe the purpose of asset use..."
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none"
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium shadow-sm"
+                  >
+                    Record Usage
+                  </button>
+                </div>
+              </div>
+
+              {/* Usage Log List */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-900">Usage History</h4>
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Asset Name
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Date of Use
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        User
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Duration
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Purpose
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {usageLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {log.assetName}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {log.dateOfUse}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {log.user}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {log.duration}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {log.purpose}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button className="p-1.5 hover:bg-gray-200 rounded transition-colors">
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Disposal Request Tab */}
+          {activeTab === "disposal" && (
+            <div className="space-y-6">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-orange-900">
+                    <strong>Note:</strong> All disposal requests must receive approval from
+                    the Commune Officer before proceeding with asset disposal.
+                  </p>
+                </div>
+              </div>
+
+              <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                <h4 className="font-semibold text-gray-900 mb-4">
+                  Submit Disposal Request
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Asset <span className="text-red-500">*</span>
+                    </label>
+                    <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white">
+                      <option value="">Select asset for disposal</option>
+                      {assets.map((asset) => (
+                        <option key={asset.id} value={asset.id}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Justification for Disposal <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows={4}
+                      placeholder="Explain why this asset needs to be disposed..."
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none"
+                    ></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Proposed Disposal Method <span className="text-red-500">*</span>
+                    </label>
+                    <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white">
+                      <option value="">Select disposal method</option>
+                      <option value="sell">Sell</option>
+                      <option value="scrap">Scrap</option>
+                      <option value="transfer">Transfer</option>
+                      <option value="write-off">Write Off</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Upload Valuation Document (Optional)
+                    </label>
+                    <button className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                      <Upload className="w-4 h-4" />
+                      Choose File
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium shadow-sm"
+                  >
+                    Submit Disposal Request
+                  </button>
+                </div>
+              </div>
+
+              {/* Disposal Requests List */}
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-900">
+                    Submitted Disposal Requests
+                  </h4>
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Request ID
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Asset Name
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Disposal Method
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Submitted Date
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {disposalRequests.map((request) => (
+                      <tr key={request.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          {request.id}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {request.assetName}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {request.disposalMethod}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          {request.submittedDate}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="inline-flex px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded border border-yellow-200">
+                            {request.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <button className="p-1.5 hover:bg-gray-200 rounded transition-colors">
+                            <Eye className="w-4 h-4 text-gray-600" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Add Asset Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8">
+            {/* Header */}
+            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-[#032EA1]">
+              <h2 className="text-2xl font-bold text-white">
+                Register New Asset
+              </h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <div className="px-8 py-6 space-y-6 max-h-[calc(100vh-250px)] overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Asset Type <span className="text-red-500">*</span>
+                  </label>
+                  <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
+                    <option value="">Select type</option>
+                    <option value="equipment">Equipment</option>
+                    <option value="vehicle">Vehicle</option>
+                    <option value="building">Building</option>
+                    <option value="infrastructure">Infrastructure</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Asset Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter asset name"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Describe the asset..."
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Serial/Identification Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter serial number"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Acquisition Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Acquisition Method <span className="text-red-500">*</span>
+                  </label>
+                  <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
+                    <option value="">Select method</option>
+                    <option value="purchased">Purchased</option>
+                    <option value="pearl">Donated by PEARL</option>
+                    <option value="other-program">Donated by Other Program</option>
+                    <option value="government">Government Grant</option>
+                    <option value="own-funds">Own Funds</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Acquisition Cost or Estimated Value <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g., $12,000"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Current Location <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter location"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Responsible Custodian Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter custodian name"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Asset Photo/Documentation
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#032EA1] transition-colors cursor-pointer">
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">
+                      Drag and drop files here or click to browse
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Upload photos for visual documentation
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-900">
+                  <strong>Note:</strong> This asset will be submitted for verification by
+                  the Commune Officer. It will only appear in the asset inventory after
+                  approval.
+                </p>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between px-8 py-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors">
+                Register Asset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
