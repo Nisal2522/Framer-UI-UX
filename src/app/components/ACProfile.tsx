@@ -16,6 +16,9 @@ import {
 } from "lucide-react";
 import { CooperativeLocationMap } from "./CooperativeLocationMap";
 
+/** Public asset; must use Vite base URL so GitHub Pages (`/repo/`) resolves correctly. */
+const COOPERATIVE_LOGO_URL = `${import.meta.env.BASE_URL}cooperative-logo.svg`;
+
 export function ACProfile() {
   const [activeTab, setActiveTab] = useState("cooperative-info");
   const [isEditing, setIsEditing] = useState(false);
@@ -30,7 +33,7 @@ export function ACProfile() {
           <div className="relative shrink-0">
             <div className="w-32 h-32 rounded-full bg-white/20 border-4 border-white/30 flex items-center justify-center overflow-hidden">
               <img
-                src="/cooperative-logo.svg"
+                src={COOPERATIVE_LOGO_URL}
                 alt="Baray Organic Farmers Cooperative logo"
                 className="w-full h-full object-cover"
               />

@@ -10,7 +10,7 @@ import { KnowledgeManagement } from "./components/KnowledgeManagement";
 import { Reports } from "./components/Reports";
 import { Login } from "./components/Login";
 
-export const router = createBrowserRouter([
+const routes = [
   {
     path: "/login",
     Component: Login,
@@ -29,4 +29,8 @@ export const router = createBrowserRouter([
       { path: "reports", Component: Reports },
     ],
   },
-]);
+];
+
+export const router = createBrowserRouter(routes, {
+  basename: import.meta.env.BASE_URL,
+});
