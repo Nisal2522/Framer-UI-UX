@@ -199,7 +199,7 @@ export function Reports() {
                       <Filter className="w-4 h-4" />
                       Filter
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[#0F2F8F] text-white rounded-lg text-sm font-medium hover:bg-[#0D2A7D] transition-colors">
                       <Download className="w-4 h-4" />
                       Export
                     </button>
@@ -322,7 +322,7 @@ export function Reports() {
                       <Filter className="w-4 h-4" />
                       Filter
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[#0F2F8F] text-white rounded-lg text-sm font-medium hover:bg-[#0D2A7D] transition-colors">
                       <Download className="w-4 h-4" />
                       Export
                     </button>
@@ -444,7 +444,7 @@ export function Reports() {
                       <Filter className="w-4 h-4" />
                       Filter
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2.5 bg-[#0F2F8F] text-white rounded-lg text-sm font-medium hover:bg-[#0D2A7D] transition-colors">
                       <Download className="w-4 h-4" />
                       Export
                     </button>
@@ -558,7 +558,7 @@ export function Reports() {
                       </p>
                     </div>
                   </div>
-                  <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
+                  <button className="flex items-center gap-2 px-4 py-2.5 bg-[#0F2F8F] text-white rounded-lg text-sm font-medium hover:bg-[#0D2A7D] transition-colors">
                     <Download className="w-4 h-4" />
                     Export
                   </button>
