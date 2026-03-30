@@ -9,7 +9,10 @@ import {
   CheckCircle,
   Clock,
   Calendar,
+  MapPinned,
 } from "lucide-react";
+import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import {
   PieChart,
   Pie,
@@ -22,12 +25,15 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  LabelList,
+  RadialBarChart,
+  RadialBar,
 } from "recharts";
 
 const genderData = [
-  { name: "Male", value: 258, percent: 58, color: "#032EA1" },
+  { name: "Male", value: 258, percent: 58, color: "#0F2F8F" },
   { name: "Female", value: 186, percent: 42, color: "#E00025" },
-  { name: "Other", value: 3, percent: 1, color: "#9CA3AF" },
+  { name: "Other", value: 3, percent: 1, color: "#94A3B8" },
 ];
 
 const ageGroupData = [
@@ -50,6 +56,20 @@ const livestockData = [
   { type: "Poultry", count: 312 },
   { type: "Pigs", count: 89 },
   { type: "Goats", count: 45 },
+];
+
+const farmerAreaData = [
+  { area: "Battambang", lat: 13.0957, lon: 103.2022, members: 78 },
+  { area: "Siem Reap", lat: 13.3671, lon: 103.8448, members: 62 },
+  { area: "Kampong Thom", lat: 12.7117, lon: 104.8885, members: 55 },
+  { area: "Kampong Cham", lat: 12.0000, lon: 105.4500, members: 49 },
+  { area: "Takeo", lat: 10.9929, lon: 104.7847, members: 41 },
+  { area: "Kampot", lat: 10.6104, lon: 104.1815, members: 37 },
+  { area: "Prey Veng", lat: 11.4868, lon: 105.3253, members: 33 },
+  { area: "Banteay Meanchey", lat: 13.7532, lon: 102.9896, members: 29 },
+  { area: "Pursat", lat: 12.5338, lon: 103.9192, members: 26 },
+  { area: "Kandal", lat: 11.2237, lon: 105.1259, members: 24 },
+  { area: "Kep", lat: 10.4829, lon: 104.3167, members: 13 },
 ];
 
 export function ACDashboard() {
@@ -206,121 +226,229 @@ export function ACDashboard() {
 
       {/* 2. Member Demographics Visualization - High Priority */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Farmer Member Distribution Map */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm lg:col-span-2">
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Farmer Members by Area</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Geographic spread of registered members across Cambodia.
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 px-3 py-1.5 text-sm text-[#0F2F8F]">
+              <MapPinned className="w-4 h-4" />
+              Total mapped members: {farmerAreaData.reduce((sum, item) => sum + item.members, 0)}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+            <div className="xl:col-span-3 h-[420px] rounded-xl overflow-hidden border border-[#0F2F8F]/20">
+              <MapContainer
+                center={[12.6, 104.9]}
+                zoom={7}
+                scrollWheelZoom={false}
+                className="h-full w-full z-0"
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {farmerAreaData.map((point) => (
+                  <CircleMarker
+                    key={point.area}
+                    center={[point.lat, point.lon]}
+                    radius={Math.max(7, Math.round(point.members / 6))}
+                    pathOptions={{
+                      color: "#0D2A7D",
+                      weight: 1.5,
+                      fillColor: "#0F2F8F",
+                      fillOpacity: 0.52,
+                    }}
+                  >
+                    <LeafletTooltip direction="top" offset={[0, -2]} opacity={1}>
+                      <div className="text-xs leading-tight">
+                        <p className="font-semibold text-gray-900">{point.area}</p>
+                        <p className="text-gray-600">{point.members} members</p>
+                      </div>
+                    </LeafletTooltip>
+                  </CircleMarker>
+                ))}
+              </MapContainer>
+            </div>
+
+            <div className="xl:col-span-1 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-blue-50/40 p-4">
+              <h4 className="text-sm font-semibold text-gray-800 mb-3">Top Coverage Areas</h4>
+              <div className="space-y-2.5">
+                {[...farmerAreaData]
+                  .sort((a, b) => b.members - a.members)
+                  .slice(0, 6)
+                  .map((area) => (
+                    <div key={area.area} className="rounded-lg border border-blue-100 bg-white px-3 py-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium text-gray-800">{area.area}</span>
+                        <span className="text-xs font-semibold text-[#0F2F8F]">{area.members}</span>
+                      </div>
+                      <div className="mt-1.5 h-1.5 rounded-full bg-blue-100">
+                        <div
+                          className="h-1.5 rounded-full bg-[#0F2F8F]"
+                          style={{ width: `${Math.min(100, (area.members / 80) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Gender Distribution */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">
-            Gender Distribution
-          </h3>
-          <div className="flex items-center justify-center">
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={genderData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
-                  }
-                  outerRadius={90}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {genderData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Gender Distribution</h3>
+              <p className="text-xs text-gray-400 mt-0.5">All registered members</p>
+            </div>
+            <span className="text-xs font-semibold text-[#0F2F8F] bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
+              447 total
+            </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs text-gray-600">Male</p>
-              <p className="text-xl font-bold text-[#032EA1] mt-1">258 (58%)</p>
+          <div className="flex items-center gap-6">
+            <div className="relative flex-shrink-0">
+              <ResponsiveContainer width={170} height={170}>
+                <PieChart>
+                  <Pie
+                    data={genderData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={52}
+                    outerRadius={78}
+                    paddingAngle={3}
+                    dataKey="value"
+                    strokeWidth={0}
+                  >
+                    {genderData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: 12 }}
+                    formatter={(val: number) => [`${val} members`]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-2xl font-bold text-gray-900">447</span>
+                <span className="text-[10px] text-gray-400">members</span>
+              </div>
             </div>
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-xs text-gray-600">Female</p>
-              <p className="text-xl font-bold text-[#E00025] mt-1">186 (42%)</p>
-            </div>
-            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg sm:col-span-1 col-span-2">
-              <p className="text-xs text-gray-600">Other</p>
-              <p className="text-xl font-bold text-gray-700 mt-1">3 (1%)</p>
+            <div className="flex-1 space-y-3">
+              {genderData.map((g) => (
+                <div key={g.name}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: g.color }} />
+                      <span className="text-sm font-medium text-gray-700">{g.name}</span>
+                    </div>
+                    <span className="text-sm font-bold" style={{ color: g.color }}>{g.value} <span className="text-gray-400 font-normal">({g.percent}%)</span></span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gray-100">
+                    <div className="h-1.5 rounded-full" style={{ width: `${g.percent}%`, backgroundColor: g.color }} />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Age Group Distribution */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">
-            Age Group Distribution
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={ageGroupData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="group" tick={{ fontSize: 12 }} stroke="#6B7280" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Age Group Distribution</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Breakdown by age & gender</p>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-[#0F2F8F]" />Male</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-[#E00025]" />Female</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm inline-block bg-[#94A3B8]" />Other</span>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={ageGroupData} barCategoryGap="28%" barGap={3}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+              <XAxis dataKey="group" tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "#FFF",
-                  border: "1px solid #E5E7EB",
-                  borderRadius: "8px",
-                }}
+                contentStyle={{ borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: 12, boxShadow: "0 4px 16px 0 rgba(0,0,0,0.08)" }}
+                cursor={{ fill: "#F8FAFC" }}
               />
-              <Bar dataKey="Male" fill="#032EA1" name="Male" />
-              <Bar dataKey="Female" fill="#E00025" name="Female" />
-              <Bar dataKey="Other" fill="#9CA3AF" name="Other" />
-              <Legend />
+              <Bar dataKey="Male" fill="#0F2F8F" name="Male" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Female" fill="#E00025" name="Female" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Other" fill="#94A3B8" name="Other" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Crop Distribution */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">
-            Crop Type Distribution
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={cropDistributionData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis type="number" tick={{ fontSize: 12 }} stroke="#6B7280" />
-              <YAxis
-                dataKey="crop"
-                type="category"
-                tick={{ fontSize: 12 }}
-                stroke="#6B7280"
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#FFF",
-                  border: "1px solid #E5E7EB",
-                  borderRadius: "8px",
-                }}
-              />
-              <Bar dataKey="farmers" fill="#032EA1" name="Farmers by crop" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Crop Type Distribution</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Farmers per crop category</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {(() => {
+              const cropColors = ["#0F2F8F", "#0D2A7D", "#3B5FCC", "#6B8EFF"];
+              const max = Math.max(...cropDistributionData.map(d => d.farmers));
+              return cropDistributionData.map((item, i) => (
+                <div key={item.crop}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: cropColors[i] }} />
+                      <span className="text-sm font-medium text-gray-700">{item.crop}</span>
+                    </div>
+                    <span className="text-sm font-bold" style={{ color: cropColors[i] }}>
+                      {item.farmers}
+                      <span className="text-xs text-gray-400 font-normal ml-1">farmers</span>
+                    </span>
+                  </div>
+                  <div className="h-2.5 rounded-full bg-gray-100">
+                    <div
+                      className="h-2.5 rounded-full transition-all duration-500"
+                      style={{ width: `${(item.farmers / max) * 100}%`, backgroundColor: cropColors[i] }}
+                    />
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
         </div>
 
         {/* Livestock Distribution */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">
-            Livestock Distribution
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={livestockData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="type" tick={{ fontSize: 12 }} stroke="#6B7280" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#6B7280" />
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Livestock Distribution</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Total headcount by type</p>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={livestockData} barCategoryGap="35%">
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+              <XAxis dataKey="type" tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: "#FFF",
-                  border: "1px solid #E5E7EB",
-                  borderRadius: "8px",
-                }}
+                contentStyle={{ borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: 12, boxShadow: "0 4px 16px 0 rgba(0,0,0,0.08)" }}
+                cursor={{ fill: "#F8FAFC" }}
+                formatter={(val: number) => [`${val} head`]}
               />
-              <Bar dataKey="count" fill="#0447D4" name="Headcount" />
+              <Bar dataKey="count" name="Headcount" radius={[6, 6, 0, 0]}>
+                {livestockData.map((_, i) => (
+                  <Cell key={i} fill={["#0F2F8F", "#3B5FCC", "#0D2A7D", "#6B8EFF"][i % 4]} />
+                ))}
+                <LabelList dataKey="count" position="top" style={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -13,8 +13,8 @@ import {
   X,
   UserCircle,
   Languages,
-  PanelLeftClose,
-  PanelLeftOpen,
+  ChevronLeft,
+  ChevronRight,
   ChevronDown,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -32,14 +32,14 @@ const LANGUAGE_OPTIONS: { code: LangCode; label: string; native: string }[] = [
 ];
 
 const navigation = [
-  { name: "AC Dashboard", path: "/", icon: LayoutDashboard },
-  { name: "AC Profile", path: "/ac-profile", icon: Building2 },
-  { name: "Committee Structure", path: "/committee-structure", icon: UserCircle },
-  { name: "Members", path: "/farmer-members", icon: Users },
-  { name: "Business Plans", path: "/business-plans", icon: FileText },
-  { name: "Assets", path: "/assets", icon: Package },
-  { name: "Knowledge Hub", path: "/knowledge", icon: BookOpen },
-  { name: "Reporting and Analytics", path: "/reports", icon: BarChart3 },
+  { name: "AC Dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { name: "AC Profile", path: "/dashboard/ac-profile", icon: Building2 },
+  { name: "Committee Structure", path: "/dashboard/committee-structure", icon: UserCircle },
+  { name: "Members", path: "/dashboard/farmer-members", icon: Users },
+  { name: "Business Plans", path: "/dashboard/business-plans", icon: FileText },
+  { name: "Assets", path: "/dashboard/assets", icon: Package },
+  { name: "Knowledge Hub", path: "/dashboard/knowledge", icon: BookOpen },
+  { name: "Reporting and Analytics", path: "/dashboard/reports", icon: BarChart3 },
 ];
 
 const profileImageUrl =
@@ -74,70 +74,68 @@ export function Root() {
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar - Desktop */}
       <aside
-        className={`hidden lg:flex lg:flex-col bg-white border-r border-gray-200 transition-all duration-300 ${
-          desktopSidebarCollapsed ? "w-20" : "w-64"
+        className={`relative hidden lg:flex lg:flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out ${
+          desktopSidebarCollapsed ? "w-[72px]" : "w-64"
         }`}
       >
-        {/* Logo + collapse (explicit layout avoids broken template literals) */}
-        <div
-          className={
-            desktopSidebarCollapsed
-              ? "flex items-center justify-between border-b border-gray-200 px-3 py-4"
-              : "flex items-center gap-3 border-b border-gray-200 px-6 py-4"
-          }
+        {/* Floating collapse toggle button on right edge */}
+        <button
+          type="button"
+          onClick={() => setDesktopSidebarCollapsed((prev) => !prev)}
+          aria-label={desktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute -right-3.5 top-5 z-50 flex h-7 w-7 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md text-[#0F2F8F] hover:bg-[#0F2F8F] hover:text-white hover:border-[#0F2F8F] transition-all duration-200"
         >
-          <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden border border-blue-100 bg-white shadow-md shadow-blue-500/20">
-            <img
-              src={faoLogo}
-              alt="FAO logo"
-              className="h-full w-full object-cover"
-            />
-          </div>
-          {!desktopSidebarCollapsed && (
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-[#032EA1] to-[#0447D4] bg-clip-text text-transparent">
-                FOMMP
-              </h1>
-            </div>
+          {desktopSidebarCollapsed ? (
+            <ChevronRight className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronLeft className="h-3.5 w-3.5" />
           )}
-          <button
-            type="button"
-            onClick={() => setDesktopSidebarCollapsed((prev) => !prev)}
-            className="hidden lg:inline-flex shrink-0 items-center justify-center rounded-lg border border-gray-300 p-2 text-gray-700 transition-colors hover:bg-gray-100"
-            aria-label={desktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            title={desktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        </button>
+
+        {/* Logo */}
+        <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-4 h-[69px] overflow-hidden">
+          <div className="w-9 h-9 shrink-0 rounded-lg overflow-hidden border border-blue-100 bg-white shadow-md shadow-blue-500/20">
+            <img src={faoLogo} alt="FAO logo" className="h-full w-full object-cover" />
+          </div>
+          <div
+            className={`min-w-0 overflow-hidden transition-all duration-300 ${
+              desktopSidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+            }`}
           >
-            {desktopSidebarCollapsed ? (
-              <PanelLeftOpen className="h-5 w-5" aria-hidden />
-            ) : (
-              <PanelLeftClose className="h-5 w-5" aria-hidden />
-            )}
-          </button>
+            <h1 className="text-base font-bold whitespace-nowrap bg-gradient-to-r from-[#0F2F8F] to-[#3B5FCC] bg-clip-text text-transparent">
+              FOMMP
+            </h1>
+            <p className="text-[9px] text-gray-400 whitespace-nowrap leading-tight">
+              Farmer Organizations Platform
+            </p>
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className={`flex-1 py-4 overflow-y-auto ${desktopSidebarCollapsed ? "px-2" : "px-3"}`}>
-          <ul className="space-y-1">
+        <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden px-2.5">
+          <ul className="space-y-0.5">
             {navigation.map((item) => (
               <li key={item.name}>
                 <NavLink
                   to={item.path}
-                  end={item.path === "/"}
+                  end={item.path === "/dashboard"}
                   title={desktopSidebarCollapsed ? item.name : undefined}
                   className={({ isActive }) =>
-                    `flex items-center rounded-lg text-sm font-medium transition-all duration-200 ${
-                      desktopSidebarCollapsed
-                        ? "justify-center px-2 py-2.5"
-                        : "gap-3 px-3 py-2.5"
-                    } ${
+                    `flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200 px-2.5 py-2.5 ${
                       isActive
-                        ? "bg-[#032EA1] text-white shadow-md"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "bg-[#0F2F8F] text-white shadow-sm"
+                        : "text-gray-600 hover:bg-blue-50 hover:text-[#0F2F8F]"
                     }`
                   }
                 >
-                  <item.icon className="w-5 h-5" />
-                  {!desktopSidebarCollapsed && item.name}
+                  <item.icon className="w-[18px] h-[18px] shrink-0" />
+                  <span
+                    className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${
+                      desktopSidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+                    }`}
+                  >
+                    {item.name}
+                  </span>
                 </NavLink>
               </li>
             ))}
@@ -145,24 +143,24 @@ export function Root() {
         </nav>
 
         {/* User Profile */}
-        <div className="p-4 border-t border-gray-200">
+        <div className="px-2.5 py-3 border-t border-gray-200">
           <div
-            className={`flex items-center rounded-lg hover:bg-gray-100 cursor-pointer ${
-              desktopSidebarCollapsed ? "justify-center px-2 py-2.5" : "gap-3 px-3 py-2"
-            }`}
+            className="flex items-center gap-3 rounded-lg hover:bg-blue-50 cursor-pointer px-2 py-2 overflow-hidden"
             title={desktopSidebarCollapsed ? "AC User - President" : undefined}
           >
             <img
               src={profileImageUrl}
               alt="AC User profile"
-              className="w-10 h-10 rounded-full object-cover border border-gray-200"
+              className="w-8 h-8 shrink-0 rounded-full object-cover border border-gray-200"
               loading="lazy"
             />
-            <div className={`flex-1 min-w-0 ${desktopSidebarCollapsed ? "hidden" : ""}`}>
-              <p className="text-sm font-medium text-gray-900 truncate">
-                AC User
-              </p>
-              <p className="text-xs text-gray-500 truncate">President</p>
+            <div
+              className={`min-w-0 overflow-hidden transition-all duration-300 ${
+                desktopSidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+              }`}
+            >
+              <p className="text-sm font-medium text-gray-900 truncate whitespace-nowrap">AC User</p>
+              <p className="text-xs text-gray-500 truncate whitespace-nowrap">President</p>
             </div>
           </div>
         </div>
@@ -210,7 +208,7 @@ export function Root() {
                   <li key={item.name}>
                     <NavLink
                       to={item.path}
-                      end={item.path === "/"}
+                      end={item.path === "/dashboard"}
                       onClick={() => setSidebarOpen(false)}
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${

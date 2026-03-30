@@ -10,14 +10,19 @@ import { AssetManagement } from "./components/AssetManagement";
 import { KnowledgeManagement } from "./components/KnowledgeManagement";
 import { Reports } from "./components/Reports";
 import { Login } from "./components/Login";
+import { LandingPage } from "./components/LandingPage";
 
 const routes = [
+  {
+    path: "/",
+    Component: LandingPage,
+  },
   {
     path: "/login",
     Component: Login,
   },
   {
-    path: "/",
+    path: "/dashboard",
     Component: Root,
     children: [
       { index: true, Component: ACDashboard },
