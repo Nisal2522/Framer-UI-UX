@@ -346,6 +346,7 @@ export function Members() {
                       </button>
                       <button
                         type="button"
+                        onClick={() => navigate(`/farmer-members/edit/${member.id}`, { state: { member } })}
                         className="p-1.5 rounded-lg text-gray-500 hover:text-[#032EA1] hover:bg-[#032EA1]/10 transition-colors"
                         aria-label="Edit member"
                       >

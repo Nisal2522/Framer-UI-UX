@@ -25,6 +25,7 @@ const routes = [
       { path: "committee-structure", Component: CommitteeStructure },
       { path: "farmer-members", Component: Members },
       { path: "farmer-members/new", Component: Member360Form },
+      { path: "farmer-members/edit/:memberId", Component: Member360Form },
       { path: "business-plans", Component: BusinessPlanTemplate },
       { path: "assets", Component: AssetManagement },
       { path: "knowledge", Component: KnowledgeManagement },

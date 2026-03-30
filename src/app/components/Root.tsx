@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router";
+import { Outlet, NavLink, useNavigate } from "react-router";
 import {
   LayoutDashboard,
   Building2,
@@ -46,6 +46,7 @@ const profileImageUrl =
   "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?auto=format&fit=crop&w=160&h=160&q=80";
 
 export function Root() {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<LangCode>("EN");
@@ -352,7 +353,10 @@ export function Root() {
                 <Bell className="w-5 h-5 text-gray-700" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-[#E00025] rounded-full"></span>
               </button>
-              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 hover:text-[#E00025]">
+              <button
+                onClick={() => navigate("/login")}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 hover:text-[#E00025]"
+              >
                 <LogOut className="w-5 h-5" />
               </button>
             </div>
