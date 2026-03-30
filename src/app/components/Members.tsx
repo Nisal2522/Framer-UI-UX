@@ -149,7 +149,7 @@ export function Members() {
           </p>
         </div>
         <button
-          onClick={() => navigate("/farmer-members/new")}
+          onClick={() => navigate("/dashboard/farmer-members/new")}
           className="flex items-center gap-2 px-4 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors shadow-md"
         >
           <Plus className="w-5 h-5" />
@@ -346,7 +346,7 @@ export function Members() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => navigate(`/farmer-members/edit/${member.id}`, { state: { member } })}
+                        onClick={() => navigate(`/dashboard/farmer-members/edit/${member.id}`, { state: { member } })}
                         className="p-1.5 rounded-lg text-gray-500 hover:text-[#032EA1] hover:bg-[#032EA1]/10 transition-colors"
                         aria-label="Edit member"
                       >

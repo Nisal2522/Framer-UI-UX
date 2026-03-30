@@ -151,7 +151,7 @@ export function Member360Form() {
         </div>
         <button
           type="button"
-          onClick={() => navigate("/farmer-members")}
+          onClick={() => navigate("/dashboard/farmer-members")}
           className="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -193,7 +193,7 @@ export function Member360Form() {
                 {/* Profile Image Upload - 1/4 width */}
                 <div className="w-1/4 flex-shrink-0">
                   <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-5 shadow-sm h-full">
-                    <p className="mb-4 text-sm font-semibold text-slate-800 text-center">Profile Photo</p>
+                    <p className="mb-4 text-sm font-semibold text-white text-center">Profile Photo</p>
                     
                     <div
                       className={`relative mx-auto w-40 h-40 rounded-full overflow-hidden border-2 border-dashed transition-all duration-200 ${
@@ -753,7 +753,7 @@ export function Member360Form() {
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
           <button
             type="button"
-            onClick={() => navigate("/farmer-members")}
+            onClick={() => navigate("/dashboard/farmer-members")}
             className="px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
           >
             Cancel
