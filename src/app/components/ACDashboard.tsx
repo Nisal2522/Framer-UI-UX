@@ -63,38 +63,48 @@ export function ACDashboard() {
         </p>
       </div>
 
-      {/* 1. Total Membership Display - Critical Priority */}
-      <div className="bg-[#032EA1] rounded-xl p-8 shadow-lg text-white">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 bg-white/20 rounded-lg flex items-center justify-center">
-              <Users className="w-8 h-8" />
-            </div>
-            <div>
-              <p className="text-sm opacity-90">Total Membership</p>
-              <p className="text-4xl font-bold mt-1">447</p>
-            </div>
+      {/* 1. Membership + key stats — compact card */}
+      <div className="rounded-xl bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-4 text-white shadow-lg ring-1 ring-white/10 sm:p-5">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/15 sm:h-12 sm:w-12">
+            <Users className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
           </div>
-          <div className="text-right">
-            <p className="text-sm opacity-90">This Year</p>
-            <div className="flex items-center gap-2 mt-1">
-              <TrendingUp className="w-5 h-5" />
-              <span className="text-2xl font-bold">+12.3%</span>
-            </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium text-white/75">Total membership</p>
+            <p className="mt-0.5 text-3xl font-bold tabular-nums sm:text-4xl">447</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/20">
-          <div>
-            <p className="text-xs opacity-75">Active Members</p>
-            <p className="text-2xl font-bold mt-1">447</p>
+
+        <div className="mt-3 grid grid-cols-2 gap-2.5 border-t border-white/15 pt-3 sm:grid-cols-4 sm:gap-3">
+          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+              Active members
+            </p>
+            <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">447</p>
           </div>
-          <div>
-            <p className="text-xs opacity-75">New This Year</p>
-            <p className="text-2xl font-bold mt-1">49</p>
+          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+              New this year
+            </p>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <span className="text-xl font-bold tabular-nums sm:text-2xl">49</span>
+              <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-400/20 px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-emerald-100 ring-1 ring-emerald-300/30 sm:text-xs">
+                <TrendingUp className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
+                +12.3%
+              </span>
+            </div>
           </div>
-          <div>
-            <p className="text-xs opacity-75">Dropout Rate</p>
-            <p className="text-2xl font-bold mt-1">3.2%</p>
+          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+              Dropout rate
+            </p>
+            <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">3.2%</p>
+          </div>
+          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+              Business plans approved
+            </p>
+            <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">1</p>
           </div>
         </div>
       </div>

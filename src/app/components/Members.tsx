@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import {
   Users,
   Plus,
@@ -9,14 +10,6 @@ import {
   Eye,
   UserCircle,
   TrendingUp,
-  X,
-  CreditCard,
-  Cake,
-  Phone,
-  MapPin,
-  Calendar,
-  Wheat,
-  Beef,
   CheckCircle,
 } from "lucide-react";
 import { farmerMemberPortraitUrl } from "../utils/committeePortraits";
@@ -91,9 +84,9 @@ const seedMembers: MemberRow[] = [
   },
 ];
 
-export function FarmerMembers() {
+export function Members() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const allMembers = useMemo(() => {
@@ -107,7 +100,7 @@ export function FarmerMembers() {
       list.push({
         ...seed,
         id: `FM-${String(i + 1).padStart(3, "0")}`,
-        fullName: i < 3 ? seed.fullName : `Farmer ${i + 1}`,
+        fullName: i < 3 ? seed.fullName : `Member ${i + 1}`,
         nationalId: `${String(100000000 + i).slice(0, 9)}`,
         gender,
         age: 18 + (i % 50),
@@ -144,25 +137,19 @@ export function FarmerMembers() {
   const maleCount = MALE_COUNT;
   const femaleCount = FEMALE_COUNT;
   const avgLandArea = 4.8;
-  const cropDistribution = [
-    { crop: "Rice", count: 234 },
-    { crop: "Cassava", count: 156 },
-    { crop: "Corn", count: 98 },
-    { crop: "Vegetables", count: 76 },
-  ];
 
   return (
     <div className="space-y-6 min-w-0 max-w-full">
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Farmer Members</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Members</h1>
           <p className="text-gray-600 mt-1">
-            Manage your cooperative's farmer member database
+            Manage your cooperative&apos;s member database
           </p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={() => navigate("/farmer-members/new")}
           className="flex items-center gap-2 px-4 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors shadow-md"
         >
           <Plus className="w-5 h-5" />
@@ -171,21 +158,21 @@ export function FarmerMembers() {
       </div>
 
       {/* Demographics Banner */}
-      <div className="bg-[#032EA1] rounded-xl p-6 shadow-lg text-white">
-        <h3 className="text-lg font-semibold mb-4">Membership Overview</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="bg-gradient-to-br from-[#032EA1] to-[#021c5e] rounded-xl p-4 shadow-lg text-white">
+        <h3 className="text-base font-semibold mb-2.5">Membership Overview</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
-            <p className="text-sm opacity-90">Total Members</p>
-            <p className="text-3xl font-bold mt-1">{totalMembers}</p>
+            <p className="text-xs opacity-90">Total Members</p>
+            <p className="text-2xl font-bold mt-0.5">{totalMembers}</p>
           </div>
-          <div className="md:col-span-1 col-span-2">
-            <p className="text-sm opacity-90">Gender ratio</p>
-            <p className="text-lg font-bold mt-1">
-              {((maleCount / totalMembers) * 100).toFixed(0)}% M ·{" "}
-              {((femaleCount / totalMembers) * 100).toFixed(0)}% F ·{" "}
-              {((OTHER_COUNT / totalMembers) * 100).toFixed(0)}% Other
-            </p>
-            <ul className="text-xs opacity-90 mt-2 space-y-0.5">
+          <div>
+            <TrendingUp className="w-5 h-5 text-purple-300" />
+            <p className="text-xs opacity-90 mt-1">New This Year</p>
+            <p className="text-2xl font-bold mt-0.5">49</p>
+          </div>
+          <div>
+            <p className="text-xs opacity-90">Gender ratio</p>
+            <ul className="text-[11px] opacity-90 mt-1.5 space-y-0.5">
               <li>
                 <span className="font-medium">Male:</span> {maleCount} (
                 {((maleCount / totalMembers) * 100).toFixed(1)}%)
@@ -201,38 +188,9 @@ export function FarmerMembers() {
             </ul>
           </div>
           <div>
-            <p className="text-sm opacity-90">Avg Land Area</p>
-            <p className="text-3xl font-bold mt-1">{avgLandArea} Ha</p>
+            <p className="text-xs opacity-90">Total Land Area</p>
+            <p className="text-2xl font-bold mt-0.5">{avgLandArea} Ha</p>
           </div>
-          <div>
-            <p className="text-sm opacity-90">Top Crop</p>
-            <p className="text-2xl font-bold mt-1">Rice</p>
-            <p className="text-xs opacity-80 mt-1">{cropDistribution[0].count} farmers</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <Users className="w-10 h-10 text-emerald-600 mb-3" />
-          <p className="text-sm text-gray-600">Active Members</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">447</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <TrendingUp className="w-10 h-10 text-purple-600 mb-3" />
-          <p className="text-sm text-gray-600">New This Year</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">49</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <UserCircle className="w-10 h-10 text-orange-600 mb-3" />
-          <p className="text-sm text-gray-600">Inactive</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">12</p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <Users className="w-10 h-10 text-red-600 mb-3" />
-          <p className="text-sm text-gray-600">Withdrawn</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">8</p>
         </div>
       </div>
 
@@ -289,12 +247,12 @@ export function FarmerMembers() {
                   National ID
                 </th>
                 <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
-                  Gen. / Age
+                  Gender
                 </th>
                 <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Village
                 </th>
-                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1] text-right">
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1] text-center">
                   Land
                 </th>
                 <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
@@ -349,10 +307,8 @@ export function FarmerMembers() {
                     </span>
                   </td>
                   <td className="px-2 sm:px-3 py-2 align-middle max-w-0">
-                    <span className="block text-xs text-gray-800 truncate">
-                      <span className="font-medium">{member.gender}</span>
-                      <span className="text-gray-400"> / </span>
-                      <span className="tabular-nums">{member.age}</span>
+                    <span className="block text-xs text-gray-800 truncate font-medium">
+                      {member.gender}
                     </span>
                   </td>
                   <td className="px-2 sm:px-3 py-2 align-middle max-w-0">
@@ -360,9 +316,9 @@ export function FarmerMembers() {
                       {member.village}
                     </span>
                   </td>
-                  <td className="px-2 sm:px-3 py-2 align-middle max-w-0 text-right">
+                  <td className="px-2 sm:px-3 py-2 align-middle max-w-0 text-center">
                     <span className="block text-xs text-gray-800 font-medium tabular-nums truncate">
-                      {member.landArea}
+                      {member.landArea} hectare
                     </span>
                   </td>
                   <td className="px-2 sm:px-3 py-2 align-middle max-w-0">
@@ -437,191 +393,6 @@ export function FarmerMembers() {
         </div>
       </div>
 
-      {/* Add Member Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8">
-            {/* Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-[#032EA1]">
-              <h2 className="text-2xl font-bold text-white">
-                Add New Farmer Member
-              </h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <X className="w-6 h-6 text-white" />
-              </button>
-            </div>
-
-            {/* Form */}
-            <div className="px-8 py-6 space-y-6 max-h-[calc(100vh-250px)] overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter full name"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    National ID <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter national ID"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Gender <span className="text-red-500">*</span>
-                  </label>
-                  <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date of Birth <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Village <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter village name"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="+855 XX XXX XXX"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Total Cultivated Land Area (Ha) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    placeholder="0.0"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Membership Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Crops (Multi-select) <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    multiple
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                    size={4}
-                  >
-                    <option value="rice">Rice</option>
-                    <option value="cassava">Cassava</option>
-                    <option value="corn">Corn</option>
-                    <option value="vegetables">Vegetables</option>
-                    <option value="coconut">Coconut</option>
-                    <option value="banana">Banana</option>
-                    <option value="pepper">Pepper</option>
-                  </select>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Hold Ctrl (Windows) or Cmd (Mac) to select multiple crops
-                  </p>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Livestock Types and Counts
-                  </label>
-                  <div className="space-y-3">
-                    <div className="flex gap-4">
-                      <select className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                        <option value="">Select Livestock Type</option>
-                        <option value="cattle">Cattle</option>
-                        <option value="buffalo">Buffalo</option>
-                        <option value="pigs">Pigs</option>
-                        <option value="chickens">Chickens</option>
-                        <option value="ducks">Ducks</option>
-                        <option value="goats">Goats</option>
-                      </select>
-                      <input
-                        type="number"
-                        placeholder="Count"
-                        className="w-32 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                      />
-                      <button className="px-4 py-2.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
-                        <Plus className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status <span className="text-red-500">*</span>
-                  </label>
-                  <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="withdrawn">Withdrawn</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between px-8 py-6 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors">
-                Add Farmer Member
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -3,7 +3,8 @@ import { Root } from "./components/Root";
 import { ACDashboard } from "./components/ACDashboard";
 import { ACProfile } from "./components/ACProfile";
 import { CommitteeStructure } from "./components/CommitteeStructure";
-import { FarmerMembers } from "./components/FarmerMembers";
+import { Members } from "./components/Members";
+import { Member360Form } from "./components/Member360Form";
 import { BusinessPlanTemplate } from "./components/BusinessPlanTemplate";
 import { AssetManagement } from "./components/AssetManagement";
 import { KnowledgeManagement } from "./components/KnowledgeManagement";
@@ -22,7 +23,8 @@ const routes = [
       { index: true, Component: ACDashboard },
       { path: "ac-profile", Component: ACProfile },
       { path: "committee-structure", Component: CommitteeStructure },
-      { path: "farmer-members", Component: FarmerMembers },
+      { path: "farmer-members", Component: Members },
+      { path: "farmer-members/new", Component: Member360Form },
       { path: "business-plans", Component: BusinessPlanTemplate },
       { path: "assets", Component: AssetManagement },
       { path: "knowledge", Component: KnowledgeManagement },

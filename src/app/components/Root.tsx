@@ -15,15 +15,27 @@ import {
   Languages,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronDown,
 } from "lucide-react";
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChatbotWidget } from "./ChatbotWidget";
+import faoLogo from "../../assets/fao.jpg";
+
+type LangCode = "EN" | "KH" | "FR" | "ZH" | "TH";
+
+const LANGUAGE_OPTIONS: { code: LangCode; label: string; native: string }[] = [
+  { code: "EN", label: "English", native: "English" },
+  { code: "KH", label: "Khmer", native: "ភាសាខ្មែរ" },
+  { code: "FR", label: "French", native: "Français" },
+  { code: "ZH", label: "Chinese", native: "中文" },
+  { code: "TH", label: "Thai", native: "ภาษาไทย" },
+];
 
 const navigation = [
   { name: "AC Dashboard", path: "/", icon: LayoutDashboard },
   { name: "AC Profile", path: "/ac-profile", icon: Building2 },
   { name: "Committee Structure", path: "/committee-structure", icon: UserCircle },
-  { name: "Farmer Members", path: "/farmer-members", icon: Users },
+  { name: "Members", path: "/farmer-members", icon: Users },
   { name: "Business Plans", path: "/business-plans", icon: FileText },
   { name: "Assets", path: "/assets", icon: Package },
   { name: "Knowledge Hub", path: "/knowledge", icon: BookOpen },
@@ -36,11 +48,26 @@ const profileImageUrl =
 export function Root() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState("EN");
+  const [selectedLanguage, setSelectedLanguage] = useState<LangCode>("EN");
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const languageMenuRef = useRef<HTMLDivElement>(null);
 
-  const toggleLanguage = () => {
-    setCurrentLanguage(currentLanguage === "EN" ? "KH" : "EN");
-  };
+  useEffect(() => {
+    if (!languageMenuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const el = languageMenuRef.current;
+      if (el && !el.contains(e.target as Node)) setLanguageMenuOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLanguageMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [languageMenuOpen]);
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -50,32 +77,39 @@ export function Root() {
           desktopSidebarCollapsed ? "w-20" : "w-64"
         }`}
       >
-        {/* Logo */}
+        {/* Logo + collapse (explicit layout avoids broken template literals) */}
         <div
-          className={`flex items-center py-4 border-b border-gray-200 ${
-            desktopSidebarCollapsed ? "justify-center px-3" : "gap-3 px-6"
-          }`}
+          className={
+            desktopSidebarCollapsed
+              ? "flex items-center justify-between border-b border-gray-200 px-3 py-4"
+              : "flex items-center gap-3 border-b border-gray-200 px-6 py-4"
+          }
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-[#032EA1] to-[#0447D4] rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
-            <Building2 className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden border border-blue-100 bg-white shadow-md shadow-blue-500/20">
+            <img
+              src={faoLogo}
+              alt="FAO logo"
+              className="h-full w-full object-cover"
+            />
           </div>
-          <div className={desktopSidebarCollapsed ? "hidden" : ""}>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-[#032EA1] to-[#0447D4] bg-clip-text text-transparent">
-              FOMMP
-            </h1>
-          </div>
+          {!desktopSidebarCollapsed && (
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-[#032EA1] to-[#0447D4] bg-clip-text text-transparent">
+                FOMMP
+              </h1>
+            </div>
+          )}
           <button
+            type="button"
             onClick={() => setDesktopSidebarCollapsed((prev) => !prev)}
-            className={`hidden lg:inline-flex p-2 rounded-lg hover:bg-gray-100 border border-gray-300 transition-colors ${
-              desktopSidebarCollapsed ? "ml-0" : "ml-auto"
-            }`}
+            className="hidden lg:inline-flex shrink-0 items-center justify-center rounded-lg border border-gray-300 p-2 text-gray-700 transition-colors hover:bg-gray-100"
             aria-label={desktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             title={desktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {desktopSidebarCollapsed ? (
-              <PanelLeftOpen className="w-5 h-5 text-gray-700" />
+              <PanelLeftOpen className="h-5 w-5" aria-hidden />
             ) : (
-              <PanelLeftClose className="w-5 h-5 text-gray-700" />
+              <PanelLeftClose className="h-5 w-5" aria-hidden />
             )}
           </button>
         </div>
@@ -147,8 +181,12 @@ export function Root() {
             {/* Logo */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#032EA1] to-[#0447D4] rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
-                  <Building2 className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 rounded-lg overflow-hidden border border-blue-100 bg-white shadow-md shadow-blue-500/20">
+                  <img
+                    src={faoLogo}
+                    alt="FAO logo"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-[#032EA1] to-[#0447D4] bg-clip-text text-transparent">
@@ -241,15 +279,75 @@ export function Root() {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-2">
-              <button
-                onClick={toggleLanguage}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors border border-gray-300"
-              >
-                <Languages className="w-4 h-4 text-gray-700" />
-                <span className="text-sm font-medium text-gray-700">
-                  {currentLanguage}
-                </span>
-              </button>
+              <div className="relative" ref={languageMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setLanguageMenuOpen((o) => !o)}
+                  className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                  aria-expanded={languageMenuOpen}
+                  aria-haspopup="dialog"
+                  aria-label="Display language"
+                >
+                  <Languages className="h-4 w-4 shrink-0" aria-hidden />
+                  <span className="text-sm font-medium tabular-nums">
+                    {selectedLanguage}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 opacity-70 transition-transform ${
+                      languageMenuOpen ? "rotate-180" : ""
+                    }`}
+                    aria-hidden
+                  />
+                </button>
+                {languageMenuOpen && (
+                  <div
+                    className="absolute right-0 z-50 mt-1.5 w-64 rounded-xl border border-gray-200 bg-white py-0.5 shadow-lg"
+                    role="radiogroup"
+                    aria-label="Display language"
+                  >
+                    <p className="border-b border-gray-100 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                      Display language
+                    </p>
+                    <fieldset className="m-0 border-0 p-0">
+                      <legend className="sr-only">Choose display language</legend>
+                      {LANGUAGE_OPTIONS.map((opt) => {
+                        const checked = selectedLanguage === opt.code;
+                        return (
+                          <label
+                            key={opt.code}
+                            className={`flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-left text-sm leading-tight transition-colors hover:bg-gray-50 ${
+                              checked ? "bg-[#032EA1]/[0.06]" : ""
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="navbar-display-language"
+                              value={opt.code}
+                              checked={checked}
+                              onChange={() => {
+                                setSelectedLanguage(opt.code);
+                                setLanguageMenuOpen(false);
+                              }}
+                              className="h-3.5 w-3.5 shrink-0 cursor-pointer accent-[#032EA1] border-gray-300 focus:ring-2 focus:ring-[#032EA1] focus:ring-offset-0"
+                            />
+                            <span className="min-w-0 flex-1">
+                              <span className="block font-medium text-gray-800 leading-tight">
+                                {opt.label}
+                              </span>
+                              <span className="mt-0.5 block text-[11px] leading-tight text-gray-500">
+                                {opt.native}
+                              </span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </fieldset>
+                    <p className="border-t border-gray-100 px-2.5 py-1.5 text-[10px] leading-snug text-gray-500">
+                      Select one language. The app UI can be wired to this choice later.
+                    </p>
+                  </div>
+                )}
+              </div>
               <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
                 <Bell className="w-5 h-5 text-gray-700" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-[#E00025] rounded-full"></span>

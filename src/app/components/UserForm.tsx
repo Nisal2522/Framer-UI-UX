@@ -10,7 +10,7 @@ export function UserForm({ onClose }: UserFormProps) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8">
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-[#032EA1] to-[#0447D4]">
+        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-br from-[#032EA1] to-[#021c5e]">
           <h2 className="text-2xl font-bold text-white">Add New User</h2>
           <button
             onClick={onClose}

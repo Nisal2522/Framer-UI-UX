@@ -4,10 +4,7 @@ import {
   Users,
   Calendar,
   User,
-  Edit2,
-  Trash2,
   X,
-  Phone,
 } from "lucide-react";
 import { committeeMemberPortraitUrl } from "../utils/committeePortraits";
 
@@ -24,9 +21,17 @@ interface CommitteeMember {
   email?: string;
 }
 
+interface CommitteeAssignmentRow {
+  role: string;
+  memberId: string;
+}
+
 export function CommitteeStructure() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState("current");
+  const [committeeAssignments, setCommitteeAssignments] = useState<CommitteeAssignmentRow[]>([
+    { role: "", memberId: "" },
+  ]);
 
   const currentCommittee: CommitteeMember[] = [
     {
@@ -109,6 +114,29 @@ export function CommitteeStructure() {
     return age;
   };
 
+  const openAddModal = () => {
+    setCommitteeAssignments([{ role: "", memberId: "" }]);
+    setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+  };
+
+  const addAssignmentRow = () => {
+    setCommitteeAssignments((prev) => [...prev, { role: "", memberId: "" }]);
+  };
+
+  const updateAssignmentRow = (
+    index: number,
+    key: keyof CommitteeAssignmentRow,
+    value: string
+  ) => {
+    setCommitteeAssignments((prev) =>
+      prev.map((row, i) => (i === index ? { ...row, [key]: value } : row))
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -122,7 +150,7 @@ export function CommitteeStructure() {
           </p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={openAddModal}
           className="flex items-center gap-2 px-4 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors shadow-md"
         >
           <Plus className="w-5 h-5" />
@@ -144,31 +172,33 @@ export function CommitteeStructure() {
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
             >
               <option value="current">
-                ✓ Current Committee (Jan 15, 2024 - Dec 31, 2026) - Active
+                Jan 15, 2024 - Dec 31, 2026
               </option>
-              <option value="2021-2023">Previous Committee (Jan 10, 2021 - Dec 31, 2023)</option>
-              <option value="2018-2020">Historical Committee (Jan 05, 2018 - Dec 31, 2020)</option>
+              <option value="2021-2023">Jan 10, 2021 - Dec 31, 2023</option>
+              <option value="2018-2020">Jan 05, 2018 - Dec 31, 2020</option>
             </select>
           </div>
         </div>
       </div>
 
       {/* Committee Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#032EA1] rounded-xl p-6 shadow-lg text-white">
-          <Users className="w-10 h-10 opacity-80 mb-3" />
-          <p className="text-sm opacity-90">Total Committee Members</p>
-          <p className="text-3xl font-bold mt-2">{currentCommittee.length}</p>
-        </div>
-        <div className="bg-[#032EA1] rounded-xl p-6 shadow-lg text-white">
-          <Calendar className="w-10 h-10 opacity-80 mb-3" />
-          <p className="text-sm opacity-90">Term Period</p>
-          <p className="text-2xl font-bold mt-2">2024 - 2026</p>
-        </div>
-        <div className="bg-[#032EA1] rounded-xl p-6 shadow-lg text-white">
-          <User className="w-10 h-10 opacity-80 mb-3" />
-          <p className="text-sm opacity-90">Term Remaining</p>
-          <p className="text-2xl font-bold mt-2">22 months</p>
+      <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-3 shadow-sm">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-white/12 px-3 py-2 text-white ring-1 ring-white/20">
+            <Users className="h-4 w-4 opacity-90" />
+            <span className="text-xs font-medium text-white/90">Total Committee Members</span>
+            <span className="text-sm font-bold">{currentCommittee.length}</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-white/12 px-3 py-2 text-white ring-1 ring-white/20">
+            <Calendar className="h-4 w-4 opacity-90" />
+            <span className="text-xs font-medium text-white/90">Term Period</span>
+            <span className="text-sm font-bold">2024 - 2026</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-white/12 px-3 py-2 text-white ring-1 ring-white/20">
+            <User className="h-4 w-4 opacity-90" />
+            <span className="text-xs font-medium text-white/90">Term Remaining</span>
+            <span className="text-sm font-bold">22 months</span>
+          </div>
         </div>
       </div>
 
@@ -263,43 +293,7 @@ export function CommitteeStructure() {
             })()}
           </div>
 
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Member details</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {currentCommittee.map((member) => (
-                <div
-                  key={member.id}
-                  className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex gap-3"
-                >
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-white border border-gray-200 shrink-0">
-                    <img
-                      src={committeeMemberPortraitUrl(member)}
-                      alt={member.fullName}
-                      loading="lazy"
-                      decoding="async"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-[#032EA1] font-medium">{member.roleTitle}</p>
-                    <p className="font-semibold text-gray-900">{member.fullName}</p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {member.gender}, Age {calculateAge(member.dateOfBirth)} · {member.phoneNumber}
-                    </p>
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <button type="button" className="p-1.5 hover:bg-gray-200 rounded transition-colors">
-                      <Edit2 className="w-4 h-4 text-gray-600" />
-                    </button>
-                    <button type="button" className="p-1.5 hover:bg-gray-200 rounded transition-colors">
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Member details section removed (cards removed per UI request) */}
         </div>
       </div>
 
@@ -308,12 +302,12 @@ export function CommitteeStructure() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8">
             {/* Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-[#032EA1]">
+            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-br from-[#032EA1] to-[#021c5e]">
               <h2 className="text-2xl font-bold text-white">
                 Add New Committee Member
               </h2>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={closeAddModal}
                 className="p-2 hover:bg-white/20 rounded-lg transition-colors"
               >
                 <X className="w-6 h-6 text-white" />
@@ -321,94 +315,97 @@ export function CommitteeStructure() {
             </div>
 
             {/* Form */}
-            <div className="px-8 py-6 space-y-6 max-h-[calc(100vh-250px)] overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Member <span className="text-red-500">*</span>
-                  </label>
-                  <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                    <option value="">Select from Farmer Members</option>
-                    <option value="1">Sok Pisey - ID: 010234567</option>
-                    <option value="2">Chea Sokha - ID: 010345678</option>
-                    <option value="3">Lim Dara - ID: 010456789</option>
-                  </select>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Member details will be auto-populated from their farmer profile
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Role Title <span className="text-red-500">*</span>
-                  </label>
-                  <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                    <option value="">Select Role</option>
-                    <option value="chairman">Chairman</option>
-                    <option value="vice-chairman">Vice Chairman</option>
-                    <option value="treasurer">Treasurer</option>
-                    <option value="secretary">Secretary</option>
-                    <option value="member-relations">Member Relations Officer</option>
-                    <option value="training">Training Coordinator</option>
-                    <option value="marketing">Marketing Officer</option>
-                    <option value="quality-control">Quality Control Officer</option>
-                    <option value="procurement">Procurement Officer</option>
-                    <option value="custom">Custom Role</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="+855 XX XXX XXX"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Appointment Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Term End Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
+            <div className="px-6 py-4 space-y-4 max-h-[calc(100vh-250px)] overflow-y-auto">
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <p className="text-sm font-semibold text-gray-900 mb-2">Committee Period</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">From</label>
+                    <input
+                      type="date"
+                      className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      aria-label="Committee period start date"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">To</label>
+                    <input
+                      type="date"
+                      className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      aria-label="Committee period end date"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-900">
-                  <strong>Note:</strong> The new committee member will be added to the
-                  current committee structure. Full member details (name, national ID, gender,
-                  date of birth) will be pulled from their farmer member profile. All changes
-                  are logged for audit purposes with version tracking.
-                </p>
+              <div className="rounded-xl border border-gray-200 overflow-hidden">
+                {committeeAssignments.map((row, index) => (
+                  <div
+                    key={`${index}-${row.role}-${row.memberId}`}
+                    className="grid grid-cols-1 md:grid-cols-2 border-b border-gray-200 last:border-b-0"
+                  >
+                    <div className="px-3 py-2.5 md:border-r border-gray-200">
+                      <select
+                        value={row.role}
+                        onChange={(e) => updateAssignmentRow(index, "role", e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                      >
+                        <option value="">Role List</option>
+                        <option value="chairman">Chairman</option>
+                        <option value="secretary">Secretary</option>
+                        <option value="treasurer">Treasurer</option>
+                      </select>
+                    </div>
+                    <div className="px-3 py-2.5">
+                      <select
+                        value={row.memberId}
+                        onChange={(e) => updateAssignmentRow(index, "memberId", e.target.value)}
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                      >
+                        <option value="">Member List</option>
+                        <option value="1">Sok Pisey</option>
+                        <option value="2">Chea Sokha</option>
+                        <option value="3">Lim Dara</option>
+                        <option value="4">Pich Sophea</option>
+                        <option value="5">Keo Sothea</option>
+                        <option value="6">Mao Vibol</option>
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-start">
+                <button
+                  type="button"
+                  onClick={addAssignmentRow}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#032EA1] border border-[#032EA1]/30 rounded-lg hover:bg-[#032EA1]/5 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Row
+                </button>
+              </div>
+
+              <div className="rounded-xl border border-gray-200 p-3 bg-gray-50">
+                <label className="inline-flex items-center gap-3 text-sm font-medium text-gray-800">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-gray-300 text-[#032EA1] focus:ring-[#032EA1]"
+                  />
+                  <span>Set Active Committee</span>
+                </label>
               </div>
             </div>
 
             {/* Footer */}
             <div className="flex items-center justify-between px-8 py-6 border-t border-gray-200 bg-gray-50">
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={closeAddModal}
                 className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
               <button className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors">
-                Add Committee Member
+                Submit
               </button>
             </div>
           </div>
