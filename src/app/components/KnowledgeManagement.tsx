@@ -52,7 +52,7 @@ const materials: KnowledgeMaterial[] = [
     views: 764,
     fileSize: "1.3 MB",
     tags: ["Irrigation", "Visual", "Guide"],
-    coverKind: "image",
+    coverKind: "video",
     coverImageUrl:
       "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&h=400&q=80",
     stagePill: "Developing",
@@ -74,6 +74,8 @@ const materials: KnowledgeMaterial[] = [
     fileSize: "890 KB",
     tags: ["Market Prices", "Rice", "Vegetables"],
     coverKind: "pdf",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=600&h=400&q=80",
     stagePill: "All Stages",
   },
   {
@@ -92,7 +94,7 @@ const materials: KnowledgeMaterial[] = [
     views: 542,
     fileSize: "124 MB",
     tags: ["Training", "Fertilizer", "Organic"],
-    coverKind: "image",
+    coverKind: "video",
     coverImageUrl:
       "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=600&h=400&q=80",
     stagePill: "All Stages",
@@ -114,6 +116,8 @@ const materials: KnowledgeMaterial[] = [
     fileSize: "420 KB",
     tags: ["Pest Management", "Rice", "Alert"],
     coverKind: "pdf",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?auto=format&fit=crop&w=600&h=400&q=80",
     stagePill: "Developing",
   },
   {
@@ -133,6 +137,8 @@ const materials: KnowledgeMaterial[] = [
     fileSize: "3.1 MB",
     tags: ["Training", "Best Practices"],
     coverKind: "pdf",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&h=400&q=80",
     stagePill: "All Stages",
   },
   {
@@ -141,7 +147,7 @@ const materials: KnowledgeMaterial[] = [
     description:
       "Official announcement and application guidelines for the 2024 agricultural subsidy program",
     contentType: "Government Program Announcement",
-    documentType: "PDF Document",
+    documentType: "Video",
     targetCrop: "All Crop Types",
     uploadDate: "2024-03-10",
     uploadedBy: "Ministry Committee",
@@ -151,7 +157,7 @@ const materials: KnowledgeMaterial[] = [
     views: 1567,
     fileSize: "560 KB",
     tags: ["Training", "Certification"],
-    coverKind: "image",
+    coverKind: "video",
     coverImageUrl:
       "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=600&h=400&q=80",
     stagePill: "Developing",
@@ -233,17 +239,34 @@ export function KnowledgeManagement() {
           >
             {/* Media */}
             <div className="relative aspect-[16/9] w-full bg-gray-100 shrink-0 overflow-hidden rounded-t-lg">
-              {material.coverKind === "pdf" ? (
+              {material.coverKind === "pdf" && !material.coverImageUrl ? (
                 <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-red-600 to-red-700">
                   <FileText className="w-12 h-12 text-white opacity-95" strokeWidth={1.5} />
                 </div>
               ) : material.coverImageUrl ? (
-                <img
-                  src={material.coverImageUrl}
-                  alt=""
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                />
+                <>
+                  <img
+                    src={material.coverImageUrl}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                  {material.coverKind === "video" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <div className="flex items-center justify-center w-14 h-14 rounded-full bg-white/90 shadow-lg">
+                        <svg viewBox="0 0 24 24" fill="#032EA1" className="w-7 h-7 ml-1">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                  {material.coverKind === "pdf" && (
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow">
+                      <FileText className="w-3 h-3" />
+                      PDF
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
                   <BookOpen className="w-10 h-10 text-gray-500" />
