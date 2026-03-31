@@ -565,7 +565,7 @@ export function Member360Form() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Expected Yield <span className="text-red-500">*</span>
+                      Expected Yield Per Year <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -606,7 +606,7 @@ export function Member360Form() {
                         Crop Name
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Expected Yield
+                        Expected Yield Per Year
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                         Number of Plants
