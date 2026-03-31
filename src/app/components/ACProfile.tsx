@@ -112,8 +112,6 @@ export function ACProfile() {
           <div className="flex overflow-x-auto">
             {[
               { id: "cooperative-info", label: "Cooperative Info" },
-              { id: "land", label: "Land" },
-              { id: "crops", label: "Crops" },
               { id: "dossier", label: "Dossier" },
             ].map((tab) => (
               <button

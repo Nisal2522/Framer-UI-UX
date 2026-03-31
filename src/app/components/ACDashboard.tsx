@@ -90,7 +90,7 @@ export function ACDashboard() {
             <Users className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-white/75">Total membership</p>
+            <p className="text-xs font-medium text-white/75">Total members</p>
             <p className="mt-0.5 text-3xl font-bold tabular-nums sm:text-4xl">447</p>
           </div>
         </div>

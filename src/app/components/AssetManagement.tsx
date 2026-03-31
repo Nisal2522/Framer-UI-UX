@@ -40,9 +40,50 @@ const USAGE_LOGS = [
   },
 ] as const;
 
+type AssetForm = {
+  type: string;
+  name: string;
+  serialNumber: string;
+  acquisitionDate: string;
+  acquisitionMethod: string;
+  value: string;
+  location: string;
+  custodian: string;
+  assetStatus: string;
+  description: string;
+};
+
+const EMPTY_FORM: AssetForm = {
+  type: "",
+  name: "",
+  serialNumber: "",
+  acquisitionDate: "",
+  acquisitionMethod: "",
+  value: "",
+  location: "",
+  custodian: "",
+  assetStatus: "",
+  description: "",
+};
+
+const typeToSelect = (t: string) => t.toLowerCase().replace(/ /g, "-") as string;
+const methodToSelect = (m: string): string => {
+  const map: Record<string, string> = {
+    "Donated by PEARL": "pearl",
+    "Own Funds": "own-funds",
+    "Purchased": "purchased",
+    "Donated by Other Program": "other-program",
+    "Government Grant": "government",
+  };
+  return map[m] ?? m.toLowerCase();
+};
+const statusToSelect = (s: string) => s.toLowerCase();
+
 export function AssetManagement() {
   const [activeTab, setActiveTab] = useState("inventory");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<null | string>(null);
+  const [assetForm, setAssetForm] = useState<AssetForm>(EMPTY_FORM);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [registerAssetFiles, setRegisterAssetFiles] = useState<File[]>([]);
   const registerFileInputRef = useRef<HTMLInputElement>(null);
@@ -52,6 +93,9 @@ export function AssetManagement() {
   const [conditionFormRating, setConditionFormRating] = useState("");
   const [conditionPhotoFiles, setConditionPhotoFiles] = useState<File[]>([]);
   const conditionPhotoInputRef = useRef<HTMLInputElement>(null);
+
+  const setField = (field: keyof AssetForm, value: string) =>
+    setAssetForm((prev) => ({ ...prev, [field]: value }));
 
   const conditionToSelectValue = (condition: string) => {
     const m: Record<string, string> = {
@@ -105,8 +149,28 @@ export function AssetManagement() {
 
   const closeAddModal = () => {
     setShowAddModal(false);
+    setEditingAsset(null);
+    setAssetForm(EMPTY_FORM);
     setRegisterAssetFiles([]);
     if (registerFileInputRef.current) registerFileInputRef.current.value = "";
+  };
+
+  const openEditModal = (asset: (typeof assets)[number]) => {
+    setEditingAsset(asset.id);
+    setAssetForm({
+      type: typeToSelect(asset.type),
+      name: asset.name,
+      serialNumber: asset.serialNumber,
+      acquisitionDate: asset.acquisitionDate,
+      acquisitionMethod: methodToSelect(asset.acquisitionMethod),
+      value: asset.value,
+      location: asset.location,
+      custodian: asset.custodian,
+      assetStatus: statusToSelect(asset.assetStatus),
+      description: "",
+    });
+    setRegisterAssetFiles([]);
+    setShowAddModal(true);
   };
 
   const assets = [
@@ -154,6 +218,81 @@ export function AssetManagement() {
       pearlFunded: true,
       assetStatus: "Inactive" as const,
       status: "Pending Verification",
+    },
+    {
+      id: "AST-004",
+      name: "Irrigation Pipeline (500m)",
+      type: "Infrastructure",
+      serialNumber: "IPL-2023-007",
+      acquisitionDate: "2023-05-18",
+      acquisitionMethod: "Donated by PEARL",
+      value: "$8,200",
+      location: "East Paddy Field",
+      custodian: "Meas Sothea",
+      condition: "Good",
+      pearlFunded: true,
+      assetStatus: "Active" as const,
+      status: "Verified",
+    },
+    {
+      id: "AST-005",
+      name: "Tractor (25HP)",
+      type: "Vehicle",
+      serialNumber: "TRC-2022-019",
+      acquisitionDate: "2022-11-05",
+      acquisitionMethod: "Own Funds",
+      value: "$15,500",
+      location: "Vehicle Depot",
+      custodian: "Sok Pisey",
+      condition: "Fair",
+      pearlFunded: false,
+      assetStatus: "Active" as const,
+      status: "Verified",
+    },
+    {
+      id: "AST-006",
+      name: "Solar Drying System",
+      type: "Equipment",
+      serialNumber: "SDS-2024-003",
+      acquisitionDate: "2024-02-28",
+      acquisitionMethod: "Donated by PEARL",
+      value: "$5,800",
+      location: "Post-Harvest Center",
+      custodian: "Keo Vanna",
+      condition: "Good",
+      pearlFunded: true,
+      assetStatus: "Active" as const,
+      status: "Verified",
+    },
+    {
+      id: "AST-007",
+      name: "Seed Storage Warehouse",
+      type: "Building",
+      serialNumber: "SSW-2021-001",
+      acquisitionDate: "2021-07-12",
+      acquisitionMethod: "Own Funds",
+      value: "$22,000",
+      location: "Cooperative Compound",
+      custodian: "Lim Dara",
+      condition: "Poor",
+      pearlFunded: false,
+      assetStatus: "Active" as const,
+      status: "Pending Verification",
+    },
+    {
+      id: "AST-008",
+      name: "Weighing Scale (500kg)",
+      type: "Equipment",
+      serialNumber: "WSC-2023-031",
+      acquisitionDate: "2023-09-14",
+      acquisitionMethod: "Donated by PEARL",
+      value: "$950",
+      location: "Main Storage Facility",
+      custodian: "Chea Sokha",
+      condition: "Good",
+      pearlFunded: true,
+      assetStatus: "Active" as const,
+      status: "Verified",
     },
   ];
 
@@ -456,6 +595,7 @@ export function AssetManagement() {
                               </button>
                               <button
                                 type="button"
+                                onClick={() => openEditModal(asset)}
                                 className="p-1.5 rounded-lg text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
                                 aria-label="Edit asset"
                               >
@@ -793,9 +933,14 @@ export function AssetManagement() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-br from-[#032EA1] to-[#021c5e]">
-              <h2 className="text-2xl font-bold text-white">
-                Register New Asset
-              </h2>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  {editingAsset ? "Edit Asset" : "Register New Asset"}
+                </h2>
+                {editingAsset && (
+                  <p className="text-blue-200 text-sm mt-0.5">ID: {editingAsset}</p>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={closeAddModal}
@@ -812,7 +957,11 @@ export function AssetManagement() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asset Type <span className="text-red-500">*</span>
                   </label>
-                  <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
+                  <select
+                    value={assetForm.type}
+                    onChange={(e) => setField("type", e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  >
                     <option value="">Select type</option>
                     <option value="equipment">Equipment</option>
                     <option value="vehicle">Vehicle</option>
@@ -829,6 +978,8 @@ export function AssetManagement() {
                   <input
                     type="text"
                     placeholder="Enter asset name"
+                    value={assetForm.name}
+                    onChange={(e) => setField("name", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                   />
                 </div>
@@ -840,6 +991,8 @@ export function AssetManagement() {
                   <input
                     type="text"
                     placeholder="Enter serial number"
+                    value={assetForm.serialNumber}
+                    onChange={(e) => setField("serialNumber", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                   />
                 </div>
@@ -850,6 +1003,8 @@ export function AssetManagement() {
                   </label>
                   <input
                     type="date"
+                    value={assetForm.acquisitionDate}
+                    onChange={(e) => setField("acquisitionDate", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                   />
                 </div>
@@ -858,7 +1013,11 @@ export function AssetManagement() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Acquisition Method <span className="text-red-500">*</span>
                   </label>
-                  <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
+                  <select
+                    value={assetForm.acquisitionMethod}
+                    onChange={(e) => setField("acquisitionMethod", e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  >
                     <option value="">Select method</option>
                     <option value="purchased">Purchased</option>
                     <option value="pearl">Donated by PEARL</option>
@@ -875,6 +1034,8 @@ export function AssetManagement() {
                   <input
                     type="text"
                     placeholder="e.g., $12,000"
+                    value={assetForm.value}
+                    onChange={(e) => setField("value", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                   />
                 </div>
@@ -886,6 +1047,8 @@ export function AssetManagement() {
                   <input
                     type="text"
                     placeholder="Enter location"
+                    value={assetForm.location}
+                    onChange={(e) => setField("location", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                   />
                 </div>
@@ -897,6 +1060,8 @@ export function AssetManagement() {
                   <input
                     type="text"
                     placeholder="Enter custodian name"
+                    value={assetForm.custodian}
+                    onChange={(e) => setField("custodian", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                   />
                 </div>
@@ -905,7 +1070,11 @@ export function AssetManagement() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Asset Status <span className="text-red-500">*</span>
                   </label>
-                  <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
+                  <select
+                    value={assetForm.assetStatus}
+                    onChange={(e) => setField("assetStatus", e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  >
                     <option value="">Select status</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -919,6 +1088,8 @@ export function AssetManagement() {
                   <textarea
                     rows={3}
                     placeholder="Describe the asset..."
+                    value={assetForm.description}
+                    onChange={(e) => setField("description", e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none"
                   ></textarea>
                 </div>
@@ -1019,7 +1190,7 @@ export function AssetManagement() {
                 Cancel
               </button>
               <button className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors">
-                Register Asset
+                {editingAsset ? "Update Asset" : "Register Asset"}
               </button>
             </div>
           </div>
