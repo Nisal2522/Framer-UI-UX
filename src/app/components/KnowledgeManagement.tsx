@@ -42,7 +42,7 @@ const materials: KnowledgeMaterial[] = [
     description:
       "Comprehensive guide for organic rice cultivation techniques and pest management",
     contentType: "Agricultural Techniques",
-    documentType: "PDF Document",
+    documentType: "Video",
     targetCrop: "Rice",
     uploadDate: "2024-03-21",
     uploadedBy: "Extension Media Unit",
