@@ -62,6 +62,33 @@ export function Member360Form() {
   const certOptions = ["USDA-NOP", "EU Organic", "JAS", "GLOBAL G.A.P."];
   const [selectedCerts, setSelectedCerts] = useState<string[]>([]);
   const [certDropdownOpen, setCertDropdownOpen] = useState(false);
+
+  type LandRow = { name: string; extend: string; status: string; certifications: string[] };
+  const EMPTY_LAND: LandRow = { name: "", extend: "", status: "", certifications: [] };
+  const [landRows, setLandRows] = useState<LandRow[]>(
+    isEditMode ? [{ name: "North Rice Field", extend: "5.2", status: "Active", certifications: ["USDA-NOP"] }] : []
+  );
+  const [landPanelOpen, setLandPanelOpen] = useState(false);
+  const [landEditRow, setLandEditRow] = useState<number | null>(null);
+  const [landForm, setLandForm] = useState<LandRow>(EMPTY_LAND);
+
+  type CropRow = { landName: string; cropName: string; yield: string; plants: string };
+  const EMPTY_CROP: CropRow = { landName: "", cropName: "", yield: "", plants: "" };
+  const [cropRows, setCropRows] = useState<CropRow[]>(
+    isEditMode ? [{ landName: "North Rice Field", cropName: "Rice", yield: "3.5 tons/ha", plants: "N/A" }] : []
+  );
+  const [cropPanelOpen, setCropPanelOpen] = useState(false);
+  const [cropEditRow, setCropEditRow] = useState<number | null>(null);
+  const [cropForm, setCropForm] = useState<CropRow>(EMPTY_CROP);
+
+  type DocRow = { docName: string; landName: string; uploadDate: string; fileSize: string; fileName: string };
+  const EMPTY_DOC: DocRow = { docName: "", landName: "", uploadDate: "", fileSize: "", fileName: "" };
+  const [docRows, setDocRows] = useState<DocRow[]>(
+    isEditMode ? [{ docName: "Land Certificate", landName: "North Rice Field", uploadDate: "Mar 15, 2024", fileSize: "2.3 MB", fileName: "land_certificate.pdf" }] : []
+  );
+  const [docPanelOpen, setDocPanelOpen] = useState(false);
+  const [docEditRow, setDocEditRow] = useState<number | null>(null);
+  const [docForm, setDocForm] = useState<DocRow>(EMPTY_DOC);
   const certDropdownRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -394,140 +421,187 @@ export function Member360Form() {
           )}
 
           {activeTab === "land" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Land Records</h3>
-              <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Land Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., North Rice Field"
-                      className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                    />
+            <div className="space-y-3">
+              {/* ── Header row ── */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-gray-900">Land Records</h3>
+                {!landPanelOpen && (
+                  <button
+                    type="button"
+                    onClick={() => { setLandEditRow(null); setLandForm(EMPTY_LAND); setLandPanelOpen(true); }}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors text-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add New Record
+                  </button>
+                )}
+              </div>
+
+              {/* ── Accordion form ── */}
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${landPanelOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
+                <div className="bg-white border border-[#032EA1]/20 rounded-xl shadow-sm">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gradient-to-r from-[#032EA1]/5 to-transparent rounded-t-xl">
+                    <h4 className="text-sm font-semibold text-[#032EA1]">
+                      {landEditRow !== null ? "Edit Land Record" : "New Land Record"}
+                    </h4>
+                    <button onClick={() => { setLandPanelOpen(false); setLandEditRow(null); }} className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Land Extend (Ha) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Status <span className="text-red-500">*</span>
-                    </label>
-                    <select className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                      <option value="">Select Status</option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Certifications
-                    </label>
-                    <div className="relative" ref={certDropdownRef}>
-                      <button
-                        type="button"
-                        onClick={() => setCertDropdownOpen((o) => !o)}
-                        className="w-full flex items-center justify-between px-3.5 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                      >
-                        <span className={selectedCerts.length === 0 ? "text-gray-400" : "text-gray-800"}>
-                          {selectedCerts.length === 0
-                            ? "Select certifications"
-                            : selectedCerts.join(", ")}
-                        </span>
-                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${certDropdownOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                      </button>
-                      {certDropdownOpen && (
-                        <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-                          {certOptions.map((cert) => (
-                            <label key={cert} className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-blue-50 transition-colors select-none">
-                              <input
-                                type="checkbox"
-                                checked={selectedCerts.includes(cert)}
-                                onChange={() => toggleCert(cert)}
-                                className="h-4 w-4 rounded border-gray-300 accent-[#032EA1]"
-                              />
-                              <span className="text-sm text-gray-700">{cert}</span>
-                            </label>
-                          ))}
+                  <div className="px-5 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Land Name <span className="text-red-500">*</span></label>
+                        <input
+                          type="text"
+                          placeholder="e.g., North Rice Field"
+                          value={landForm.name}
+                          onChange={(e) => setLandForm((f) => ({ ...f, name: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Land Extend (Ha) <span className="text-red-500">*</span></label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={landForm.extend}
+                          onChange={(e) => setLandForm((f) => ({ ...f, extend: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Status <span className="text-red-500">*</span></label>
+                        <select
+                          value={landForm.status}
+                          onChange={(e) => setLandForm((f) => ({ ...f, status: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                        >
+                          <option value="">Select Status</option>
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Certifications</label>
+                        <div className="relative" ref={certDropdownRef}>
+                          <button
+                            type="button"
+                            onClick={() => setCertDropdownOpen((o) => !o)}
+                            className="w-full flex items-center justify-between px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-[#032EA1] outline-none text-left"
+                          >
+                            <span className={landForm.certifications.length === 0 ? "text-gray-400" : "text-gray-800 truncate"}>
+                              {landForm.certifications.length === 0 ? "Select" : landForm.certifications.join(", ")}
+                            </span>
+                            <svg className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${certDropdownOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                          </button>
+                          {certDropdownOpen && (
+                            <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                              {certOptions.map((cert) => (
+                                <label key={cert} className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-blue-50 transition-colors select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={landForm.certifications.includes(cert)}
+                                    onChange={() => setLandForm((f) => ({
+                                      ...f,
+                                      certifications: f.certifications.includes(cert)
+                                        ? f.certifications.filter((c) => c !== cert)
+                                        : [...f.certifications, cert],
+                                    }))}
+                                    className="h-4 w-4 rounded border-gray-300 accent-[#032EA1]"
+                                  />
+                                  <span className="text-sm text-gray-700">{cert}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <button type="button" className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium">
+                        <MapPin className="w-3.5 h-3.5" />
+                        Mark location on map
+                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }}
+                          className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (landEditRow !== null) {
+                              setLandRows((prev) => prev.map((r, i) => i === landEditRow ? { ...landForm } : r));
+                            } else {
+                              setLandRows((prev) => [...prev, { ...landForm }]);
+                            }
+                            setLandPanelOpen(false);
+                            setLandEditRow(null);
+                            setLandForm(EMPTY_LAND);
+                          }}
+                          className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
+                        >
+                          {landEditRow !== null ? "Update" : "Add Land"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:items-center sm:justify-between">
-                  <button
-                    type="button"
-                    className="flex items-center justify-center gap-2 px-3.5 py-1.5 bg-blue-100 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors w-fit self-start text-sm"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    Mark the location in the map
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center justify-center gap-2 px-5 py-2 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium w-fit self-end sm:self-auto shrink-0 text-sm"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Land
-                  </button>
-                </div>
               </div>
 
+              {/* ── Table ── */}
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Land Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Extend (Ha)
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Certification
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Ref Number
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Actions
-                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Land Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Extend (Ha)</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Certification</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">North Rice Field</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">5.2</td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded border border-emerald-200">
-                          Active
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">USDA-NOP</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">DEED-001-2024</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button className="p-1 hover:bg-gray-200 rounded">
-                            <Edit2 className="w-4 h-4 text-gray-600" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-200 rounded">
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                  <tbody className="divide-y divide-gray-100">
+                    {landRows.map((row, i) => (
+                      <tr key={i} className={`hover:bg-blue-50/40 transition-colors ${landEditRow === i && landPanelOpen ? "bg-blue-50" : ""}`}>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.extend}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded border ${row.status === "Active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                            {row.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.certifications.join(", ") || "—"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            <button
+                              className="p-1.5 rounded hover:bg-blue-100 text-[#032EA1] transition-colors"
+                              onClick={() => { setLandEditRow(i); setLandForm({ ...row }); setLandPanelOpen(true); }}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              className="p-1.5 rounded hover:bg-red-100 text-red-500 transition-colors"
+                              onClick={() => setLandRows((prev) => prev.filter((_, idx) => idx !== i))}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {landRows.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-10 text-center text-sm text-gray-400">
+                          No land records yet. Click "Add New Record" to get started.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -535,104 +609,152 @@ export function Member360Form() {
           )}
 
           {activeTab === "crops" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Crop Records</h3>
-              <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Land Name <span className="text-red-500">*</span>
-                    </label>
-                    <select className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                      <option value="">Select Land</option>
-                      <option value="north-rice-field">North Rice Field</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Crop Name <span className="text-red-500">*</span>
-                    </label>
-                    <select className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                      <option value="">Select Crop</option>
-                      <option value="rice">Rice</option>
-                      <option value="cassava">Cassava</option>
-                      <option value="corn">Corn</option>
-                      <option value="coconut">Coconut</option>
-                      <option value="banana">Banana</option>
-                      <option value="pepper">Pepper</option>
-                      <option value="vegetables">Vegetables</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Expected Yield Per Year <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., 3.5 tons/ha"
-                      className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Number of Plants
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., 1000 plants or 500 kg/ha"
-                      className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                    />
-                  </div>
-                </div>
-                <div className="pt-2 flex justify-end">
+            <div className="space-y-3">
+              {/* ── Header row ── */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-gray-900">Crop Records</h3>
+                {!cropPanelOpen && (
                   <button
                     type="button"
-                    className="flex items-center gap-2 px-5 py-2 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium text-sm"
+                    onClick={() => { setCropEditRow(null); setCropForm(EMPTY_CROP); setCropPanelOpen(true); }}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors text-sm font-medium"
                   >
                     <Plus className="w-4 h-4" />
-                    Add Crop
+                    Add New Record
                   </button>
+                )}
+              </div>
+
+              {/* ── Accordion form ── */}
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${cropPanelOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+                <div className="bg-white border border-[#032EA1]/20 rounded-xl shadow-sm">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gradient-to-r from-[#032EA1]/5 to-transparent rounded-t-xl">
+                    <h4 className="text-sm font-semibold text-[#032EA1]">
+                      {cropEditRow !== null ? "Edit Crop Record" : "New Crop Record"}
+                    </h4>
+                    <button onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }} className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="px-5 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Land Name <span className="text-red-500">*</span></label>
+                        <select
+                          value={cropForm.landName}
+                          onChange={(e) => setCropForm((f) => ({ ...f, landName: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                        >
+                          <option value="">Select Land</option>
+                          {landRows.map((l) => <option key={l.name} value={l.name}>{l.name}</option>)}
+                          <option value="North Rice Field">North Rice Field</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Crop Name <span className="text-red-500">*</span></label>
+                        <select
+                          value={cropForm.cropName}
+                          onChange={(e) => setCropForm((f) => ({ ...f, cropName: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                        >
+                          <option value="">Select Crop</option>
+                          {["Rice","Cassava","Corn","Coconut","Banana","Pepper","Vegetables"].map((c) => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Expected Yield Per Year <span className="text-red-500">*</span></label>
+                        <input
+                          type="text"
+                          placeholder="e.g., 3.5 tons/ha"
+                          value={cropForm.yield}
+                          onChange={(e) => setCropForm((f) => ({ ...f, yield: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Number of Plants</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., 1000 plants"
+                          value={cropForm.plants}
+                          onChange={(e) => setCropForm((f) => ({ ...f, plants: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }}
+                        className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (cropEditRow !== null) {
+                            setCropRows((prev) => prev.map((r, i) => i === cropEditRow ? { ...cropForm } : r));
+                          } else {
+                            setCropRows((prev) => [...prev, { ...cropForm }]);
+                          }
+                          setCropPanelOpen(false);
+                          setCropEditRow(null);
+                          setCropForm(EMPTY_CROP);
+                        }}
+                        className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
+                      >
+                        {cropEditRow !== null ? "Update" : "Add Crop"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* ── Table ── */}
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Land Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Crop Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Expected Yield Per Year
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Number of Plants
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Actions
-                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Land Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Crop Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Expected Yield / Year</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">No. of Plants</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">North Rice Field</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">Rice</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">3.5 tons/ha</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">N/A</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button className="p-1 hover:bg-gray-200 rounded">
-                            <Edit2 className="w-4 h-4 text-gray-600" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-200 rounded">
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                  <tbody className="divide-y divide-gray-100">
+                    {cropRows.map((row, i) => (
+                      <tr key={i} className={`hover:bg-blue-50/40 transition-colors ${cropEditRow === i && cropPanelOpen ? "bg-blue-50" : ""}`}>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.landName}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.cropName}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.yield}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.plants || "—"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            <button
+                              className="p-1.5 rounded hover:bg-blue-100 text-[#032EA1] transition-colors"
+                              onClick={() => { setCropEditRow(i); setCropForm({ ...row }); setCropPanelOpen(true); }}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              className="p-1.5 rounded hover:bg-red-100 text-red-500 transition-colors"
+                              onClick={() => setCropRows((prev) => prev.filter((_, idx) => idx !== i))}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {cropRows.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-10 text-center text-sm text-gray-400">
+                          No crop records yet. Click "Add New Record" to get started.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -640,88 +762,158 @@ export function Member360Form() {
           )}
 
           {activeTab === "dossier" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Document Dossier</h3>
-
-              <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Land Name</label>
-                    <select className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                      <option value="">Select Land</option>
-                      <option value="north-rice-field">North Rice Field</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Document Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., Land Certificate"
-                      className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                    />
-                  </div>
-                </div>
-
-                <label className="block cursor-pointer">
-                  <input type="file" className="sr-only" />
-                  <div className="rounded-lg border border-dashed border-slate-300 bg-white px-5 py-6 text-center hover:border-[#032EA1]/60 transition-colors">
-                    <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-700">Drag and drop to upload here or select file</p>
-                    <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, JPG, PNG (Max 10MB)</p>
-                  </div>
-                </label>
-
-                <div className="pt-2 flex justify-end">
+            <div className="space-y-3">
+              {/* ── Header row ── */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-gray-900">Document Dossier</h3>
+                {!docPanelOpen && (
                   <button
                     type="button"
-                    className="flex items-center gap-2 px-5 py-2 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium text-sm"
+                    onClick={() => { setDocEditRow(null); setDocForm(EMPTY_DOC); setDocPanelOpen(true); }}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors text-sm font-medium"
                   >
                     <Plus className="w-4 h-4" />
-                    Add Document
+                    Add New Record
                   </button>
+                )}
+              </div>
+
+              {/* ── Accordion form ── */}
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${docPanelOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+                <div className="bg-white border border-[#032EA1]/20 rounded-xl shadow-sm">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gradient-to-r from-[#032EA1]/5 to-transparent rounded-t-xl">
+                    <h4 className="text-sm font-semibold text-[#032EA1]">
+                      {docEditRow !== null ? "Edit Document" : "New Document"}
+                    </h4>
+                    <button onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }} className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="px-5 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Document Name <span className="text-red-500">*</span></label>
+                        <input
+                          type="text"
+                          placeholder="e.g., Land Certificate"
+                          value={docForm.docName}
+                          onChange={(e) => setDocForm((f) => ({ ...f, docName: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Land Name</label>
+                        <select
+                          value={docForm.landName}
+                          onChange={(e) => setDocForm((f) => ({ ...f, landName: e.target.value }))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                        >
+                          <option value="">Select Land</option>
+                          {landRows.map((l) => <option key={l.name} value={l.name}>{l.name}</option>)}
+                          <option value="North Rice Field">North Rice Field</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">File</label>
+                      <label className="block cursor-pointer">
+                        <input type="file" className="sr-only" onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) setDocForm((prev) => ({ ...prev, fileName: f.name, fileSize: `${(f.size / 1024 / 1024).toFixed(1)} MB` }));
+                        }} />
+                        <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-4 text-center hover:border-[#032EA1]/60 transition-colors">
+                          <Upload className="w-5 h-5 mx-auto text-gray-400 mb-1" />
+                          {docForm.fileName ? (
+                            <p className="text-sm font-medium text-[#032EA1]">{docForm.fileName}</p>
+                          ) : (
+                            <>
+                              <p className="text-sm text-gray-600">Drag & drop or click to select</p>
+                              <p className="text-xs text-gray-400 mt-0.5">PDF, DOC, DOCX, JPG, PNG (Max 10MB)</p>
+                            </>
+                          )}
+                        </div>
+                      </label>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }}
+                        className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const now = new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+                          const entry = { ...docForm, uploadDate: docForm.uploadDate || now };
+                          if (docEditRow !== null) {
+                            setDocRows((prev) => prev.map((r, i) => i === docEditRow ? entry : r));
+                          } else {
+                            setDocRows((prev) => [...prev, entry]);
+                          }
+                          setDocPanelOpen(false);
+                          setDocEditRow(null);
+                          setDocForm(EMPTY_DOC);
+                        }}
+                        className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
+                      >
+                        {docEditRow !== null ? "Update" : "Add Document"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
+              {/* ── Table ── */}
               <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Document Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Land Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Upload Date
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        File Size
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Actions
-                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Document Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Land Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Upload Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">File Size</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">Land Certificate</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">North Rice Field</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">Mar 15, 2024</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">2.3 MB</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button className="p-1 hover:bg-gray-200 rounded" aria-label="View document">
-                            <FileText className="w-4 h-4 text-gray-600" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-200 rounded" aria-label="Delete document">
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                  <tbody className="divide-y divide-gray-100">
+                    {docRows.map((row, i) => (
+                      <tr key={i} className={`hover:bg-blue-50/40 transition-colors ${docEditRow === i && docPanelOpen ? "bg-blue-50" : ""}`}>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-[#032EA1] shrink-0" />
+                            {row.docName}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.landName || "—"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.uploadDate || "—"}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{row.fileSize || "—"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1">
+                            <button
+                              className="p-1.5 rounded hover:bg-blue-100 text-[#032EA1] transition-colors"
+                              onClick={() => { setDocEditRow(i); setDocForm({ ...row }); setDocPanelOpen(true); }}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              className="p-1.5 rounded hover:bg-red-100 text-red-500 transition-colors"
+                              onClick={() => setDocRows((prev) => prev.filter((_, idx) => idx !== i))}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {docRows.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-10 text-center text-sm text-gray-400">
+                          No documents yet. Click "Add New Record" to upload one.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
