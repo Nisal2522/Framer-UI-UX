@@ -306,50 +306,32 @@ export function BusinessPlanTemplate() {
       {/* ── HISTORY VIEW (/dashboard/business-plans) ── */}
       {!isNewPlan && (
         <div className="space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">Total Submitted</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{pastPlans.length}</p>
-                </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow">
-                  <FileText className="w-5 h-5 text-white" />
-                </div>
+          {/* Summary Banner */}
+          <div className="rounded-xl bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-4 text-white shadow-lg ring-1 ring-white/10 sm:p-5">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+              <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+                <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+                  Total Submitted
+                </p>
+                <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">{pastPlans.length}</p>
               </div>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">Approved</p>
-                  <p className="text-2xl font-bold text-emerald-600 mt-1">{approvedCount}</p>
-                </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shadow">
-                  <CheckCircle2 className="w-5 h-5 text-white" />
-                </div>
+              <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+                <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+                  Approved
+                </p>
+                <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">{approvedCount}</p>
               </div>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">Under Review</p>
-                  <p className="text-2xl font-bold text-orange-500 mt-1">{reviewCount}</p>
-                </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-500 rounded-lg flex items-center justify-center shadow">
-                  <Clock className="w-5 h-5 text-white" />
-                </div>
+              <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+                <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+                  Under Review
+                </p>
+                <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">{reviewCount}</p>
               </div>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">Rejected</p>
-                  <p className="text-2xl font-bold text-red-500 mt-1">{rejectedCount}</p>
-                </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-500 rounded-lg flex items-center justify-center shadow">
-                  <XCircle className="w-5 h-5 text-white" />
-                </div>
+              <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+                <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+                  Rejected
+                </p>
+                <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">{rejectedCount}</p>
               </div>
             </div>
           </div>
