@@ -243,14 +243,16 @@ export function CommitteeStructure() {
                   <span className={`text-sm font-medium ${selectedPeriod === period.id ? "text-[#0F2F8F]" : "text-gray-700"}`}>
                     {period.label}
                   </span>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); openEditModal(period.id); }}
-                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#0F2F8F] border border-[#0F2F8F]/30 rounded-lg hover:bg-[#0F2F8F] hover:text-white transition-colors"
-                  >
-                    <Pencil className="w-3 h-3" />
-                    Edit
-                  </button>
+                  {selectedPeriod === period.id && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); openEditModal(period.id); }}
+                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#0F2F8F] border border-[#0F2F8F]/30 rounded-lg hover:bg-[#0F2F8F] hover:text-white transition-colors"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      Edit
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -285,10 +287,6 @@ export function CommitteeStructure() {
           <h3 className="font-semibold text-gray-900">
             Committee organizational chart
           </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Reporting lines and hanging branches (assistant layout). Portraits are real stock
-            headshots (gender-matched); replace with your own files or cloud URLs when available.
-          </p>
         </div>
         <div className="p-6 overflow-x-auto">
           <div className="min-w-[720px] flex flex-col items-center gap-0">

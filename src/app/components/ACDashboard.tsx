@@ -11,8 +11,21 @@ import {
   Calendar,
   MapPinned,
 } from "lucide-react";
-import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip as LeafletTooltip, Popup } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
+const redPinIcon = L.divIcon({
+  className: "",
+  html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="24" height="36">
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 24 12 24S24 21 24 12C24 5.373 18.627 0 12 0z" fill="#EF4444" stroke="#991B1B" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="4.5" fill="white" opacity="0.9"/>
+  </svg>`,
+  iconSize: [24, 36],
+  iconAnchor: [12, 36],
+  popupAnchor: [0, -36],
+  tooltipAnchor: [12, -20],
+});
 import {
   PieChart,
   Pie,
@@ -285,16 +298,10 @@ export function ACDashboard() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 {farmerMapMembers.map((farmer) => (
-                  <CircleMarker
+                  <Marker
                     key={farmer.id}
-                    center={[farmer.lat, farmer.lon]}
-                    radius={8}
-                    pathOptions={{
-                      color: "#0D2A7D",
-                      weight: 2,
-                      fillColor: "#0F2F8F",
-                      fillOpacity: 0.85,
-                    }}
+                    position={[farmer.lat, farmer.lon]}
+                    icon={redPinIcon}
                   >
                     <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
                       <span className="text-xs font-semibold">{farmer.name}</span>
@@ -338,7 +345,7 @@ export function ACDashboard() {
                         </div>
                       </div>
                     </Popup>
-                  </CircleMarker>
+                  </Marker>
                 ))}
               </MapContainer>
             </div>
