@@ -32,6 +32,7 @@ const routes = [
       { path: "farmer-members/new", Component: Member360Form },
       { path: "farmer-members/edit/:memberId", Component: Member360Form },
       { path: "business-plans", Component: BusinessPlanTemplate },
+      { path: "business-plans/new", Component: BusinessPlanTemplate },
       { path: "assets", Component: AssetManagement },
       { path: "knowledge", Component: KnowledgeManagement },
       { path: "reports", Component: Reports },
