@@ -5,6 +5,7 @@ import {
   Calendar,
   User,
   X,
+  Trash2,
 } from "lucide-react";
 import { committeeMemberPortraitUrl } from "../utils/committeePortraits";
 
@@ -125,6 +126,10 @@ export function CommitteeStructure() {
 
   const addAssignmentRow = () => {
     setCommitteeAssignments((prev) => [...prev, { role: "", memberId: "" }]);
+  };
+
+  const removeAssignmentRow = (index: number) => {
+    setCommitteeAssignments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateAssignmentRow = (
@@ -341,26 +346,38 @@ export function CommitteeStructure() {
               <div className="rounded-xl border border-gray-200 overflow-hidden">
                 {committeeAssignments.map((row, index) => (
                   <div
-                    key={`${index}-${row.role}-${row.memberId}`}
-                    className="grid grid-cols-1 md:grid-cols-2 border-b border-gray-200 last:border-b-0"
+                    key={index}
+                    className="grid border-b border-gray-200 last:border-b-0"
+                    style={{ gridTemplateColumns: "2rem 1fr 1fr 2.5rem" }}
                   >
-                    <div className="px-3 py-2.5 md:border-r border-gray-200">
+                    {/* Row number */}
+                    <div className="flex items-center justify-center bg-gray-50 border-r border-gray-200 text-xs font-semibold text-gray-400 select-none">
+                      {index + 1}
+                    </div>
+
+                    {/* Role */}
+                    <div className="px-3 py-2.5 border-r border-gray-200">
                       <select
                         value={row.role}
                         onChange={(e) => updateAssignmentRow(index, "role", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white text-sm"
                       >
                         <option value="">Role List</option>
                         <option value="chairman">Chairman</option>
                         <option value="secretary">Secretary</option>
                         <option value="treasurer">Treasurer</option>
+                        <option value="auditor">Auditor</option>
+                        <option value="vice-chairman">Vice Chairman</option>
+                        <option value="member">Member</option>
                       </select>
                     </div>
-                    <div className="px-3 py-2.5">
+
+                    {/* Member */}
+                    <div className="px-3 py-2.5 border-r border-gray-200">
                       <select
                         value={row.memberId}
                         onChange={(e) => updateAssignmentRow(index, "memberId", e.target.value)}
-                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white text-sm"
                       >
                         <option value="">Member List</option>
                         <option value="1">Sok Pisey</option>
@@ -370,6 +387,19 @@ export function CommitteeStructure() {
                         <option value="5">Keo Sothea</option>
                         <option value="6">Mao Vibol</option>
                       </select>
+                    </div>
+
+                    {/* Delete button */}
+                    <div className="flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => removeAssignmentRow(index)}
+                        disabled={committeeAssignments.length === 1}
+                        className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+                        aria-label={`Remove row ${index + 1}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 ))}
