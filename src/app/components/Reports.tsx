@@ -51,7 +51,7 @@ export function Reports() {
   const acRegistrationData = [
     {
       regNumber: "AC-KT-2024-157",
-      name: "Baray Organic Farmers Cooperative",
+      name: "Prasat Sambor Rung Roeang Modern Agricultural Cooperative",
       type: "Agricultural Cooperative",
       province: "Kampong Thom",
       district: "Baray",

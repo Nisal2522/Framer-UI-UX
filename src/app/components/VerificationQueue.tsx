@@ -230,7 +230,7 @@ export function VerificationQueue() {
   const pendingVerifications = [
     {
       id: "AC-157",
-      name: "Baray Organic Farmers Cooperative",
+      name: "Prasat Sambor Rung Roeang Modern Agricultural Cooperative",
       type: "AC",
       location: "Kampong Thom, Baray, Baray Commune",
       contactPerson: "Sok Pisey",

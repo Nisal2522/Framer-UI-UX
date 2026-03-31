@@ -66,6 +66,49 @@ const EMPTY_FORM: AssetForm = {
   description: "",
 };
 
+type ExistingAttachment = {
+  id: string;
+  name: string;
+  size: string;
+  type: "image" | "pdf" | "doc";
+  url?: string;
+};
+
+const ASSET_ATTACHMENTS: Record<string, ExistingAttachment[]> = {
+  "AST-001": [
+    { id: "a1", name: "rice-mill-machine.jpg", size: "1.4 MB", type: "image", url: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=300&q=80" },
+    { id: "a2", name: "purchase-receipt.pdf", size: "234 KB", type: "pdf" },
+  ],
+  "AST-002": [
+    { id: "b1", name: "delivery-truck-front.jpg", size: "2.1 MB", type: "image", url: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=300&q=80" },
+    { id: "b2", name: "delivery-truck-side.jpg", size: "1.8 MB", type: "image", url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=300&q=80" },
+    { id: "b3", name: "vehicle-registration.pdf", size: "312 KB", type: "pdf" },
+  ],
+  "AST-003": [
+    { id: "c1", name: "water-pump-installed.jpg", size: "980 KB", type: "image", url: "https://images.unsplash.com/photo-1558618047-3f5e21f3e8a9?auto=format&fit=crop&w=300&q=80" },
+    { id: "c2", name: "pump-manual.pdf", size: "1.2 MB", type: "pdf" },
+  ],
+  "AST-004": [
+    { id: "d1", name: "irrigation-pipeline.jpg", size: "1.6 MB", type: "image", url: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=300&q=80" },
+  ],
+  "AST-005": [
+    { id: "e1", name: "tractor-field.jpg", size: "2.3 MB", type: "image", url: "https://images.unsplash.com/photo-1530267981375-f0de937f5f13?auto=format&fit=crop&w=300&q=80" },
+    { id: "e2", name: "tractor-docs.pdf", size: "560 KB", type: "pdf" },
+  ],
+  "AST-006": [
+    { id: "f1", name: "solar-drying-setup.jpg", size: "1.1 MB", type: "image", url: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=300&q=80" },
+  ],
+  "AST-007": [
+    { id: "g1", name: "warehouse-exterior.jpg", size: "1.9 MB", type: "image", url: "https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=300&q=80" },
+    { id: "g2", name: "warehouse-interior.jpg", size: "1.5 MB", type: "image", url: "https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=300&q=80" },
+    { id: "g3", name: "land-title.pdf", size: "445 KB", type: "pdf" },
+  ],
+  "AST-008": [
+    { id: "h1", name: "weighing-scale.jpg", size: "760 KB", type: "image", url: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=300&q=80" },
+    { id: "h2", name: "calibration-cert.pdf", size: "180 KB", type: "pdf" },
+  ],
+};
+
 const typeToSelect = (t: string) => t.toLowerCase().replace(/ /g, "-") as string;
 const methodToSelect = (m: string): string => {
   const map: Record<string, string> = {
@@ -84,6 +127,7 @@ export function AssetManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAsset, setEditingAsset] = useState<null | string>(null);
   const [assetForm, setAssetForm] = useState<AssetForm>(EMPTY_FORM);
+  const [existingAttachments, setExistingAttachments] = useState<ExistingAttachment[]>([]);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [registerAssetFiles, setRegisterAssetFiles] = useState<File[]>([]);
   const registerFileInputRef = useRef<HTMLInputElement>(null);
@@ -152,6 +196,7 @@ export function AssetManagement() {
     setEditingAsset(null);
     setAssetForm(EMPTY_FORM);
     setRegisterAssetFiles([]);
+    setExistingAttachments([]);
     if (registerFileInputRef.current) registerFileInputRef.current.value = "";
   };
 
@@ -169,6 +214,7 @@ export function AssetManagement() {
       assetStatus: statusToSelect(asset.assetStatus),
       description: "",
     });
+    setExistingAttachments(ASSET_ATTACHMENTS[asset.id] ?? []);
     setRegisterAssetFiles([]);
     setShowAddModal(true);
   };
@@ -436,18 +482,6 @@ export function AssetManagement() {
                 </div>
               </div>
 
-              {/* PEARL Funded Filter */}
-              <div className="flex items-center gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <input
-                  type="checkbox"
-                  id="pearl-filter"
-                  className="w-4 h-4 text-[#032EA1] border-gray-300 rounded focus:ring-[#032EA1]"
-                />
-                <label htmlFor="pearl-filter" className="text-sm text-blue-900">
-                  Show only PEARL project funded/donated assets (for FAO/GCF reporting)
-                </label>
-              </div>
-
               {/* Assets Table */}
               <div className="w-full min-w-0 rounded-2xl border border-gray-200/80 bg-white shadow-[0_4px_24px_-4px_rgba(3,46,161,0.08),0_2px_8px_-2px_rgba(0,0,0,0.06)] overflow-hidden">
                 <div className="w-full min-w-0 overflow-hidden">
@@ -515,11 +549,6 @@ export function AssetManagement() {
                               >
                                 {asset.name}
                               </span>
-                              {asset.pearlFunded && (
-                                <span className="inline-flex w-fit items-center px-1.5 py-0.5 bg-sky-100 text-sky-800 text-[10px] font-semibold rounded border border-sky-200/80">
-                                  PEARL
-                                </span>
-                              )}
                             </div>
                           </td>
                           <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
@@ -1098,6 +1127,56 @@ export function AssetManagement() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Upload Asset Photo/Documentation
                   </label>
+
+                  {/* Existing attachments (edit mode) */}
+                  {existingAttachments.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-500 mb-2 font-medium">Existing Attachments</p>
+                      <div className="flex flex-wrap gap-3">
+                        {existingAttachments.map((att) => (
+                          <div key={att.id} className="relative group">
+                            {att.type === "image" && att.url ? (
+                              <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-blue-100 shadow-sm">
+                                <img
+                                  src={att.url}
+                                  alt={att.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => setExistingAttachments((prev) => prev.filter((a) => a.id !== att.id))}
+                                    className="opacity-0 group-hover:opacity-100 p-1.5 bg-red-500 text-white rounded-full transition-opacity shadow"
+                                    aria-label={`Remove ${att.name}`}
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                <p className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[9px] px-1 py-0.5 truncate">{att.name}</p>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 pl-3 pr-2 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                                <FileText className="w-5 h-5 text-red-400 shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="text-xs font-medium text-gray-800 truncate max-w-[120px]">{att.name}</p>
+                                  <p className="text-[10px] text-gray-400">{att.size}</p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setExistingAttachments((prev) => prev.filter((a) => a.id !== att.id))}
+                                  className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                                  aria-label={`Remove ${att.name}`}
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <input
                     ref={registerFileInputRef}
                     type="file"

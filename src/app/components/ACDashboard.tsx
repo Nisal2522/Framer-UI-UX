@@ -11,7 +11,7 @@ import {
   Calendar,
   MapPinned,
 } from "lucide-react";
-import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import {
   PieChart,
@@ -72,6 +72,29 @@ const farmerAreaData = [
   { area: "Kep", lat: 10.4829, lon: 104.3167, members: 13 },
 ];
 
+const farmerMapMembers = [
+  { id: "FM-001", name: "Sok Pisey",        lat: 13.11, lon: 103.18, landArea: 5.2, area: "Battambang",       address: "Sangkat Ratanak, Khan Battambang",             image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-002", name: "Chea Sokha",       lat: 13.08, lon: 103.25, landArea: 3.8, area: "Battambang",       address: "Phum Prey, Commune Anlong Vil",                 image: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-003", name: "Lim Dara",         lat: 13.05, lon: 103.22, landArea: 6.1, area: "Battambang",       address: "Sangkat Svay Por, Battambang",                  image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-004", name: "Pich Sophea",      lat: 13.40, lon: 103.80, landArea: 2.5, area: "Siem Reap",        address: "Sangkat Svay Dangkum, Siem Reap City",          image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-005", name: "Keo Sothea",       lat: 13.35, lon: 103.88, landArea: 4.0, area: "Siem Reap",        address: "Phum Angkor Thom, Siem Reap",                   image: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-006", name: "Mao Vibol",        lat: 13.38, lon: 103.75, landArea: 3.2, area: "Siem Reap",        address: "Commune Chreav, District Siem Reap",            image: "https://images.unsplash.com/photo-1463453091185-61582044d556?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-007", name: "Yon Chanthy",      lat: 12.72, lon: 104.90, landArea: 7.4, area: "Kampong Thom",     address: "Sangkat Kampong Thom, Stueng Saen",             image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-008", name: "Heng Ratha",       lat: 12.68, lon: 104.85, landArea: 5.0, area: "Kampong Thom",     address: "Phum Prek, Commune Roka, Kampong Thom",         image: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-009", name: "Nget Bopha",       lat: 12.00, lon: 105.46, landArea: 2.9, area: "Kampong Cham",     address: "Sangkat Veal Vong, Kampong Cham City",          image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-010", name: "Ros Channak",      lat: 12.04, lon: 105.42, landArea: 4.5, area: "Kampong Cham",     address: "Commune Kdei Chong, Kampong Cham",              image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-011", name: "Sao Kimhak",       lat: 10.99, lon: 104.79, landArea: 3.1, area: "Takeo",            address: "Sangkat Roka Knong, Takeo City",                image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-012", name: "Chan Pisey",       lat: 10.95, lon: 104.82, landArea: 2.7, area: "Takeo",            address: "Phum Trea, Commune Samraong, Takeo",            image: "https://images.unsplash.com/photo-1542206395-9feb3edaa68d?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-013", name: "Noun Sreyleak",    lat: 10.61, lon: 104.19, landArea: 1.8, area: "Kampot",           address: "Sangkat Kampong Kandal, Kampot City",           image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-014", name: "Kong Vanna",       lat: 10.65, lon: 104.17, landArea: 3.6, area: "Kampot",           address: "Commune Tuek Chhou, District Kampot",           image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-015", name: "Tep Sophon",       lat: 11.49, lon: 105.32, landArea: 4.2, area: "Prey Veng",        address: "Sangkat Prey Veng, Prey Veng City",             image: "https://images.unsplash.com/photo-1500048993953-d23a436266cf?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-016", name: "Ouk Samnang",      lat: 13.76, lon: 102.98, landArea: 5.5, area: "Banteay Meanchey", address: "Sangkat Serei Saophoan, Sisophon",              image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-017", name: "Meas Sothea",      lat: 12.54, lon: 103.93, landArea: 3.9, area: "Pursat",           address: "Sangkat Phsar Chas, Pursat City",               image: "https://images.unsplash.com/photo-1520409364224-63400afe26e5?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-018", name: "Pen Virak",        lat: 11.22, lon: 105.13, landArea: 2.3, area: "Kandal",           address: "Commune Koh Thom, District Koh Thom, Kandal",  image: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-019", name: "Yorn Dara",        lat: 10.48, lon: 104.32, landArea: 1.5, area: "Kep",              address: "Sangkat Kep, Kep City",                         image: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=80&q=80" },
+  { id: "FM-020", name: "Sim Borey",        lat: 13.14, lon: 103.20, landArea: 6.8, area: "Battambang",       address: "Commune Ek Phnom, District Ek Phnom",           image: "https://images.unsplash.com/photo-1474978528675-4a50a4508dc6?auto=format&fit=crop&w=80&q=80" },
+];
+
 export function ACDashboard() {
   return (
     <div className="space-y-6">
@@ -85,22 +108,30 @@ export function ACDashboard() {
 
       {/* 1. Membership + key stats — compact card */}
       <div className="rounded-xl bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-4 text-white shadow-lg ring-1 ring-white/10 sm:p-5">
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/15 sm:h-12 sm:w-12">
-            <Users className="h-6 w-6 sm:h-7 sm:w-7" aria-hidden />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-white/75">Total members</p>
-            <p className="mt-0.5 text-3xl font-bold tabular-nums sm:text-4xl">447</p>
-          </div>
-        </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2.5 border-t border-white/15 pt-3 sm:grid-cols-4 sm:gap-3">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6 sm:gap-3">
           <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
             <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
               Active members
             </p>
             <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">447</p>
+          </div>
+          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+              Male Members
+            </p>
+            <div className="mt-1 flex items-center gap-1.5">
+              <p className="text-xl font-bold tabular-nums sm:text-2xl">258</p>
+              <span className="text-[10px] text-white/50 font-medium">57.7%</span>
+            </div>
+          </div>
+          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
+            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+              Female Members
+            </p>
+            <div className="mt-1 flex items-center gap-1.5">
+              <p className="text-xl font-bold tabular-nums sm:text-2xl">186</p>
+              <span className="text-[10px] text-white/50 font-medium">41.6%</span>
+            </div>
           </div>
           <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
             <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
@@ -230,7 +261,7 @@ export function ACDashboard() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm lg:col-span-2">
           <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Farmer Members by Area</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Members by Area</h3>
               <p className="text-sm text-gray-500 mt-1">
                 Geographic spread of registered members across Cambodia.
               </p>
@@ -244,7 +275,7 @@ export function ACDashboard() {
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
             <div className="xl:col-span-3 h-[420px] rounded-xl overflow-hidden border border-[#0F2F8F]/20">
               <MapContainer
-                center={[12.6, 104.9]}
+                center={[12.6, 104.2]}
                 zoom={7}
                 scrollWheelZoom={false}
                 className="h-full w-full z-0"
@@ -253,24 +284,60 @@ export function ACDashboard() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                {farmerAreaData.map((point) => (
+                {farmerMapMembers.map((farmer) => (
                   <CircleMarker
-                    key={point.area}
-                    center={[point.lat, point.lon]}
-                    radius={Math.max(7, Math.round(point.members / 6))}
+                    key={farmer.id}
+                    center={[farmer.lat, farmer.lon]}
+                    radius={8}
                     pathOptions={{
                       color: "#0D2A7D",
-                      weight: 1.5,
+                      weight: 2,
                       fillColor: "#0F2F8F",
-                      fillOpacity: 0.52,
+                      fillOpacity: 0.85,
                     }}
                   >
-                    <LeafletTooltip direction="top" offset={[0, -2]} opacity={1}>
-                      <div className="text-xs leading-tight">
-                        <p className="font-semibold text-gray-900">{point.area}</p>
-                        <p className="text-gray-600">{point.members} members</p>
-                      </div>
+                    <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                      <span className="text-xs font-semibold">{farmer.name}</span>
                     </LeafletTooltip>
+                    <Popup minWidth={220} maxWidth={240}>
+                      <div style={{ fontFamily: "inherit", padding: "4px 2px 2px" }}>
+                        {/* Header: avatar + name */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                          <img
+                            src={farmer.image}
+                            alt={farmer.name}
+                            style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", border: "2px solid #0F2F8F33", flexShrink: 0 }}
+                          />
+                          <div>
+                            <p style={{ fontWeight: 700, fontSize: 14, color: "#111827", lineHeight: 1.3, margin: 0 }}>{farmer.name}</p>
+                            <p style={{ fontSize: 11, color: "#6B7280", margin: "2px 0 0", fontWeight: 500 }}>{farmer.id}</p>
+                          </div>
+                        </div>
+                        {/* Divider */}
+                        <div style={{ borderTop: "1px solid #E5E7EB", marginBottom: 8 }} />
+                        {/* Details rows — all labels aligned */}
+                        <div style={{ display: "grid", gridTemplateColumns: "16px 1fr", rowGap: 6, columnGap: 8, alignItems: "start" }}>
+                          {/* Location */}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0F2F8F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13, marginTop: 1 }}><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                          <div>
+                            <p style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", margin: 0 }}>Location</p>
+                            <p style={{ fontSize: 12, color: "#374151", fontWeight: 500, margin: "1px 0 0", lineHeight: 1.4 }}>{farmer.address}</p>
+                          </div>
+                          {/* Province */}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0F2F8F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13, marginTop: 1 }}><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                          <div>
+                            <p style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", margin: 0 }}>Province</p>
+                            <p style={{ fontSize: 12, color: "#374151", fontWeight: 500, margin: "1px 0 0" }}>{farmer.area}</p>
+                          </div>
+                          {/* Land Area */}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0F2F8F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13, marginTop: 1 }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                          <div>
+                            <p style={{ fontSize: 10, color: "#9CA3AF", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", margin: 0 }}>Land Area</p>
+                            <p style={{ fontSize: 12, color: "#0F2F8F", fontWeight: 700, margin: "1px 0 0" }}>{farmer.landArea} Ha</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Popup>
                   </CircleMarker>
                 ))}
               </MapContainer>
@@ -427,30 +494,38 @@ export function ACDashboard() {
 
         {/* Livestock Distribution */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Livestock Distribution</h3>
               <p className="text-xs text-gray-400 mt-0.5">Total headcount by type</p>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={livestockData} barCategoryGap="35%">
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-              <XAxis dataKey="type" tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{ borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: 12, boxShadow: "0 4px 16px 0 rgba(0,0,0,0.08)" }}
-                cursor={{ fill: "#F8FAFC" }}
-                formatter={(val: number) => [`${val} head`]}
-              />
-              <Bar dataKey="count" name="Headcount" radius={[6, 6, 0, 0]}>
-                {livestockData.map((_, i) => (
-                  <Cell key={i} fill={["#0F2F8F", "#3B5FCC", "#0D2A7D", "#6B8EFF"][i % 4]} />
-                ))}
-                <LabelList dataKey="count" position="top" style={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="space-y-4">
+            {(() => {
+              const livestockColors = ["#0F2F8F", "#0D2A7D", "#3B5FCC", "#6B8EFF"];
+              const max = Math.max(...livestockData.map(d => d.count));
+              return livestockData.map((item, i) => (
+                <div key={item.type}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: livestockColors[i] }} />
+                      <span className="text-sm font-medium text-gray-700">{item.type}</span>
+                    </div>
+                    <span className="text-sm font-bold" style={{ color: livestockColors[i] }}>
+                      {item.count}
+                      <span className="text-xs text-gray-400 font-normal ml-1">head</span>
+                    </span>
+                  </div>
+                  <div className="h-2.5 rounded-full bg-gray-100">
+                    <div
+                      className="h-2.5 rounded-full transition-all duration-500"
+                      style={{ width: `${(item.count / max) * 100}%`, backgroundColor: livestockColors[i] }}
+                    />
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
         </div>
       </div>
 

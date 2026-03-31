@@ -59,6 +59,21 @@ export function Member360Form() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const certOptions = ["USDA-NOP", "EU Organic", "JAS", "GLOBAL G.A.P."];
+  const [selectedCerts, setSelectedCerts] = useState<string[]>([]);
+  const [certDropdownOpen, setCertDropdownOpen] = useState(false);
+  const certDropdownRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (certDropdownRef.current && !certDropdownRef.current.contains(e.target as Node)) {
+        setCertDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+  const toggleCert = (cert: string) =>
+    setSelectedCerts((prev) => prev.includes(cert) ? prev.filter((c) => c !== cert) : [...prev, cert]);
   
   const [formData, setFormData] = useState<FormData>({
     nameWithInitial: "",
@@ -141,7 +156,7 @@ export function Member360Form() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            {isEditMode ? `Edit Member - ${memberData?.id}` : "Member 360"}
+            {isEditMode ? "Edit Member Profile" : "Member Profile"}
           </h1>
           <p className="text-gray-600 mt-1">
             {isEditMode 
@@ -295,17 +310,7 @@ export function Member360Form() {
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Fixed Phone</label>
-                        <input
-                          type="text"
-                          placeholder="Enter fixed phone"
-                          value={formData.fixedPhone}
-                          onChange={(e) => handleInputChange("fixedPhone", e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#032EA1] outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Mobile Phone</label>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">Phone No</label>
                         <input
                           type="tel"
                           placeholder="Enter mobile phone"
@@ -325,18 +330,6 @@ export function Member360Form() {
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">
-                          Address <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Enter address"
-                          value={formData.address}
-                          onChange={(e) => handleInputChange("address", e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#032EA1] outline-none"
-                        />
-                      </div>
-                      <div>
                         <label className="mb-1 block text-xs font-medium text-slate-600">Gender</label>
                         <select
                           value={formData.gender}
@@ -349,48 +342,14 @@ export function Member360Form() {
                           <option value="other">Other</option>
                         </select>
                       </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Contact Person</label>
-                        <input
-                          type="text"
-                          placeholder="Enter contact person name"
-                          value={formData.contactPerson}
-                          onChange={(e) => handleInputChange("contactPerson", e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#032EA1] outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">
-                          Contact Person Phone
-                        </label>
-                        <input
-                          type="tel"
-                          placeholder="Enter contact person phone"
-                          value={formData.contactPersonPhone}
-                          onChange={(e) => handleInputChange("contactPersonPhone", e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#032EA1] outline-none"
-                        />
-                      </div>
                     </div>
                   </div>
 
                   <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm">
                     <p className="mb-3 text-sm font-semibold text-slate-800">Location & Reference</p>
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Country</label>
-                        <input
-                          type="text"
-                          placeholder="Enter country"
-                          value={formData.country}
-                          onChange={(e) => handleInputChange("country", e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#032EA1] outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">
-                          Address <span className="text-red-500">*</span>
-                        </label>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">Address <span className="text-red-500">*</span></label>
                         <input
                           type="text"
                           placeholder="Enter address"
@@ -410,12 +369,20 @@ export function Member360Form() {
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Field Officer</label>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">Zip</label>
                         <input
-                          type="email"
-                          placeholder="Enter field officer email"
-                          value={formData.fieldOfficer}
-                          onChange={(e) => handleInputChange("fieldOfficer", e.target.value)}
+                          type="text"
+                          placeholder="Enter zip code"
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#032EA1] outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">Country</label>
+                        <input
+                          type="text"
+                          placeholder="Enter country"
+                          value={formData.country}
+                          onChange={(e) => handleInputChange("country", e.target.value)}
                           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#032EA1] outline-none"
                         />
                       </div>
@@ -466,23 +433,35 @@ export function Member360Form() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Certifications
                     </label>
-                    <select className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                      <option value="">Select Certification</option>
-                      <option value="usda-nop">USDA-NOP</option>
-                      <option value="eu">EU Organic</option>
-                      <option value="jas">JAS</option>
-                      <option value="global-gap">GLOBAL G.A.P.</option>
-                    </select>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Ref Number (Deed Number) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter deed number"
-                      className="w-full px-3.5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                    />
+                    <div className="relative" ref={certDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setCertDropdownOpen((o) => !o)}
+                        className="w-full flex items-center justify-between px-3.5 py-2 border border-gray-300 rounded-lg bg-white text-sm text-left focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      >
+                        <span className={selectedCerts.length === 0 ? "text-gray-400" : "text-gray-800"}>
+                          {selectedCerts.length === 0
+                            ? "Select certifications"
+                            : selectedCerts.join(", ")}
+                        </span>
+                        <svg className={`w-4 h-4 text-gray-400 transition-transform ${certDropdownOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      </button>
+                      {certDropdownOpen && (
+                        <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+                          {certOptions.map((cert) => (
+                            <label key={cert} className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-blue-50 transition-colors select-none">
+                              <input
+                                type="checkbox"
+                                checked={selectedCerts.includes(cert)}
+                                onChange={() => toggleCert(cert)}
+                                className="h-4 w-4 rounded border-gray-300 accent-[#032EA1]"
+                              />
+                              <span className="text-sm text-gray-700">{cert}</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2.5 pt-1 sm:flex-row sm:items-center sm:justify-between">
@@ -758,9 +737,35 @@ export function Member360Form() {
           >
             Cancel
           </button>
-          <button className="px-6 py-2 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors">
-            {isEditMode ? "Update Member" : "Save Member"}
-          </button>
+          <div className="flex items-center gap-3">
+            {activeTab === "profile" && (
+              <button
+                type="button"
+                onClick={() => setActiveTab("land")}
+                className="px-6 py-2 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors"
+              >
+                {isEditMode ? "Update Member" : "Save & Next"}
+              </button>
+            )}
+            {activeTab === "land" && (
+              <button
+                type="button"
+                onClick={() => setActiveTab("crops")}
+                className="px-6 py-2 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors"
+              >
+                Next
+              </button>
+            )}
+            {activeTab === "crops" && (
+              <button
+                type="button"
+                onClick={() => setActiveTab("dossier")}
+                className="px-6 py-2 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors"
+              >
+                Next
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

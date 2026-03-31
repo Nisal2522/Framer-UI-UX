@@ -31,7 +31,7 @@ export function ACProfile() {
             <div className="w-32 h-32 rounded-full bg-white/20 border-4 border-white/30 flex items-center justify-center overflow-hidden">
               <img
                 src={COOPERATIVE_LOGO_URL}
-                alt="Baray Organic Farmers Cooperative logo"
+                alt="Prasat Sambor Rung Roeang Modern Agricultural Cooperative logo"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -47,7 +47,7 @@ export function ACProfile() {
           {/* Info */}
           <div className="flex-1 text-white min-w-0">
             <div className="flex flex-col gap-3 mb-3">
-              <h1 className="text-3xl font-bold">Baray Organic Farmers Cooperative</h1>
+              <h1 className="text-3xl font-bold">Prasat Sambor Rung Roeang Modern Agricultural Cooperative</h1>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500 rounded-full shadow-sm">
                   <CheckCircle className="w-4 h-4 text-white shrink-0" />
@@ -164,18 +164,6 @@ export function ACProfile() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Country
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue="Cambodia"
-                        disabled={!isEditing}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                        placeholder="Country"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         City
                       </label>
                       <input
@@ -196,6 +184,18 @@ export function ACProfile() {
                         disabled={!isEditing}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="Zip"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Country
+                      </label>
+                      <input
+                        type="text"
+                        defaultValue="Cambodia"
+                        disabled={!isEditing}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                        placeholder="Country"
                       />
                     </div>
                   </div>
@@ -551,15 +551,6 @@ export function ACProfile() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Land Name
-                    </label>
-                    <select className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none">
-                      <option value="">Select Land</option>
-                      <option value="north-rice-field">North Rice Field</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Document Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -596,9 +587,6 @@ export function ACProfile() {
                         Document Name
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Land Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                         Upload Date
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
@@ -611,10 +599,9 @@ export function ACProfile() {
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        Land Certificate
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        Constitution
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">North Rice Field</td>
                       <td className="px-4 py-3 text-sm text-gray-700">Mar 15, 2024</td>
                       <td className="px-4 py-3 text-sm text-gray-700">2.3 MB</td>
                       <td className="px-4 py-3">

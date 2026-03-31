@@ -36,8 +36,8 @@ const navigation = [
   { name: "AC Profile", path: "/dashboard/ac-profile", icon: Building2 },
   { name: "Committee Structure", path: "/dashboard/committee-structure", icon: UserCircle },
   { name: "Members", path: "/dashboard/farmer-members", icon: Users },
-  { name: "Business Plans", path: "/dashboard/business-plans", icon: FileText },
   { name: "Assets", path: "/dashboard/assets", icon: Package },
+  { name: "Business Plans", path: "/dashboard/business-plans", icon: FileText },
   { name: "Knowledge Hub", path: "/dashboard/knowledge", icon: BookOpen },
   { name: "Reporting and Analytics", path: "/dashboard/reports", icon: BarChart3 },
 ];
@@ -103,11 +103,8 @@ export function Root() {
             }`}
           >
             <h1 className="text-base font-bold whitespace-nowrap bg-gradient-to-r from-[#0F2F8F] to-[#3B5FCC] bg-clip-text text-transparent">
-              FOMMP
+              AgriCoop Portal
             </h1>
-            <p className="text-[9px] text-gray-400 whitespace-nowrap leading-tight">
-              Farmer Organizations Platform
-            </p>
           </div>
         </div>
 
@@ -189,7 +186,7 @@ export function Root() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-[#032EA1] to-[#0447D4] bg-clip-text text-transparent">
-                    FOMMP
+                    AgriCoop Portal
                   </h1>
                 </div>
               </div>
@@ -268,7 +265,7 @@ export function Root() {
                   <Building2 className="w-6 h-6 text-[#032EA1]" />
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
-                      Baray Organic Farmers Cooperative
+                      Prasat Sambor Rung Roeang Modern Agricultural Cooperative
                     </p>
                     <p className="text-xs text-gray-500">AC-KT-2024-157</p>
                   </div>

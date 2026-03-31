@@ -6,6 +6,7 @@ import {
   User,
   X,
   Trash2,
+  Pencil,
 } from "lucide-react";
 import { committeeMemberPortraitUrl } from "../utils/committeePortraits";
 
@@ -27,12 +28,57 @@ interface CommitteeAssignmentRow {
   memberId: string;
 }
 
+const committeePeriods = [
+  {
+    id: "current",
+    label: "Jan 15, 2024 - Dec 31, 2026",
+    from: "2024-01-15",
+    to: "2026-12-31",
+    assignments: [
+      { role: "chairman",      memberId: "1" },
+      { role: "vice-chairman", memberId: "2" },
+      { role: "treasurer",     memberId: "3" },
+      { role: "secretary",     memberId: "4" },
+      { role: "member",        memberId: "5" },
+      { role: "member",        memberId: "6" },
+    ],
+  },
+  {
+    id: "2021-2023",
+    label: "Jan 10, 2021 - Dec 31, 2023",
+    from: "2021-01-10",
+    to: "2023-12-31",
+    assignments: [
+      { role: "chairman",      memberId: "3" },
+      { role: "vice-chairman", memberId: "1" },
+      { role: "treasurer",     memberId: "4" },
+      { role: "secretary",     memberId: "2" },
+      { role: "auditor",       memberId: "5" },
+    ],
+  },
+  {
+    id: "2018-2020",
+    label: "Jan 05, 2018 - Dec 31, 2020",
+    from: "2018-01-05",
+    to: "2020-12-31",
+    assignments: [
+      { role: "chairman",      memberId: "5" },
+      { role: "vice-chairman", memberId: "3" },
+      { role: "treasurer",     memberId: "6" },
+      { role: "secretary",     memberId: "1" },
+    ],
+  },
+];
+
 export function CommitteeStructure() {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingPeriodId, setEditingPeriodId] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState("current");
   const [committeeAssignments, setCommitteeAssignments] = useState<CommitteeAssignmentRow[]>([
     { role: "", memberId: "" },
   ]);
+  const [periodFrom, setPeriodFrom] = useState("");
+  const [periodTo, setPeriodTo] = useState("");
 
   const currentCommittee: CommitteeMember[] = [
     {
@@ -116,12 +162,26 @@ export function CommitteeStructure() {
   };
 
   const openAddModal = () => {
+    setEditingPeriodId(null);
+    setPeriodFrom("");
+    setPeriodTo("");
     setCommitteeAssignments([{ role: "", memberId: "" }]);
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (periodId: string) => {
+    const period = committeePeriods.find((p) => p.id === periodId);
+    if (!period) return;
+    setEditingPeriodId(periodId);
+    setPeriodFrom(period.from);
+    setPeriodTo(period.to);
+    setCommitteeAssignments(period.assignments.map((a) => ({ ...a })));
     setShowAddModal(true);
   };
 
   const closeAddModal = () => {
     setShowAddModal(false);
+    setEditingPeriodId(null);
   };
 
   const addAssignmentRow = () => {
@@ -165,23 +225,35 @@ export function CommitteeStructure() {
 
       {/* Period Selector - Committee Version Tracking */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-        <div className="flex items-center gap-4">
-          <Calendar className="w-5 h-5 text-gray-400" />
+        <div className="flex items-start gap-4">
+          <Calendar className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Committee Version History
-            </label>
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
-            >
-              <option value="current">
-                Jan 15, 2024 - Dec 31, 2026
-              </option>
-              <option value="2021-2023">Jan 10, 2021 - Dec 31, 2023</option>
-              <option value="2018-2020">Jan 05, 2018 - Dec 31, 2020</option>
-            </select>
+            <p className="text-sm font-medium text-gray-700 mb-2">Committee Version History</p>
+            <div className="divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
+              {committeePeriods.map((period) => (
+                <div
+                  key={period.id}
+                  className={`flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors ${
+                    selectedPeriod === period.id
+                      ? "bg-[#0F2F8F]/8 border-l-2 border-l-[#0F2F8F]"
+                      : "bg-white hover:bg-gray-50"
+                  }`}
+                  onClick={() => setSelectedPeriod(period.id)}
+                >
+                  <span className={`text-sm font-medium ${selectedPeriod === period.id ? "text-[#0F2F8F]" : "text-gray-700"}`}>
+                    {period.label}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); openEditModal(period.id); }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#0F2F8F] border border-[#0F2F8F]/30 rounded-lg hover:bg-[#0F2F8F] hover:text-white transition-colors"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    Edit
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -308,9 +380,16 @@ export function CommitteeStructure() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8">
             {/* Header */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-br from-[#032EA1] to-[#021c5e]">
-              <h2 className="text-2xl font-bold text-white">
-                Add New Committee Member
-              </h2>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  {editingPeriodId ? "Edit Committee" : "Add New Committee Member"}
+                </h2>
+                {editingPeriodId && (
+                  <p className="text-blue-200 text-sm mt-0.5">
+                    {committeePeriods.find((p) => p.id === editingPeriodId)?.label}
+                  </p>
+                )}
+              </div>
               <button
                 onClick={closeAddModal}
                 className="p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -328,6 +407,8 @@ export function CommitteeStructure() {
                     <label className="block text-xs font-medium text-gray-600 mb-1">From</label>
                     <input
                       type="date"
+                      value={periodFrom}
+                      onChange={(e) => setPeriodFrom(e.target.value)}
                       className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                       aria-label="Committee period start date"
                     />
@@ -336,6 +417,8 @@ export function CommitteeStructure() {
                     <label className="block text-xs font-medium text-gray-600 mb-1">To</label>
                     <input
                       type="date"
+                      value={periodTo}
+                      onChange={(e) => setPeriodTo(e.target.value)}
                       className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                       aria-label="Committee period end date"
                     />
@@ -435,7 +518,7 @@ export function CommitteeStructure() {
                 Cancel
               </button>
               <button className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors">
-                Submit
+                {editingPeriodId ? "Update Committee" : "Submit"}
               </button>
             </div>
           </div>
