@@ -25,6 +25,16 @@ import {
 
 const pastPlans = [
   {
+    id: "BP-2025-001",
+    title: "Agricultural Growth Plan 2025",
+    status: "Draft",
+    submittedDate: null,
+    approvedDate: null,
+    budget: "$55,000",
+    progress: 0,
+    reviewer: "Not Assigned",
+  },
+  {
     id: "BP-2023-001",
     title: "Rice Production Expansion 2023",
     status: "Approved",

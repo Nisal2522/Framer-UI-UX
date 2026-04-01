@@ -16,11 +16,10 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Sprout,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ChatbotWidget } from "./ChatbotWidget";
-import faoLogo from "../../assets/fao.jpg";
-
 type LangCode = "EN" | "KH" | "FR" | "ZH" | "TH";
 
 const LANGUAGE_OPTIONS: { code: LangCode; label: string; native: string }[] = [
@@ -94,8 +93,8 @@ export function Root() {
 
         {/* Logo */}
         <div className="flex items-center gap-3 border-b border-gray-200 px-4 py-4 h-[69px] overflow-hidden">
-          <div className="w-9 h-9 shrink-0 rounded-lg overflow-hidden border border-blue-100 bg-white shadow-md shadow-blue-500/20">
-            <img src={faoLogo} alt="FAO logo" className="h-full w-full object-cover" />
+          <div className="w-9 h-9 shrink-0 rounded-lg bg-[#032EA1] border border-blue-300 shadow-md shadow-blue-500/20 flex items-center justify-center">
+            <Sprout className="w-5 h-5 text-green-400" />
           </div>
           <div
             className={`min-w-0 overflow-hidden transition-all duration-300 ${
@@ -177,12 +176,8 @@ export function Root() {
             {/* Logo */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg overflow-hidden border border-blue-100 bg-white shadow-md shadow-blue-500/20">
-                  <img
-                    src={faoLogo}
-                    alt="FAO logo"
-                    className="h-full w-full object-cover"
-                  />
+                <div className="w-10 h-10 rounded-lg bg-[#032EA1] border border-blue-100 shadow-md shadow-blue-500/20 flex items-center justify-center">
+                  <Sprout className="w-6 h-6 text-green-400" />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-[#032EA1] to-[#0447D4] bg-clip-text text-transparent">

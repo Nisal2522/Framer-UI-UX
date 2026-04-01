@@ -31,8 +31,6 @@ import {
   Heart,
   Quote,
 } from "lucide-react";
-import faoLogo from "../../assets/fao.jpg";
-
 const heroSlides = [
   {
     image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1920&q=80",
@@ -167,12 +165,11 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                <img src={faoLogo} alt="FAO logo" className="h-full w-full object-cover" />
+              <div className="w-10 h-10 rounded-lg bg-[#032EA1] border border-blue-100 shadow-md shadow-blue-500/20 flex items-center justify-center">
+                <Sprout className="w-6 h-6 text-green-400" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900">FOMMP</h1>
-                <p className="text-[10px] text-gray-500 tracking-wide leading-none">Farmer Organizations Management Platform</p>
+                <h1 className="text-lg font-bold bg-gradient-to-r from-[#0F2F8F] to-[#3B5FCC] bg-clip-text text-transparent">AgriCoop Portal</h1>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-8">
@@ -560,7 +557,9 @@ export function LandingPage() {
           <p className="text-center text-sm text-gray-400 mb-8 font-medium tracking-wide uppercase">Supported By</p>
           <div className="flex flex-wrap items-center justify-center gap-12 opacity-60 grayscale">
             <div className="flex items-center gap-2">
-              <img src={faoLogo} alt="FAO" className="w-10 h-10 rounded-lg object-cover" />
+              <div className="w-10 h-10 rounded-lg bg-[#032EA1] flex items-center justify-center">
+                <Sprout className="w-6 h-6 text-green-400" />
+              </div>
               <span className="text-lg font-bold text-gray-700">FAO</span>
             </div>
             <div className="flex items-center gap-2">
@@ -581,12 +580,11 @@ export function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-10 border-b border-gray-800">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-700">
-                  <img src={faoLogo} alt="FAO logo" className="h-full w-full object-cover" />
+                <div className="w-10 h-10 rounded-lg bg-[#032EA1] border border-gray-700 flex items-center justify-center">
+                  <Sprout className="w-6 h-6 text-green-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">FOMMP</h3>
-                  <p className="text-xs text-gray-500">Farmer Organizations Management Platform</p>
+                  <h3 className="text-lg font-bold bg-gradient-to-r from-[#6B9FFF] to-[#93BFFF] bg-clip-text text-transparent">AgriCoop Portal</h3>
                 </div>
               </div>
               <p className="text-sm text-gray-400 mb-6 max-w-md leading-relaxed">
