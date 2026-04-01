@@ -421,9 +421,9 @@ export function Member360Form() {
           )}
 
           {activeTab === "land" && (
-            <div className="flex gap-0 min-h-[420px]">
-              {/* ── Master: Table ── */}
-              <div className={`flex flex-col transition-all duration-300 ${landPanelOpen ? "w-[55%]" : "w-full"}`}>
+            <div className="relative min-h-[420px]">
+              {/* ── Table (always full width) ── */}
+              <div className="flex flex-col w-full">
                 <div className="flex items-center justify-between pb-3">
                   <h3 className="text-base font-semibold text-gray-900">Land Records</h3>
                   {!landPanelOpen && (
@@ -482,16 +482,28 @@ export function Member360Form() {
                 </div>
               </div>
 
-              {/* ── Detail: Sidebar form ── */}
+              {/* ── Land form: overlay drawer (does not shrink table) ── */}
               {landPanelOpen && (
-                <div className="w-[45%] border-l border-gray-200 bg-gray-50 flex flex-col rounded-r-lg">
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white rounded-tr-lg">
-                    <h4 className="text-sm font-semibold text-gray-800">{landEditRow !== null ? "Edit Land Record" : "New Land Record"}</h4>
-                    <button onClick={() => { setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }} className="p-1 rounded hover:bg-gray-100 text-gray-400">
+                <>
+                  <div
+                    className="fixed inset-0 z-[100] bg-black/40"
+                    aria-hidden
+                    onClick={() => { setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }}
+                  />
+                  <div
+                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="land-drawer-title"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
+                    <h4 id="land-drawer-title" className="text-sm font-semibold text-white">{landEditRow !== null ? "Edit Land Record" : "New Land Record"}</h4>
+                    <button type="button" onClick={() => { setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                  <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Land Name <span className="text-red-500">*</span></label>
                       <input type="text" placeholder="e.g., North Rice Field" value={landForm.name} onChange={(e) => setLandForm((f) => ({ ...f, name: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white" />
@@ -533,21 +545,21 @@ export function Member360Form() {
                       <MapPin className="w-3.5 h-3.5" /> Mark location on map
                     </button>
                   </div>
-                  <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 rounded-br-lg">
+                  <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
                     <button type="button" onClick={() => { setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
                     <button type="button" onClick={() => { if (landEditRow !== null) { setLandRows((prev) => prev.map((r, i) => i === landEditRow ? { ...landForm } : r)); } else { setLandRows((prev) => [...prev, { ...landForm }]); } setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
                       {landEditRow !== null ? "Update" : "Add Land"}
                     </button>
                   </div>
-                </div>
+                  </div>
+                </>
               )}
             </div>
           )}
 
           {activeTab === "crops" && (
-            <div className="flex gap-0 min-h-[420px]">
-              {/* ── Master: Table ── */}
-              <div className={`flex flex-col transition-all duration-300 ${cropPanelOpen ? "w-[55%]" : "w-full"}`}>
+            <div className="relative min-h-[420px]">
+              <div className="flex flex-col w-full">
                 <div className="flex items-center justify-between pb-3">
                   <h3 className="text-base font-semibold text-gray-900">Crop Records</h3>
                   {!cropPanelOpen && (
@@ -590,14 +602,25 @@ export function Member360Form() {
                 </div>
               </div>
 
-              {/* ── Detail: Sidebar form ── */}
               {cropPanelOpen && (
-                <div className="w-[45%] border-l border-gray-200 bg-gray-50 flex flex-col rounded-r-lg">
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white rounded-tr-lg">
-                    <h4 className="text-sm font-semibold text-gray-800">{cropEditRow !== null ? "Edit Crop Record" : "New Crop Record"}</h4>
-                    <button onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }} className="p-1 rounded hover:bg-gray-100 text-gray-400"><X className="w-4 h-4" /></button>
+                <>
+                  <div
+                    className="fixed inset-0 z-[100] bg-black/40"
+                    aria-hidden
+                    onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }}
+                  />
+                  <div
+                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="crop-drawer-title"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
+                    <h4 id="crop-drawer-title" className="text-sm font-semibold text-white">{cropEditRow !== null ? "Edit Crop Record" : "New Crop Record"}</h4>
+                    <button type="button" onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close"><X className="w-4 h-4" /></button>
                   </div>
-                  <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                  <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Land Name <span className="text-red-500">*</span></label>
                       <select value={cropForm.landName} onChange={(e) => setCropForm((f) => ({ ...f, landName: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white">
@@ -622,21 +645,21 @@ export function Member360Form() {
                       <input type="text" placeholder="e.g., 1000 plants or 500 kg/ha" value={cropForm.plants} onChange={(e) => setCropForm((f) => ({ ...f, plants: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white" />
                     </div>
                   </div>
-                  <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 rounded-br-lg">
+                  <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
                     <button type="button" onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
                     <button type="button" onClick={() => { if (cropEditRow !== null) { setCropRows((prev) => prev.map((r, i) => i === cropEditRow ? { ...cropForm } : r)); } else { setCropRows((prev) => [...prev, { ...cropForm }]); } setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
                       {cropEditRow !== null ? "Update" : "Add Crop"}
                     </button>
                   </div>
-                </div>
+                  </div>
+                </>
               )}
             </div>
           )}
 
           {activeTab === "dossier" && (
-            <div className="flex gap-0 min-h-[420px]">
-              {/* ── Master: Table ── */}
-              <div className={`flex flex-col transition-all duration-300 ${docPanelOpen ? "w-[55%]" : "w-full"}`}>
+            <div className="relative min-h-[420px]">
+              <div className="flex flex-col w-full">
                 <div className="flex items-center justify-between pb-3">
                   <h3 className="text-base font-semibold text-gray-900">Document Dossier</h3>
                   {!docPanelOpen && (
@@ -681,14 +704,25 @@ export function Member360Form() {
                 </div>
               </div>
 
-              {/* ── Detail: Sidebar form ── */}
               {docPanelOpen && (
-                <div className="w-[45%] border-l border-gray-200 bg-gray-50 flex flex-col rounded-r-lg">
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white rounded-tr-lg">
-                    <h4 className="text-sm font-semibold text-gray-800">{docEditRow !== null ? "Edit Document" : "New Document"}</h4>
-                    <button onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }} className="p-1 rounded hover:bg-gray-100 text-gray-400"><X className="w-4 h-4" /></button>
+                <>
+                  <div
+                    className="fixed inset-0 z-[100] bg-black/40"
+                    aria-hidden
+                    onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }}
+                  />
+                  <div
+                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="doc-drawer-title"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
+                    <h4 id="doc-drawer-title" className="text-sm font-semibold text-white">{docEditRow !== null ? "Edit Document" : "New Document"}</h4>
+                    <button type="button" onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close"><X className="w-4 h-4" /></button>
                   </div>
-                  <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                  <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Document Name <span className="text-red-500">*</span></label>
                       <input type="text" placeholder="e.g., Land Certificate" value={docForm.docName} onChange={(e) => setDocForm((f) => ({ ...f, docName: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white" />
@@ -719,13 +753,14 @@ export function Member360Form() {
                       </label>
                     </div>
                   </div>
-                  <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 rounded-br-lg">
+                  <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
                     <button type="button" onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
                     <button type="button" onClick={() => { const now = new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }); const entry = { ...docForm, uploadDate: docForm.uploadDate || now }; if (docEditRow !== null) { setDocRows((prev) => prev.map((r, i) => i === docEditRow ? entry : r)); } else { setDocRows((prev) => [...prev, entry]); } setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
                       {docEditRow !== null ? "Update" : "Add Document"}
                     </button>
                   </div>
-                </div>
+                  </div>
+                </>
               )}
             </div>
           )}

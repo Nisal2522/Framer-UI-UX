@@ -10,6 +10,12 @@ import {
   Clock,
   Calendar,
   MapPinned,
+  UserCheck,
+  UserPlus,
+  UserX,
+  ClipboardCheck,
+  Activity,
+  UserRound,
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Tooltip as LeafletTooltip, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -122,35 +128,55 @@ export function ACDashboard() {
       {/* 1. Membership + key stats — compact card */}
       <div className="rounded-xl bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-4 text-white shadow-lg ring-1 ring-white/10 sm:p-5">
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6 sm:gap-3">
-          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
-            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
-              Active members
-            </p>
-            <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">447</p>
+
+          {/* Active members */}
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">Active members</p>
+              <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center shrink-0">
+                <Activity className="w-3.5 h-3.5 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-xl font-bold tabular-nums sm:text-2xl">447</p>
           </div>
-          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
-            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
-              Male Members
-            </p>
-            <div className="mt-1 flex items-center gap-1.5">
+
+          {/* Male Members */}
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">Male Members</p>
+              <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center shrink-0">
+                <UserCheck className="w-3.5 h-3.5 text-sky-500" />
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
               <p className="text-xl font-bold tabular-nums sm:text-2xl">258</p>
               <span className="text-[10px] text-white/50 font-medium">57.7%</span>
             </div>
           </div>
-          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
-            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
-              Female Members
-            </p>
-            <div className="mt-1 flex items-center gap-1.5">
+
+          {/* Female Members */}
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">Female Members</p>
+              <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center shrink-0">
+                <UserRound className="w-3.5 h-3.5 text-rose-500" />
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
               <p className="text-xl font-bold tabular-nums sm:text-2xl">186</p>
               <span className="text-[10px] text-white/50 font-medium">41.6%</span>
             </div>
           </div>
-          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
-            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
-              New this year
-            </p>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+
+          {/* New this year */}
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">New this year</p>
+              <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center shrink-0">
+                <UserPlus className="w-3.5 h-3.5 text-emerald-500" />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-xl font-bold tabular-nums sm:text-2xl">49</span>
               <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-400/20 px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-emerald-100 ring-1 ring-emerald-300/30 sm:text-xs">
                 <TrendingUp className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
@@ -158,18 +184,29 @@ export function ACDashboard() {
               </span>
             </div>
           </div>
-          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
-            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
-              Dropout rate
-            </p>
-            <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">3.2%</p>
+
+          {/* Dropout rate */}
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">Dropout rate</p>
+              <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center shrink-0">
+                <UserX className="w-3.5 h-3.5 text-orange-500" />
+              </div>
+            </div>
+            <p className="text-xl font-bold tabular-nums sm:text-2xl">3.2%</p>
           </div>
-          <div className="min-w-0 rounded-lg bg-white/5 px-2 py-2 ring-1 ring-white/10 sm:px-2.5">
-            <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
-              Business plans approved
-            </p>
-            <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">1</p>
+
+          {/* Business plans approved */}
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">Business plans approved</p>
+              <div className="w-6 h-6 rounded-md bg-white flex items-center justify-center shrink-0">
+                <ClipboardCheck className="w-3.5 h-3.5 text-emerald-600" />
+              </div>
+            </div>
+            <p className="text-xl font-bold tabular-nums sm:text-2xl">1</p>
           </div>
+
         </div>
       </div>
 
