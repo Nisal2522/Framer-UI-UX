@@ -5,15 +5,18 @@
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Framer</title>
-      <script type="module" crossorigin src="/assets/index-BOlUxeEL.js"></script>
-      <link rel="stylesheet" crossorigin href="/assets/index-Bmk-rrfD.css">
+      <script type="module" crossorigin src="/assets/index-Dp7SWvfj.js"></script>
+      <link rel="stylesheet" crossorigin href="/assets/index-DnZN24nK.css">
     </head>
 
     <body>
       <div id="root"></div>
     <script>
       // GitHub Pages SPA redirect support (works with 404.html fallback).
+      // Important: this must NOT run on Vercel/custom domains.
       (function (l) {
+        var isGitHubPages = l.hostname.endsWith("github.io");
+        if (!isGitHubPages) return;
         if (l.search[1] === "/") {
           const decoded = l.search
             .slice(1)

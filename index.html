@@ -11,7 +11,10 @@
       <div id="root"></div>
     <script>
       // GitHub Pages SPA redirect support (works with 404.html fallback).
+      // Important: this must NOT run on Vercel/custom domains.
       (function (l) {
+        var isGitHubPages = l.hostname.endsWith("github.io");
+        if (!isGitHubPages) return;
         if (l.search[1] === "/") {
           const decoded = l.search
             .slice(1)
