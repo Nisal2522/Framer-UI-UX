@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { Sprout, Users, Shield, ArrowLeft } from "lucide-react";
 import { useState } from "react";
-import backgroundImage from "../../assets/background.png";
+import backgroundImage from "../../assets/AgreCoopLogin.gif";
 import { setPortalUser } from "../auth/portalUser";
 
 export function Login() {
