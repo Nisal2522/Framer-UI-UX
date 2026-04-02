@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Upload, Save, FileText, Video, Image as ImageIcon, Tag } from "lucide-react";
+import { X, Upload, FileText, Tag } from "lucide-react";
 
 interface KnowledgeUploadFormProps {
   onClose: () => void;
@@ -23,25 +23,38 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl my-8">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#032EA1] to-[#0447D4]">
-          <h2 className="text-2xl font-bold text-white">Upload Knowledge Material</h2>
+    <>
+      <div
+        className="fixed inset-0 z-[100] bg-black/40"
+        aria-hidden
+        onClick={onClose}
+      />
+      <div
+        className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-2xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="km-upload-drawer-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
+          <h2 id="km-upload-drawer-title" className="text-sm font-semibold text-white">
+            Upload Knowledge Material
+          </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors"
+            aria-label="Close"
           >
-            <X className="w-6 h-6 text-white" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Form Content */}
-        <div className="px-6 py-4 max-h-[calc(100vh-300px)] overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
           <div className="space-y-4">
             {/* Material Information */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Material Information
               </h3>
               <div className="grid grid-cols-1 gap-4">
@@ -70,7 +83,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
 
             {/* Categorization */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Categorization
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -133,13 +146,14 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
 
             {/* Tags */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Tags (Select all that apply)
               </h3>
               <div className="flex flex-wrap gap-2">
                 {availableTags.map((tag) => (
                   <button
                     key={tag}
+                    type="button"
                     onClick={() => toggleTag(tag)}
                     className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       selectedTags.includes(tag)
@@ -159,7 +173,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
 
             {/* Target Audience */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Target Audience
               </h3>
               <div className="space-y-3">
@@ -196,7 +210,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
 
             {/* Language */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Language & Localization
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -228,7 +242,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
 
             {/* File Upload */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Upload File(s) <span className="text-red-500">*</span>
               </h3>
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:border-[#032EA1] transition-colors cursor-pointer">
@@ -258,7 +272,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
 
             {/* Publishing Options */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-base font-semibold text-gray-900 mb-4">
                 Publishing Options
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -287,7 +301,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
 
             {/* Version Control */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Version Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -344,25 +358,31 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div className="px-5 py-3 border-t border-gray-200 bg-white flex flex-wrap items-center justify-between gap-2 shrink-0">
           <button
+            type="button"
             onClick={onClose}
-            className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+            className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
           >
             Cancel
           </button>
-          <div className="flex items-center gap-3">
-            <button className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+            >
               Save as Draft
             </button>
-            <button className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#032EA1] to-[#0447D4] text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+            <button
+              type="button"
+              className="flex items-center gap-2 px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
+            >
               <Upload className="w-4 h-4" />
               Publish Material
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

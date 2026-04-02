@@ -171,7 +171,7 @@ function mediaLabel(m: KnowledgeMaterial): string {
 }
 
 export function KnowledgeManagement() {
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredMaterials = useMemo(() => {
@@ -197,7 +197,8 @@ export function KnowledgeManagement() {
           </p>
         </div>
         <button
-          onClick={() => setShowUploadModal(true)}
+          type="button"
+          onClick={() => setUploadDrawerOpen(true)}
           className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors shadow-md shrink-0"
         >
           <Plus className="w-5 h-5" />
@@ -388,8 +389,8 @@ export function KnowledgeManagement() {
         </div>
       </div>
 
-      {showUploadModal && (
-        <KnowledgeUploadForm onClose={() => setShowUploadModal(false)} />
+      {uploadDrawerOpen && (
+        <KnowledgeUploadForm onClose={() => setUploadDrawerOpen(false)} />
       )}
     </div>
   );
