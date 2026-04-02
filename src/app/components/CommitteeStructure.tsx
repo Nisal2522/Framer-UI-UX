@@ -227,34 +227,35 @@ export function CommitteeStructure() {
       <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
         <div className="flex items-start gap-4">
           <Calendar className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-700 mb-2">Committee Version History</p>
-            <div className="divide-y divide-gray-100 rounded-lg border border-gray-200 overflow-hidden">
-              {committeePeriods.map((period) => (
-                <div
-                  key={period.id}
-                  className={`flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors ${
-                    selectedPeriod === period.id
-                      ? "bg-[#0F2F8F]/8 border-l-2 border-l-[#0F2F8F]"
-                      : "bg-white hover:bg-gray-50"
-                  }`}
-                  onClick={() => setSelectedPeriod(period.id)}
-                >
-                  <span className={`text-sm font-medium ${selectedPeriod === period.id ? "text-[#0F2F8F]" : "text-gray-700"}`}>
+          <div className="flex-1 min-w-0">
+            <label
+              htmlFor="committee-version-history"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Committee Version History
+            </label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <select
+                id="committee-version-history"
+                value={selectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value)}
+                className="w-full sm:flex-1 sm:max-w-xl min-w-0 px-3 py-2.5 text-sm font-medium text-gray-900 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-[#032EA1] focus:border-[#032EA1] outline-none cursor-pointer"
+                aria-label="Select committee term period"
+              >
+                {committeePeriods.map((period) => (
+                  <option key={period.id} value={period.id}>
                     {period.label}
-                  </span>
-                  {selectedPeriod === period.id && (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); openEditModal(period.id); }}
-                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#0F2F8F] border border-[#0F2F8F]/30 rounded-lg hover:bg-[#0F2F8F] hover:text-white transition-colors"
-                    >
-                      <Pencil className="w-3 h-3" />
-                      Edit
-                    </button>
-                  )}
-                </div>
-              ))}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => openEditModal(selectedPeriod)}
+                className="flex shrink-0 items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-medium text-[#0F2F8F] border border-[#0F2F8F]/30 rounded-lg hover:bg-[#0F2F8F] hover:text-white transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit
+              </button>
             </div>
           </div>
         </div>
@@ -372,32 +373,43 @@ export function CommitteeStructure() {
         </div>
       </div>
 
-      {/* Add Committee Modal */}
+      {/* Add / Edit Committee — overlay drawer (same pattern as Usage History in Asset Management) */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8">
-            {/* Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 bg-gradient-to-br from-[#032EA1] to-[#021c5e]">
+        <>
+          <div
+            className="fixed inset-0 z-[100] bg-black/40"
+            aria-hidden
+            onClick={closeAddModal}
+          />
+          <div
+            className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-2xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="committee-drawer-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
               <div>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 id="committee-drawer-title" className="text-sm font-semibold text-white">
                   {editingPeriodId ? "Edit Committee" : "Add New Committee Member"}
                 </h2>
                 {editingPeriodId && (
-                  <p className="text-blue-200 text-sm mt-0.5">
+                  <p className="text-xs text-white/80 mt-0.5">
                     {committeePeriods.find((p) => p.id === editingPeriodId)?.label}
                   </p>
                 )}
               </div>
               <button
+                type="button"
                 onClick={closeAddModal}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors"
+                aria-label="Close"
               >
-                <X className="w-6 h-6 text-white" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Form */}
-            <div className="px-6 py-4 space-y-4 max-h-[calc(100vh-250px)] overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-4">
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
                 <p className="text-sm font-semibold text-gray-900 mb-2">Committee Period</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
@@ -507,20 +519,23 @@ export function CommitteeStructure() {
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-between px-8 py-6 border-t border-gray-200 bg-gray-50">
+            <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
               <button
+                type="button"
                 onClick={closeAddModal}
-                className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
-              <button className="px-6 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors">
+              <button
+                type="button"
+                className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
+              >
                 {editingPeriodId ? "Update Committee" : "Submit"}
               </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
