@@ -1205,11 +1205,11 @@ export function AssetManagement() {
 
               <div className="relative min-h-[420px]">
                 <div className="flex flex-col w-full">
-                  <div className="flex flex-wrap items-center gap-3 min-w-0 pb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 min-w-0 pb-3 w-full">
                     <h3 className="text-base font-semibold text-gray-900 shrink-0">
                       Submitted Disposal Requests
                     </h3>
-                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <div className="flex flex-wrap items-center justify-end gap-2 shrink-0 min-w-0">
                       <button
                         type="button"
                         className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
@@ -1219,17 +1219,15 @@ export function AssetManagement() {
                       </button>
                       <div className="relative w-[220px] sm:w-[260px] min-w-[10rem] max-w-full shrink-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                    <input
-                      type="search"
+                        <input
+                          type="search"
                           value={disposalSearch}
                           onChange={(e) => setDisposalSearch(e.target.value)}
                           placeholder="Search requests..."
                           className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                           aria-label="Search disposal requests"
-                    />
-                  </div>
-                </div>
-                    <div className="flex flex-1 flex-wrap items-center justify-end gap-2 min-w-0">
+                        />
+                      </div>
                       {!disposalDrawerOpen && (
                         <button
                           type="button"
