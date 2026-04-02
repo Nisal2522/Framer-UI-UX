@@ -37,7 +37,7 @@ export function Login() {
 
       {/* Left side - Image with overlay */}
       <div className="hidden lg:flex lg:w-1/2 relative">
-        <div className="relative z-10 flex flex-col justify-start pt-8 px-12 text-white">
+        <div className="relative z-10 flex h-full flex-col justify-between pt-8 px-12 text-white">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
@@ -50,7 +50,7 @@ export function Login() {
             </div>
           </div>
           
-          <div className="space-y-16 max-w-md">
+          <div className="space-y-16 max-w-md pb-10">
             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
               <div className="flex items-start gap-3">
                 <Users className="w-6 h-6 text-blue-200 mt-1 flex-shrink-0" />
