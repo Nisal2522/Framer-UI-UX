@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   ArrowRight,
   Users,
+  UserCog,
   Building2,
   Shield,
   LayoutDashboard,
@@ -294,54 +295,68 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* About */}
-      <section id="about" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <span className="text-[#0F2F8F] font-semibold text-sm tracking-wide uppercase">About the Platform</span>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3 mb-6 leading-tight">
+      {/* About — full-width band, reference layout */}
+      <section id="about" className="w-full py-20 lg:py-28 bg-gradient-to-b from-slate-50 via-white to-white border-y border-slate-100/80">
+        <div className="w-full max-w-[min(100%,1440px)] mx-auto px-4 sm:px-6 lg:px-10 xl:px-14 2xl:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 xl:gap-20 items-center">
+            <div className="lg:col-span-5">
+              <span className="text-[#0F2F8F] font-semibold text-xs sm:text-sm tracking-[0.2em] uppercase">
+                About the Platform
+              </span>
+              <h2 className="mt-4 text-3xl sm:text-4xl lg:text-[2.35rem] xl:text-4xl font-bold text-[#0c1a3a] leading-[1.15] tracking-tight">
                 Bridging Agriculture and Technology for Sustainable Growth
               </h2>
-              <p className="text-gray-600 text-lg leading-relaxed mb-6">
+              <p className="mt-5 text-gray-600 text-base sm:text-lg leading-relaxed max-w-xl">
                 FOMMP is a comprehensive digital platform developed under the FAO/PEARL initiative
                 to modernize agricultural cooperative management in Cambodia. It connects three
                 key stakeholders in a unified ecosystem.
               </p>
-              <div className="space-y-4">
+              <ul className="mt-8 space-y-5">
                 {[
-                  { icon: Shield, label: "Government", desc: "Oversight, approvals, and nationwide analytics" },
-                  { icon: Building2, label: "Cooperatives", desc: "Member management, business plans, and resources" },
-                  { icon: Users, label: "Farmers", desc: "Profiles, land tracking, and training access" },
+                  { icon: Shield, label: "Government", desc: "Oversight, approvals, and nationwide analytics." },
+                  { icon: Building2, label: "Cooperatives", desc: "Member management, business plans, and resources." },
+                  { icon: UserCog, label: "Farmers", desc: "Profiles, land tracking, and training access." },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-5 h-5 text-[#0F2F8F]" />
+                  <li key={i} className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-sky-100/90 flex items-center justify-center flex-shrink-0 shadow-sm shadow-sky-900/5">
+                      <item.icon className="w-5 h-5 text-[#0F2F8F]" strokeWidth={2} />
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{item.label}</h4>
-                      <p className="text-sm text-gray-500">{item.desc}</p>
+                    <div className="min-w-0 pt-0.5">
+                      <h4 className="font-semibold text-[#0c1a3a] text-base">{item.label}</h4>
+                      <p className="text-sm text-gray-500 mt-0.5 leading-snug">{item.desc}</p>
                     </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="lg:col-span-7 w-full">
+              <div
+                className="grid grid-cols-2 gap-3 sm:gap-4 w-full min-h-[280px] sm:min-h-[360px] lg:min-h-[420px] xl:min-h-[480px]"
+                style={{ gridAutoRows: "minmax(0, 1fr)" }}
+              >
+                {farmerImages.map((img, i) => (
+                  <div
+                    key={i}
+                    className={[
+                      "relative overflow-hidden rounded-2xl ring-1 ring-black/[0.06] shadow-lg shadow-slate-900/10",
+                      i === 0 ? "row-span-2 min-h-[200px] sm:min-h-[260px]" : "min-h-[120px] sm:min-h-[140px]",
+                      i === 3 ? "col-span-2 min-h-[140px] sm:min-h-[160px]" : "",
+                    ].join(" ")}
+                  >
+                    <img
+                      src={img.src}
+                      alt={img.alt}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+                    <p className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 text-white text-xs sm:text-sm font-medium leading-snug drop-shadow-sm">
+                      {img.caption}
+                    </p>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {farmerImages.map((img, i) => (
-                <div
-                  key={i}
-                  className={`relative overflow-hidden rounded-2xl ${i === 0 ? "row-span-2" : ""}`}
-                >
-                  <img
-                    src={img.src}
-                    alt={img.alt}
-                    className={`w-full object-cover ${i === 0 ? "h-full" : "h-48"}`}
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <p className="absolute bottom-3 left-3 right-3 text-white text-xs font-medium">{img.caption}</p>
-                </div>
-              ))}
             </div>
           </div>
         </div>
