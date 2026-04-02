@@ -295,13 +295,21 @@ export function BusinessPlans() {
                         <span className="text-xs font-medium text-gray-600">
                           Progress
                         </span>
-                        <span className="text-xs font-semibold text-[#032EA1]">
+                        <span
+                          className={`text-xs font-semibold ${
+                            plan.progress === 100 ? "text-emerald-600" : "text-[#032EA1]"
+                          }`}
+                        >
                           {plan.progress}%
                         </span>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-[#032EA1] to-[#0447D4] rounded-full transition-all duration-300"
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            plan.progress === 100
+                              ? "bg-gradient-to-r from-emerald-500 to-emerald-600"
+                              : "bg-gradient-to-r from-[#032EA1] to-[#0447D4]"
+                          }`}
                           style={{ width: `${plan.progress}%` }}
                         ></div>
                       </div>

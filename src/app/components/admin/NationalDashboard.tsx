@@ -202,39 +202,33 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   return (
     <div className="space-y-10">
       <div>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#0F2F8F]">
-          <MapPinned className="h-3.5 w-3.5" />
-          {scope === "national" ? "Ministry / FAO" : "Provincial (PDAFF)"}
-        </div>
         <h1 className="mt-1 text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
-        <p className="mt-1 text-gray-600 max-w-3xl">{subtitle}</p>
       </div>
 
       {/* 1. National AC Overview */}
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-[#0F2F8F]" />
-          {scopeLabel} AC overview
-        </h2>
-        <p className="text-sm text-gray-500 mt-1">
-          AC counts by status, new registrations ({new Date().getFullYear()}), and geographic distribution.
-        </p>
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <section className="space-y-6">
+        <div className="rounded-xl bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-4 text-white shadow-lg ring-1 ring-white/10 sm:p-5">
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 sm:gap-3">
           {[
-            { label: "Active", value: acStats.active, icon: Building2, tone: "bg-emerald-50 text-emerald-800" },
-            { label: "Inactive", value: acStats.inactive, icon: Activity, tone: "bg-slate-100 text-slate-700" },
-            { label: "Suspended", value: acStats.suspended, icon: Ban, tone: "bg-amber-50 text-amber-800" },
-            { label: "Withdrawn", value: acStats.withdrawn, icon: LogOut, tone: "bg-red-50 text-red-800" },
-            { label: "New ACs (YTD)", value: acStats.newYtd, icon: UserPlus, tone: "bg-blue-50 text-[#0F2F8F]" },
+            { label: "Active", value: acStats.active, icon: Building2, iconColor: "text-emerald-600" },
+            { label: "Inactive", value: acStats.inactive, icon: Activity, iconColor: "text-slate-600" },
+            { label: "Suspended", value: acStats.suspended, icon: Ban, iconColor: "text-amber-600" },
+            { label: "Withdrawn", value: acStats.withdrawn, icon: LogOut, iconColor: "text-red-600" },
+            { label: "New ACs (YTD)", value: acStats.newYtd, icon: UserPlus, iconColor: "text-blue-600" },
           ].map((c) => (
-            <div key={c.label} className={`rounded-xl p-4 ${c.tone}`}>
-              <c.icon className="h-4 w-4 opacity-80 mb-2" />
-              <p className="text-2xl font-bold tabular-nums">{c.value.toLocaleString()}</p>
-              <p className="text-xs font-medium opacity-90">{c.label}</p>
+            <div key={c.label} className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">{c.label}</p>
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-amber-200/70 bg-white shadow-[0_0_0_1px_rgba(251,191,36,0.18),0_0_10px_rgba(251,191,36,0.28)] transition-transform duration-200 hover:scale-110">
+                  <c.icon className={`h-3.5 w-3.5 ${c.iconColor}`} />
+                </div>
+              </div>
+              <p className="text-xl font-bold tabular-nums sm:text-2xl">{c.value.toLocaleString()}</p>
             </div>
           ))}
         </div>
-        <div className="mt-6 h-[320px] rounded-xl overflow-hidden border border-gray-100 ring-1 ring-black/[0.04]">
+        </div>
+        <div className="h-[320px] rounded-xl overflow-hidden border border-gray-100 bg-white ring-1 ring-black/[0.04]">
           <MapContainer center={[12.7, 104.9]} zoom={scope === "national" ? 6.3 : 8} className="h-full w-full z-0" scrollWheelZoom>
             <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {mapProvinces.map((p) => (

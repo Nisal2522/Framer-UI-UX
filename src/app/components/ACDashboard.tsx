@@ -503,8 +503,8 @@ export function ACDashboard() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Crop Type Distribution (Expected Yield)</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Expected yield by crop category</p>
+              <h3 className="text-lg font-semibold text-gray-900">Crop Distribution</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Expected Yield per Year</p>
             </div>
           </div>
           <div className="space-y-4">
@@ -539,8 +539,8 @@ export function ACDashboard() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Livestock Distribution (Expected Yield)</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Expected projected headcount by type</p>
+              <h3 className="text-lg font-semibold text-gray-900">Livestock Distribution</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Expected Yield per Year</p>
             </div>
           </div>
           <div className="space-y-4">

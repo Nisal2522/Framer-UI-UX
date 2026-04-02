@@ -489,11 +489,21 @@ export function BusinessPlanTemplate() {
                               <TrendingUp className="w-3 h-3" />
                               Progress
                             </span>
-                            <span className="font-semibold text-[#032EA1]">{plan.progress}%</span>
+                            <span
+                              className={`font-semibold ${
+                                plan.progress === 100 ? "text-emerald-600" : "text-[#032EA1]"
+                              }`}
+                            >
+                              {plan.progress}%
+                            </span>
                           </div>
                           <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-[#032EA1] to-[#0447D4] rounded-full transition-all duration-500"
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                plan.progress === 100
+                                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600"
+                                  : "bg-gradient-to-r from-[#032EA1] to-[#0447D4]"
+                              }`}
                               style={{ width: `${plan.progress}%` }}
                             />
                           </div>
