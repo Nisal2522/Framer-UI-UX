@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
   ChevronDown,
@@ -86,6 +86,34 @@ const pastPlans = [
   },
 ];
 
+const planPrefillById: Record<string, Record<string, string>> = {
+  "BP-2025-001": {
+    "1.1": "Prasat Sambor Rung Roeang Modern AC is a farmer-led cooperative focused on rice and mixed-crop production in Kampong Thom.",
+    "1.2": "We aggregate produce, provide member services, and coordinate input purchasing for 447 active members.",
+    "2.1": "2025 objective: improve productivity by 12% while reducing post-harvest losses through better handling.",
+    "2.2": "Primary buyers include district millers and two provincial wholesalers under seasonal agreements.",
+    "2.3": "Estimated annual budget: $55,000 with co-financing from member contributions and retained surplus.",
+    "2.4": "Key milestones include irrigation schedule rollout, farmer training cycles, and quality checks by quarter.",
+    "2.5": "Top risks: weather variability, pest pressure, and transport disruptions during peak season.",
+    "2.6": "Plan follows environmental safeguards, efficient water use, and inclusive participation targets.",
+    "2.7": "Progress tracked monthly using yield, member participation, and financial performance indicators.",
+    "2.8": "After review approval, implementation begins with procurement and training mobilization.",
+    "3.1": "Investment request prioritizes productivity assets aligned with approved business activities.",
+    "3.2": "Asset list includes irrigation upgrades, storage improvements, and quality control tools.",
+    "3.3": "Members contribute labor, in-kind materials, and partial cost sharing where feasible.",
+    "3.4": "Maintenance plan assigns custodians and quarterly servicing schedules for all assets.",
+    "3.5": "Safeguards ensure equitable access for women, youth, and vulnerable member households.",
+    "3.6": "Committee confirms accountability and signs implementation commitments.",
+    "4": "Annexes include member registry summary, market assumptions, and costing worksheets.",
+  },
+  "BP-2023-001": {
+    "1.1": "Rice Production Expansion 2023 targeted improved paddy productivity and milling efficiency.",
+    "2.1": "Approved plan reached 100% completion with all milestones delivered on time.",
+    "2.3": "Total approved budget execution: $42,000.",
+    "2.7": "Performance monitoring closed with expected outputs achieved and verified.",
+  },
+};
+
 const statusConfig: Record<
   string,
   {
@@ -149,6 +177,17 @@ export function BusinessPlanTemplate() {
   const [completedSections, setCompletedSections] = useState<string[]>(["1"]);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const exportContentRef = useRef<HTMLDivElement>(null);
+  const selectedPlan = (location.state as { fromPlan?: (typeof pastPlans)[number] } | null)?.fromPlan;
+  const [sectionContent, setSectionContent] = useState<Record<string, string>>({});
+
+  const initialPrefill = useMemo(
+    () => (selectedPlan ? planPrefillById[selectedPlan.id] ?? {} : {}),
+    [selectedPlan]
+  );
+
+  useEffect(() => {
+    setSectionContent(initialPrefill);
+  }, [initialPrefill]);
 
   const sections: Section[] = [
     {
@@ -303,7 +342,7 @@ export function BusinessPlanTemplate() {
         )}
         {!isNewPlan && (
           <button
-            onClick={() => navigate("new")}
+            onClick={() => navigate("/dashboard/business-plans/new", { state: null })}
             className="flex items-center gap-2 bg-gradient-to-r from-[#032EA1] to-[#0447D4] text-white px-5 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 shrink-0 text-sm"
           >
             <Plus className="w-4 h-4" />
@@ -464,16 +503,21 @@ export function BusinessPlanTemplate() {
                         <button
                           type="button"
                           title="View plan"
-                          className="p-2.5 border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-[#032EA1] transition-colors group"
+                          onClick={() =>
+                            navigate("/dashboard/business-plans/new", {
+                              state: { fromPlan: plan },
+                            })
+                          }
+                          className="p-2.5 rounded-lg bg-[#032EA1]/10 text-[#032EA1] border border-[#032EA1]/20 hover:bg-[#032EA1]/15 transition-colors"
                         >
-                          <Eye className="w-4 h-4 text-gray-500 group-hover:text-[#032EA1]" />
+                          <Eye className="w-4 h-4" />
                         </button>
                         <button
                           type="button"
                           title="Download plan"
-                          className="p-2.5 border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-[#032EA1] transition-colors group"
+                          className="p-2.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
                         >
-                          <Download className="w-4 h-4 text-gray-500 group-hover:text-[#032EA1]" />
+                          <Download className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -510,11 +554,12 @@ export function BusinessPlanTemplate() {
                 <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-semibold text-blue-900">
-                    Business Plan Status: Draft
+                    Business Plan Status: {selectedPlan ? `${selectedPlan.status} (Loaded)` : "Draft"}
                   </p>
                   <p className="text-xs text-blue-700 mt-1">
-                    Complete all sections and submit for review. Your plan will go through
-                    multi-level review and approval process.
+                    {selectedPlan
+                      ? `Loaded from ${selectedPlan.id} — ${selectedPlan.title}. You can review and update before resubmission.`
+                      : "Complete all sections and submit for review. Your plan will go through multi-level review and approval process."}
                   </p>
                 </div>
               </div>
@@ -648,6 +693,13 @@ export function BusinessPlanTemplate() {
                                     <div className="px-4 pb-4">
                                       <textarea
                                         placeholder={`Enter details for ${sub.title}...`}
+                                        value={sectionContent[sub.id] ?? ""}
+                                        onChange={(e) =>
+                                          setSectionContent((prev) => ({
+                                            ...prev,
+                                            [sub.id]: e.target.value,
+                                          }))
+                                        }
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none"
                                         rows={4}
                                       />
@@ -660,6 +712,13 @@ export function BusinessPlanTemplate() {
                             <div className="bg-white border border-gray-200 rounded-lg p-4">
                               <textarea
                                 placeholder={`Enter details for ${section.title}...`}
+                                value={sectionContent[section.id] ?? ""}
+                                onChange={(e) =>
+                                  setSectionContent((prev) => ({
+                                    ...prev,
+                                    [section.id]: e.target.value,
+                                  }))
+                                }
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none"
                                 rows={6}
                               />

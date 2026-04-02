@@ -310,14 +310,14 @@ export function BusinessPlans() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    <button className="p-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group">
-                      <Eye className="w-4 h-4 text-gray-600 group-hover:text-[#032EA1]" />
+                    <button className="p-2.5 rounded-lg bg-[#032EA1]/10 text-[#032EA1] border border-[#032EA1]/20 hover:bg-[#032EA1]/15 transition-colors">
+                      <Eye className="w-4 h-4" />
                     </button>
                     <button className="p-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group">
                       <FileEdit className="w-4 h-4 text-gray-600 group-hover:text-[#032EA1]" />
                     </button>
-                    <button className="p-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group">
-                      <Download className="w-4 h-4 text-gray-600 group-hover:text-[#032EA1]" />
+                    <button className="p-2.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors">
+                      <Download className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

@@ -63,18 +63,19 @@ const ageGroupData = [
   { group: "55+", Male: 20, Female: 21, Other: 0 },
 ];
 
+// Expected yield breakdown (prototype values; integrate with real business plan / progress data later)
 const cropDistributionData = [
-  { crop: "Rice", farmers: 234 },
-  { crop: "Cassava", farmers: 156 },
-  { crop: "Corn", farmers: 98 },
-  { crop: "Vegetables", farmers: 76 },
+  { crop: "Rice", expectedYield: 234 }, // tons/year (illustrative)
+  { crop: "Cassava", expectedYield: 156 },
+  { crop: "Corn", expectedYield: 98 },
+  { crop: "Vegetables", expectedYield: 76 },
 ];
 
 const livestockData = [
-  { type: "Cattle", count: 128 },
-  { type: "Poultry", count: 312 },
-  { type: "Pigs", count: 89 },
-  { type: "Goats", count: 45 },
+  { type: "Cattle", expectedYield: 128 }, // heads (illustrative projection)
+  { type: "Poultry", expectedYield: 312 },
+  { type: "Pigs", expectedYield: 89 },
+  { type: "Goats", expectedYield: 45 },
 ];
 
 const farmerAreaData = [
@@ -504,14 +505,14 @@ export function ACDashboard() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Crop Type Distribution</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Farmers per crop category</p>
+              <h3 className="text-lg font-semibold text-gray-900">Crop Type Distribution (Expected Yield)</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Expected yield by crop category</p>
             </div>
           </div>
           <div className="space-y-4">
             {(() => {
               const cropColors = ["#0F2F8F", "#0D2A7D", "#3B5FCC", "#6B8EFF"];
-              const max = Math.max(...cropDistributionData.map(d => d.farmers));
+              const max = Math.max(...cropDistributionData.map(d => d.expectedYield));
               return cropDistributionData.map((item, i) => (
                 <div key={item.crop}>
                   <div className="flex items-center justify-between mb-1.5">
@@ -520,14 +521,14 @@ export function ACDashboard() {
                       <span className="text-sm font-medium text-gray-700">{item.crop}</span>
                     </div>
                     <span className="text-sm font-bold" style={{ color: cropColors[i] }}>
-                      {item.farmers}
-                      <span className="text-xs text-gray-400 font-normal ml-1">farmers</span>
+                      {item.expectedYield}
+                      <span className="text-xs text-gray-400 font-normal ml-1">tons/yr</span>
                     </span>
                   </div>
                   <div className="h-2.5 rounded-full bg-gray-100">
                     <div
                       className="h-2.5 rounded-full transition-all duration-500"
-                      style={{ width: `${(item.farmers / max) * 100}%`, backgroundColor: cropColors[i] }}
+                      style={{ width: `${(item.expectedYield / max) * 100}%`, backgroundColor: cropColors[i] }}
                     />
                   </div>
                 </div>
@@ -540,14 +541,14 @@ export function ACDashboard() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Livestock Distribution</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Total headcount by type</p>
+              <h3 className="text-lg font-semibold text-gray-900">Livestock Distribution (Expected Yield)</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Expected projected headcount by type</p>
             </div>
           </div>
           <div className="space-y-4">
             {(() => {
               const livestockColors = ["#0F2F8F", "#0D2A7D", "#3B5FCC", "#6B8EFF"];
-              const max = Math.max(...livestockData.map(d => d.count));
+              const max = Math.max(...livestockData.map(d => d.expectedYield));
               return livestockData.map((item, i) => (
                 <div key={item.type}>
                   <div className="flex items-center justify-between mb-1.5">
@@ -556,14 +557,14 @@ export function ACDashboard() {
                       <span className="text-sm font-medium text-gray-700">{item.type}</span>
                     </div>
                     <span className="text-sm font-bold" style={{ color: livestockColors[i] }}>
-                      {item.count}
-                      <span className="text-xs text-gray-400 font-normal ml-1">head</span>
+                      {item.expectedYield}
+                      <span className="text-xs text-gray-400 font-normal ml-1">heads</span>
                     </span>
                   </div>
                   <div className="h-2.5 rounded-full bg-gray-100">
                     <div
                       className="h-2.5 rounded-full transition-all duration-500"
-                      style={{ width: `${(item.count / max) * 100}%`, backgroundColor: livestockColors[i] }}
+                      style={{ width: `${(item.expectedYield / max) * 100}%`, backgroundColor: livestockColors[i] }}
                     />
                   </div>
                 </div>

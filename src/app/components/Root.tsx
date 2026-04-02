@@ -187,7 +187,7 @@ export function Root() {
         <div className="px-2.5 py-3 border-t border-gray-200">
           <div
             className="flex items-center gap-3 rounded-lg hover:bg-blue-50 cursor-pointer px-2 py-2 overflow-hidden"
-            title={desktopSidebarCollapsed ? (admin ? "Government Admin" : "AC User - President") : undefined}
+            title={desktopSidebarCollapsed ? (admin ? "Government Admin" : "Sok Pisey - Chairman") : undefined}
           >
             <img
               src={profileImageUrl}
@@ -201,10 +201,10 @@ export function Root() {
               }`}
             >
               <p className="text-sm font-medium text-gray-900 truncate whitespace-nowrap">
-                {admin ? "Government Admin" : "AC User"}
+                {admin ? "Government Admin" : "Sok Pisey"}
               </p>
               <p className="text-xs text-gray-500 truncate whitespace-nowrap">
-                {admin ? portalUser?.email ?? "Ministry / FAO" : "President"}
+                {admin ? portalUser?.email ?? "Ministry / FAO" : "Chairman"}
               </p>
             </div>
           </div>
