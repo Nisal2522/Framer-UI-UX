@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Mail,
   Phone,
@@ -42,15 +42,28 @@ export function ACProfile() {
     },
   ]);
   const [dossierDrawerOpen, setDossierDrawerOpen] = useState(false);
+  const [dossierDrawerVisible, setDossierDrawerVisible] = useState(false);
   const [dossierDocName, setDossierDocName] = useState("");
   const [dossierSelectedFile, setDossierSelectedFile] = useState<File | null>(null);
   const dossierFileInputRef = useRef<HTMLInputElement>(null);
 
+  const DRAWER_ANIM_MS = 200;
+
+  useEffect(() => {
+    if (!dossierDrawerOpen) return;
+    const frame = requestAnimationFrame(() => setDossierDrawerVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, [dossierDrawerOpen]);
+
   const closeDossierDrawer = () => {
-    setDossierDrawerOpen(false);
-    setDossierDocName("");
-    setDossierSelectedFile(null);
-    if (dossierFileInputRef.current) dossierFileInputRef.current.value = "";
+    setDossierDrawerVisible(false);
+    window.setTimeout(() => {
+      setDossierDrawerOpen(false);
+      setDossierDocName("");
+      setDossierSelectedFile(null);
+      if (dossierFileInputRef.current)
+        dossierFileInputRef.current.value = "";
+    }, DRAWER_ANIM_MS);
   };
 
   const submitDossierDocument = () => {
@@ -685,12 +698,16 @@ export function ACProfile() {
               {dossierDrawerOpen && (
                 <>
                   <div
-                    className="fixed inset-0 z-[100] bg-black/40"
+                    className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+                      dossierDrawerVisible ? "opacity-100" : "opacity-0"
+                    }`}
                     aria-hidden
                     onClick={closeDossierDrawer}
                   />
                   <div
-                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
+                      dossierDrawerVisible ? "translate-x-0" : "translate-x-full"
+                    }`}
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="dossier-drawer-title"

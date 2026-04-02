@@ -69,6 +69,7 @@ export function Member360Form() {
     isEditMode ? [{ name: "North Rice Field", extend: "5.2", status: "Active", certifications: ["USDA-NOP"] }] : []
   );
   const [landPanelOpen, setLandPanelOpen] = useState(false);
+  const [landPanelVisible, setLandPanelVisible] = useState(false);
   const [landEditRow, setLandEditRow] = useState<number | null>(null);
   const [landForm, setLandForm] = useState<LandRow>(EMPTY_LAND);
 
@@ -78,6 +79,7 @@ export function Member360Form() {
     isEditMode ? [{ landName: "North Rice Field", cropName: "Rice", yield: "3.5 tons/ha", plants: "N/A" }] : []
   );
   const [cropPanelOpen, setCropPanelOpen] = useState(false);
+  const [cropPanelVisible, setCropPanelVisible] = useState(false);
   const [cropEditRow, setCropEditRow] = useState<number | null>(null);
   const [cropForm, setCropForm] = useState<CropRow>(EMPTY_CROP);
 
@@ -87,9 +89,58 @@ export function Member360Form() {
     isEditMode ? [{ docName: "Land Certificate", landName: "North Rice Field", uploadDate: "Mar 15, 2024", fileSize: "2.3 MB", fileName: "land_certificate.pdf" }] : []
   );
   const [docPanelOpen, setDocPanelOpen] = useState(false);
+  const [docPanelVisible, setDocPanelVisible] = useState(false);
   const [docEditRow, setDocEditRow] = useState<number | null>(null);
   const [docForm, setDocForm] = useState<DocRow>(EMPTY_DOC);
   const certDropdownRef = useRef<HTMLDivElement>(null);
+
+  const DRAWER_ANIM_MS = 200;
+
+  const closeLandPanel = () => {
+    setLandPanelVisible(false);
+    window.setTimeout(() => {
+      setLandPanelOpen(false);
+      setLandEditRow(null);
+      setLandForm(EMPTY_LAND);
+    }, DRAWER_ANIM_MS);
+  };
+
+  const closeCropPanel = () => {
+    setCropPanelVisible(false);
+    window.setTimeout(() => {
+      setCropPanelOpen(false);
+      setCropEditRow(null);
+      setCropForm(EMPTY_CROP);
+    }, DRAWER_ANIM_MS);
+  };
+
+  const closeDocPanel = () => {
+    setDocPanelVisible(false);
+    window.setTimeout(() => {
+      setDocPanelOpen(false);
+      setDocEditRow(null);
+      setDocForm(EMPTY_DOC);
+    }, DRAWER_ANIM_MS);
+  };
+
+  useEffect(() => {
+    if (!landPanelOpen) return;
+    const frame = requestAnimationFrame(() => setLandPanelVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, [landPanelOpen]);
+
+  useEffect(() => {
+    if (!cropPanelOpen) return;
+    const frame = requestAnimationFrame(() => setCropPanelVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, [cropPanelOpen]);
+
+  useEffect(() => {
+    if (!docPanelOpen) return;
+    const frame = requestAnimationFrame(() => setDocPanelVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, [docPanelOpen]);
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (certDropdownRef.current && !certDropdownRef.current.contains(e.target as Node)) {
@@ -486,12 +537,16 @@ export function Member360Form() {
               {landPanelOpen && (
                 <>
                   <div
-                    className="fixed inset-0 z-[100] bg-black/40"
+                    className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+                      landPanelVisible ? "opacity-100" : "opacity-0"
+                    }`}
                     aria-hidden
-                    onClick={() => { setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }}
+                    onClick={closeLandPanel}
                   />
                   <div
-                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
+                      landPanelVisible ? "translate-x-0" : "translate-x-full"
+                    }`}
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="land-drawer-title"
@@ -499,7 +554,7 @@ export function Member360Form() {
                   >
                   <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
                     <h4 id="land-drawer-title" className="text-sm font-semibold text-white">{landEditRow !== null ? "Edit Land Record" : "New Land Record"}</h4>
-                    <button type="button" onClick={() => { setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close">
+                    <button type="button" onClick={closeLandPanel} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -546,8 +601,8 @@ export function Member360Form() {
                     </button>
                   </div>
                   <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
-                    <button type="button" onClick={() => { setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
-                    <button type="button" onClick={() => { if (landEditRow !== null) { setLandRows((prev) => prev.map((r, i) => i === landEditRow ? { ...landForm } : r)); } else { setLandRows((prev) => [...prev, { ...landForm }]); } setLandPanelOpen(false); setLandEditRow(null); setLandForm(EMPTY_LAND); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
+                    <button type="button" onClick={closeLandPanel} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                    <button type="button" onClick={() => { if (landEditRow !== null) { setLandRows((prev) => prev.map((r, i) => i === landEditRow ? { ...landForm } : r)); } else { setLandRows((prev) => [...prev, { ...landForm }]); } closeLandPanel(); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
                       {landEditRow !== null ? "Update" : "Add Land"}
                     </button>
                   </div>
@@ -605,12 +660,16 @@ export function Member360Form() {
               {cropPanelOpen && (
                 <>
                   <div
-                    className="fixed inset-0 z-[100] bg-black/40"
+                    className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+                      cropPanelVisible ? "opacity-100" : "opacity-0"
+                    }`}
                     aria-hidden
-                    onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }}
+                    onClick={closeCropPanel}
                   />
                   <div
-                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
+                      cropPanelVisible ? "translate-x-0" : "translate-x-full"
+                    }`}
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="crop-drawer-title"
@@ -618,7 +677,7 @@ export function Member360Form() {
                   >
                   <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
                     <h4 id="crop-drawer-title" className="text-sm font-semibold text-white">{cropEditRow !== null ? "Edit Crop Record" : "New Crop Record"}</h4>
-                    <button type="button" onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close"><X className="w-4 h-4" /></button>
+                    <button type="button" onClick={closeCropPanel} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close"><X className="w-4 h-4" /></button>
                   </div>
                   <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-3">
                     <div>
@@ -646,8 +705,8 @@ export function Member360Form() {
                     </div>
                   </div>
                   <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
-                    <button type="button" onClick={() => { setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
-                    <button type="button" onClick={() => { if (cropEditRow !== null) { setCropRows((prev) => prev.map((r, i) => i === cropEditRow ? { ...cropForm } : r)); } else { setCropRows((prev) => [...prev, { ...cropForm }]); } setCropPanelOpen(false); setCropEditRow(null); setCropForm(EMPTY_CROP); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
+                    <button type="button" onClick={closeCropPanel} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                    <button type="button" onClick={() => { if (cropEditRow !== null) { setCropRows((prev) => prev.map((r, i) => i === cropEditRow ? { ...cropForm } : r)); } else { setCropRows((prev) => [...prev, { ...cropForm }]); } closeCropPanel(); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
                       {cropEditRow !== null ? "Update" : "Add Crop"}
                     </button>
                   </div>
@@ -707,12 +766,16 @@ export function Member360Form() {
               {docPanelOpen && (
                 <>
                   <div
-                    className="fixed inset-0 z-[100] bg-black/40"
+                    className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+                      docPanelVisible ? "opacity-100" : "opacity-0"
+                    }`}
                     aria-hidden
-                    onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }}
+                    onClick={closeDocPanel}
                   />
                   <div
-                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
+                      docPanelVisible ? "translate-x-0" : "translate-x-full"
+                    }`}
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="doc-drawer-title"
@@ -720,7 +783,7 @@ export function Member360Form() {
                   >
                   <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
                     <h4 id="doc-drawer-title" className="text-sm font-semibold text-white">{docEditRow !== null ? "Edit Document" : "New Document"}</h4>
-                    <button type="button" onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close"><X className="w-4 h-4" /></button>
+                    <button type="button" onClick={closeDocPanel} className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors" aria-label="Close"><X className="w-4 h-4" /></button>
                   </div>
                   <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-3">
                     <div>
@@ -754,8 +817,8 @@ export function Member360Form() {
                     </div>
                   </div>
                   <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
-                    <button type="button" onClick={() => { setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
-                    <button type="button" onClick={() => { const now = new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }); const entry = { ...docForm, uploadDate: docForm.uploadDate || now }; if (docEditRow !== null) { setDocRows((prev) => prev.map((r, i) => i === docEditRow ? entry : r)); } else { setDocRows((prev) => [...prev, entry]); } setDocPanelOpen(false); setDocEditRow(null); setDocForm(EMPTY_DOC); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
+                    <button type="button" onClick={closeDocPanel} className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                    <button type="button" onClick={() => { const now = new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }); const entry = { ...docForm, uploadDate: docForm.uploadDate || now }; if (docEditRow !== null) { setDocRows((prev) => prev.map((r, i) => i === docEditRow ? entry : r)); } else { setDocRows((prev) => [...prev, entry]); } closeDocPanel(); }} className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium">
                       {docEditRow !== null ? "Update" : "Add Document"}
                     </button>
                   </div>

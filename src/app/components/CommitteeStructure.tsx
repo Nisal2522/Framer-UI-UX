@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Users,
@@ -72,6 +72,7 @@ const committeePeriods = [
 
 export function CommitteeStructure() {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
   const [editingPeriodId, setEditingPeriodId] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState("current");
   const [committeeAssignments, setCommitteeAssignments] = useState<CommitteeAssignmentRow[]>([
@@ -179,9 +180,20 @@ export function CommitteeStructure() {
     setShowAddModal(true);
   };
 
+  const DRAWER_ANIM_MS = 200;
+
+  useEffect(() => {
+    if (!showAddModal) return;
+    const frame = requestAnimationFrame(() => setAddModalVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, [showAddModal]);
+
   const closeAddModal = () => {
-    setShowAddModal(false);
-    setEditingPeriodId(null);
+    setAddModalVisible(false);
+    window.setTimeout(() => {
+      setShowAddModal(false);
+      setEditingPeriodId(null);
+    }, DRAWER_ANIM_MS);
   };
 
   const addAssignmentRow = () => {
@@ -377,12 +389,16 @@ export function CommitteeStructure() {
       {showAddModal && (
         <>
           <div
-            className="fixed inset-0 z-[100] bg-black/40"
+            className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+              addModalVisible ? "opacity-100" : "opacity-0"
+            }`}
             aria-hidden
             onClick={closeAddModal}
           />
           <div
-            className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-2xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+            className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-2xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
+              addModalVisible ? "translate-x-0" : "translate-x-full"
+            }`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="committee-drawer-title"

@@ -8,6 +8,7 @@ interface KnowledgeUploadFormProps {
 export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isVisible, setIsVisible] = useState(false);
+  const ANIM_MS = 240;
 
   const availableTags = [
     "Rice", "Vegetables", "Livestock", "Organic", "Climate Resilience",
@@ -30,7 +31,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
 
   const handleClose = () => {
     setIsVisible(false);
-    window.setTimeout(() => onClose(), 220);
+    window.setTimeout(() => onClose(), ANIM_MS);
   };
 
   return (
@@ -43,7 +44,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
         onClick={handleClose}
       />
       <div
-        className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-2xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-out ${
+        className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-2xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
           isVisible ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"

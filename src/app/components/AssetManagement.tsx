@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Package,
   Plus,
@@ -287,6 +287,7 @@ const statusToSelect = (s: string) => s.toLowerCase();
 export function AssetManagement() {
   const [activeTab, setActiveTab] = useState("inventory");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
   const [editingAsset, setEditingAsset] = useState<null | string>(null);
   const [assetForm, setAssetForm] = useState<AssetForm>(EMPTY_FORM);
   const [existingAttachments, setExistingAttachments] = useState<ExistingAttachment[]>([]);
@@ -301,15 +302,37 @@ export function AssetManagement() {
   const conditionPhotoInputRef = useRef<HTMLInputElement>(null);
   const [usageLogs, setUsageLogs] = useState<UsageLogRow[]>(INITIAL_USAGE_LOGS);
   const [usageDrawerOpen, setUsageDrawerOpen] = useState(false);
+  const [usageDrawerVisible, setUsageDrawerVisible] = useState(false);
   const [usageForm, setUsageForm] = useState<UsageFormState>(EMPTY_USAGE_FORM);
   const [disposalRequests, setDisposalRequests] = useState<DisposalRequestRow[]>(
     INITIAL_DISPOSAL_REQUESTS
   );
   const [disposalDrawerOpen, setDisposalDrawerOpen] = useState(false);
+  const [disposalDrawerVisible, setDisposalDrawerVisible] = useState(false);
   const [disposalForm, setDisposalForm] = useState<DisposalFormState>(EMPTY_DISPOSAL_FORM);
   const [disposalValuationFiles, setDisposalValuationFiles] = useState<File[]>([]);
   const disposalValuationInputRef = useRef<HTMLInputElement>(null);
   const [disposalSearch, setDisposalSearch] = useState("");
+
+  const DRAWER_ANIM_MS = 200;
+
+  useEffect(() => {
+    if (!showAddModal) return;
+    const frame = requestAnimationFrame(() => setAddModalVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, [showAddModal]);
+
+  useEffect(() => {
+    if (!usageDrawerOpen) return;
+    const frame = requestAnimationFrame(() => setUsageDrawerVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, [usageDrawerOpen]);
+
+  useEffect(() => {
+    if (!disposalDrawerOpen) return;
+    const frame = requestAnimationFrame(() => setDisposalDrawerVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, [disposalDrawerOpen]);
 
   const setField = (field: keyof AssetForm, value: string) =>
     setAssetForm((prev) => ({ ...prev, [field]: value }));
@@ -365,12 +388,15 @@ export function AssetManagement() {
   };
 
   const closeAddModal = () => {
-    setShowAddModal(false);
-    setEditingAsset(null);
-    setAssetForm(EMPTY_FORM);
-    setRegisterAssetFiles([]);
-    setExistingAttachments([]);
-    if (registerFileInputRef.current) registerFileInputRef.current.value = "";
+    setAddModalVisible(false);
+    window.setTimeout(() => {
+      setShowAddModal(false);
+      setEditingAsset(null);
+      setAssetForm(EMPTY_FORM);
+      setRegisterAssetFiles([]);
+      setExistingAttachments([]);
+      if (registerFileInputRef.current) registerFileInputRef.current.value = "";
+    }, DRAWER_ANIM_MS);
   };
 
   const openEditModal = (asset: (typeof assets)[number]) => {
@@ -540,8 +566,11 @@ export function AssetManagement() {
   }, [usageHistorySearch, usageLogs]);
 
   const closeUsageDrawer = () => {
-    setUsageDrawerOpen(false);
-    setUsageForm(EMPTY_USAGE_FORM);
+    setUsageDrawerVisible(false);
+    window.setTimeout(() => {
+      setUsageDrawerOpen(false);
+      setUsageForm(EMPTY_USAGE_FORM);
+    }, DRAWER_ANIM_MS);
   };
 
   const submitUsageRecord = () => {
@@ -592,10 +621,13 @@ export function AssetManagement() {
   }, [disposalSearch, disposalRequests]);
 
   const closeDisposalDrawer = () => {
-    setDisposalDrawerOpen(false);
-    setDisposalForm(EMPTY_DISPOSAL_FORM);
-    setDisposalValuationFiles([]);
-    if (disposalValuationInputRef.current) disposalValuationInputRef.current.value = "";
+    setDisposalDrawerVisible(false);
+    window.setTimeout(() => {
+      setDisposalDrawerOpen(false);
+      setDisposalForm(EMPTY_DISPOSAL_FORM);
+      setDisposalValuationFiles([]);
+      if (disposalValuationInputRef.current) disposalValuationInputRef.current.value = "";
+    }, DRAWER_ANIM_MS);
   };
 
   const submitDisposalRequest = () => {
@@ -1056,12 +1088,16 @@ export function AssetManagement() {
               {usageDrawerOpen && (
                 <>
                   <div
-                    className="fixed inset-0 z-[100] bg-black/40"
+                    className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+                      usageDrawerVisible ? "opacity-100" : "opacity-0"
+                    }`}
                     aria-hidden
                     onClick={closeUsageDrawer}
                   />
                   <div
-                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
+                      usageDrawerVisible ? "translate-x-0" : "translate-x-full"
+                    }`}
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="usage-drawer-title"
@@ -1361,12 +1397,16 @@ export function AssetManagement() {
                 {disposalDrawerOpen && (
                   <>
                     <div
-                      className="fixed inset-0 z-[100] bg-black/40"
+                      className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+                        disposalDrawerVisible ? "opacity-100" : "opacity-0"
+                      }`}
                       aria-hidden
                       onClick={closeDisposalDrawer}
                     />
                     <div
-                      className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                      className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
+                        disposalDrawerVisible ? "translate-x-0" : "translate-x-full"
+                      }`}
                       role="dialog"
                       aria-modal="true"
                       aria-labelledby="disposal-drawer-title"
@@ -1497,12 +1537,16 @@ export function AssetManagement() {
       {showAddModal && (
         <>
           <div
-            className="fixed inset-0 z-[100] bg-black/40"
+            className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+              addModalVisible ? "opacity-100" : "opacity-0"
+            }`}
             aria-hidden
             onClick={closeAddModal}
           />
           <div
-            className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-3xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+            className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-3xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-in-out ${
+              addModalVisible ? "translate-x-0" : "translate-x-full"
+            }`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="asset-drawer-title"
