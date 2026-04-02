@@ -619,9 +619,9 @@ export function AssetManagement() {
           justification: disposalForm.justification.trim(),
           disposalMethod: methodLabel,
           submittedDate,
-          status: "Pending",
-        },
-      ];
+      status: "Pending",
+    },
+  ];
     });
     closeDisposalDrawer();
   };
@@ -629,11 +629,11 @@ export function AssetManagement() {
   return (
     <div className="space-y-6 min-w-0 max-w-full">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Asset Management</h1>
-        <p className="text-gray-600 mt-1">
-          Digital lifecycle management for all cooperative assets
-        </p>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Asset Management</h1>
+          <p className="text-gray-600 mt-1">
+            Digital lifecycle management for all cooperative assets
+          </p>
       </div>
 
       {/* Tabs */}
@@ -665,38 +665,12 @@ export function AssetManagement() {
           {/* Asset Inventory Tab */}
           {activeTab === "inventory" && (
             <div className="relative min-h-[420px] space-y-6">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h3 className="text-base font-semibold text-gray-900">Asset Inventory</h3>
-                {!showAddModal && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingAsset(null);
-                      setAssetForm(EMPTY_FORM);
-                      setExistingAttachments([]);
-                      setRegisterAssetFiles([]);
-                      if (registerFileInputRef.current)
-                        registerFileInputRef.current.value = "";
-                      setShowAddModal(true);
-                    }}
-                    className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors text-sm font-medium whitespace-nowrap shrink-0 sm:self-start"
-                  >
-                    <Plus className="w-4 h-4" /> Register New Asset
-                  </button>
-                )}
-              </div>
-
-              {/* Filters and Actions */}
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search assets..."
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                  />
-                </div>
-                <div className="flex gap-2 items-center">
+              {/* Title + search + filter + export + register — single toolbar row */}
+              <div className="flex flex-wrap items-center gap-3 min-w-0">
+                <h3 className="text-base font-semibold text-gray-900 shrink-0">
+                  Asset Inventory
+                </h3>
+                <div className="flex flex-1 flex-wrap items-center justify-end gap-2 min-w-0">
                   <button
                     type="button"
                     className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
@@ -704,6 +678,14 @@ export function AssetManagement() {
                     <Filter className="w-4 h-4" />
                     Filter
                   </button>
+                  <div className="relative w-[220px] sm:w-[260px] min-w-[10rem] max-w-full shrink-0">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Search assets..."
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                    />
+                  </div>
                   <div className="relative">
                     <button
                       type="button"
@@ -741,6 +723,23 @@ export function AssetManagement() {
                       </>
                     )}
                   </div>
+                  {!showAddModal && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingAsset(null);
+                        setAssetForm(EMPTY_FORM);
+                        setExistingAttachments([]);
+                        setRegisterAssetFiles([]);
+                        if (registerFileInputRef.current)
+                          registerFileInputRef.current.value = "";
+                        setShowAddModal(true);
+                      }}
+                      className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors text-sm font-medium whitespace-nowrap"
+                    >
+                      <Plus className="w-4 h-4" /> Register New Asset
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -949,71 +948,108 @@ export function AssetManagement() {
                   </div>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden flex-1">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                          Asset Name
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                          Select Period
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                          User
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                          Duration
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                          Purpose
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {filteredUsageLogs.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan={6}
-                            className="px-4 py-10 text-center text-sm text-gray-400"
-                          >
-                            {usageLogs.length === 0
-                              ? 'No usage records yet. Click "Record Usage" to get started.'
-                              : "No usage records match your search."}
-                          </td>
+                <div className="w-full min-w-0 rounded-2xl border border-gray-200/80 bg-white shadow-[0_4px_24px_-4px_rgba(3,46,161,0.08),0_2px_8px_-2px_rgba(0,0,0,0.06)] overflow-hidden flex-1">
+                  <div className="w-full min-w-0 overflow-hidden">
+                    <table className="w-full table-fixed border-collapse text-left">
+                      <colgroup>
+                        <col className="w-[20%]" />
+                        <col className="w-[18%]" />
+                        <col className="w-[14%]" />
+                        <col className="w-[10%]" />
+                        <col className="w-[30%]" />
+                        <col className="w-[8%]" />
+                      </colgroup>
+                      <thead>
+                        <tr className="bg-gradient-to-r from-[#032EA1]/[0.07] via-[#032EA1]/[0.04] to-transparent border-b border-[#032EA1]/15">
+                          <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                            Asset Name
+                          </th>
+                          <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                            Select Period
+                          </th>
+                          <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                            User
+                          </th>
+                          <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                            Duration
+                          </th>
+                          <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                            Purpose
+                          </th>
+                          <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1] text-center">
+                            Actions
+                          </th>
                         </tr>
-                      ) : (
-                        filteredUsageLogs.map((log) => (
-                          <tr key={log.id} className="hover:bg-blue-50/40 transition-colors">
-                            <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                              {log.assetName}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-700">
-                              {formatUsagePeriodRange(log.periodStart, log.periodEnd)}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-700">{log.user}</td>
-                            <td className="px-4 py-3 text-sm text-gray-700">{log.duration}</td>
-                            <td className="px-4 py-3 text-sm text-gray-700">{log.purpose}</td>
-                            <td className="px-4 py-3">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setUsageLogs((prev) => prev.filter((r) => r.id !== log.id))
-                                }
-                                className="p-1.5 hover:bg-gray-200 rounded transition-colors"
-                                aria-label="Delete usage record"
-                              >
-                                <Trash2 className="w-4 h-4 text-red-600" />
-                              </button>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {filteredUsageLogs.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="px-4 py-10 text-center text-sm text-gray-400"
+                            >
+                              {usageLogs.length === 0
+                                ? 'No usage records yet. Click "Record Usage" to get started.'
+                                : "No usage records match your search."}
                             </td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                        ) : (
+                          filteredUsageLogs.map((log, rowIdx) => (
+                            <tr
+                              key={log.id}
+                              className={`group transition-colors ${
+                                rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60"
+                              } hover:bg-[#032EA1]/[0.04]`}
+                            >
+                              <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                                <span
+                                  className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug line-clamp-2"
+                                  title={log.assetName}
+                                >
+                                  {log.assetName}
+                                </span>
+                              </td>
+                              <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                                <span className="block text-xs text-gray-700 leading-snug line-clamp-2">
+                                  {formatUsagePeriodRange(log.periodStart, log.periodEnd)}
+                                </span>
+                              </td>
+                              <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                                <span className="text-xs text-gray-700 line-clamp-2" title={log.user}>
+                                  {log.user}
+                                </span>
+                              </td>
+                              <td className="px-2 sm:px-3 py-2.5 align-middle whitespace-nowrap">
+                                <span className="text-xs text-gray-700">{log.duration}</span>
+                              </td>
+                              <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                                <span
+                                  className="block text-xs text-gray-700 leading-snug line-clamp-2"
+                                  title={log.purpose}
+                                >
+                                  {log.purpose}
+                                </span>
+                              </td>
+                              <td className="px-2 sm:px-3 py-2.5 align-middle text-center">
+                                <div className="flex items-center justify-center">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setUsageLogs((prev) => prev.filter((r) => r.id !== log.id))
+                                    }
+                                    className="p-1.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                    aria-label="Delete usage record"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
@@ -1033,8 +1069,8 @@ export function AssetManagement() {
                   >
                     <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
                       <h4 id="usage-drawer-title" className="text-sm font-semibold text-white">
-                        Record Asset Usage
-                      </h4>
+                  Record Asset Usage
+                </h4>
                       <button
                         type="button"
                         onClick={closeUsageDrawer}
@@ -1045,10 +1081,10 @@ export function AssetManagement() {
                       </button>
                     </div>
                     <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-3">
-                      <div>
+                  <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Asset <span className="text-red-500">*</span>
-                        </label>
+                      Asset <span className="text-red-500">*</span>
+                    </label>
                         <select
                           value={usageForm.assetId}
                           onChange={(e) =>
@@ -1056,85 +1092,85 @@ export function AssetManagement() {
                           }
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
                         >
-                          <option value="">Select asset</option>
-                          {assets.map((asset) => (
-                            <option key={asset.id} value={asset.id}>
-                              {asset.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
+                      <option value="">Select asset</option>
+                      {assets.map((asset) => (
+                        <option key={asset.id} value={asset.id}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Select Period <span className="text-red-500">*</span>
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <input
-                            type="date"
-                            aria-label="Period start"
+                      Select Period <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="date"
+                        aria-label="Period start"
                             value={usageForm.periodStart}
                             onChange={(e) =>
                               setUsageForm((f) => ({ ...f, periodStart: e.target.value }))
                             }
                             className="w-full min-w-0 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
-                          />
-                          <input
-                            type="date"
-                            aria-label="Period end"
+                      />
+                      <input
+                        type="date"
+                        aria-label="Period end"
                             value={usageForm.periodEnd}
                             onChange={(e) =>
                               setUsageForm((f) => ({ ...f, periodEnd: e.target.value }))
                             }
                             className="w-full min-w-0 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
-                          />
-                        </div>
-                      </div>
-                      <div>
+                      />
+                    </div>
+                  </div>
+                  <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">
-                          User (Member Name or Group) <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Enter member name or group"
+                      User (Member Name or Group) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter member name or group"
                           value={usageForm.user}
                           onChange={(e) =>
                             setUsageForm((f) => ({ ...f, user: e.target.value }))
                           }
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
-                        />
-                      </div>
-                      <div>
+                    />
+                  </div>
+                  <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Duration <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g., 4 hours"
+                      Duration <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., 4 hours"
                           value={usageForm.duration}
                           onChange={(e) =>
                             setUsageForm((f) => ({ ...f, duration: e.target.value }))
                           }
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
-                        />
-                      </div>
+                    />
+                  </div>
                       <div>
                         <label className="block text-xs font-medium text-gray-600 mb-1">
-                          Purpose <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                          rows={3}
-                          placeholder="Describe the purpose of asset use..."
+                      Purpose <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Describe the purpose of asset use..."
                           value={usageForm.purpose}
                           onChange={(e) =>
                             setUsageForm((f) => ({ ...f, purpose: e.target.value }))
                           }
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none bg-white"
                         />
-                      </div>
-                    </div>
+                  </div>
+                </div>
                     <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
-                      <button
-                        type="button"
+                  <button
+                    type="button"
                         onClick={closeUsageDrawer}
                         className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
                       >
@@ -1144,11 +1180,11 @@ export function AssetManagement() {
                         type="button"
                         onClick={submitUsageRecord}
                         className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
-                      >
-                        Record Usage
-                      </button>
-                    </div>
-                  </div>
+                  >
+                    Record Usage
+                  </button>
+                </div>
+              </div>
                 </>
               )}
             </div>
@@ -1169,22 +1205,31 @@ export function AssetManagement() {
 
               <div className="relative min-h-[420px]">
                 <div className="flex flex-col w-full">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pb-3">
-                    <h3 className="text-base font-semibold text-gray-900">
+                  <div className="flex flex-wrap items-center gap-3 min-w-0 pb-3">
+                    <h3 className="text-base font-semibold text-gray-900 shrink-0">
                       Submitted Disposal Requests
                     </h3>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 w-full sm:w-auto">
-                      <div className="relative w-full sm:max-w-xs">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                        <input
-                          type="search"
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <Filter className="w-4 h-4" />
+                        Filter
+                      </button>
+                      <div className="relative w-[220px] sm:w-[260px] min-w-[10rem] max-w-full shrink-0">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                    <input
+                      type="search"
                           value={disposalSearch}
                           onChange={(e) => setDisposalSearch(e.target.value)}
                           placeholder="Search requests..."
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                          className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                           aria-label="Search disposal requests"
-                        />
-                      </div>
+                    />
+                  </div>
+                </div>
+                    <div className="flex flex-1 flex-wrap items-center justify-end gap-2 min-w-0">
                       {!disposalDrawerOpen && (
                         <button
                           type="button"
@@ -1195,7 +1240,7 @@ export function AssetManagement() {
                               disposalValuationInputRef.current.value = "";
                             setDisposalDrawerOpen(true);
                           }}
-                          className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors text-sm font-medium whitespace-nowrap shrink-0"
+                          className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors text-sm font-medium whitespace-nowrap"
                         >
                           <Plus className="w-4 h-4" /> New Disposal Request
                         </button>
@@ -1203,92 +1248,117 @@ export function AssetManagement() {
                     </div>
                   </div>
 
-                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden flex-1">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                            Request ID
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                            Asset Name
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                            Disposal Method
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                            Submitted Date
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                            Status
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {filteredDisposalRequests.length === 0 ? (
-                          <tr>
-                            <td
-                              colSpan={6}
-                              className="px-4 py-10 text-center text-sm text-gray-400"
-                            >
-                              {disposalRequests.length === 0
-                                ? 'No disposal requests yet. Click "New Disposal Request" to get started.'
-                                : "No requests match your search."}
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredDisposalRequests.map((request) => (
-                            <tr
-                              key={request.id}
-                              className="hover:bg-blue-50/40 transition-colors"
-                            >
-                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                {request.id}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-900">
-                                {request.assetName}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-700">
-                                {request.disposalMethod}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-700 tabular-nums">
-                                {request.submittedDate}
-                              </td>
-                              <td className="px-4 py-3">
-                                {request.status === "Approved" ? (
-                                  <span className="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 bg-emerald-500 text-white rounded-full text-[10px] sm:text-xs font-semibold shadow-sm">
-                                    <CheckCircle className="w-3 h-3 shrink-0" aria-hidden />
-                                    <span className="truncate">Approved</span>
+                  <div className="w-full min-w-0 rounded-2xl border border-gray-200/80 bg-white shadow-[0_4px_24px_-4px_rgba(3,46,161,0.08),0_2px_8px_-2px_rgba(0,0,0,0.06)] overflow-hidden flex-1">
+                    <div className="w-full min-w-0 overflow-hidden">
+                      <table className="w-full table-fixed border-collapse text-left">
+                        <colgroup>
+                          <col className="w-[11%]" />
+                          <col className="w-[24%]" />
+                          <col className="w-[14%]" />
+                          <col className="w-[12%]" />
+                          <col className="w-[15%]" />
+                          <col className="w-[10%]" />
+                        </colgroup>
+                        <thead>
+                          <tr className="bg-gradient-to-r from-[#032EA1]/[0.07] via-[#032EA1]/[0.04] to-transparent border-b border-[#032EA1]/15">
+                            <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                              Request ID
+                            </th>
+                            <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                        Asset Name
+                      </th>
+                            <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                              Disposal Method
+                      </th>
+                            <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                              Submitted Date
+                      </th>
+                            <th className="px-2 sm:px-3 py-2.5 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                              Status
+                      </th>
+                            <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1] text-center">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {filteredDisposalRequests.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={6}
+                                className="px-4 py-10 text-center text-sm text-gray-400"
+                        >
+                                {disposalRequests.length === 0
+                                  ? 'No disposal requests yet. Click "New Disposal Request" to get started.'
+                                  : "No requests match your search."}
+                        </td>
+                      </tr>
+                    ) : (
+                            filteredDisposalRequests.map((request, rowIdx) => (
+                              <tr
+                                key={request.id}
+                                className={`group transition-colors ${
+                                  rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60"
+                                } hover:bg-[#032EA1]/[0.04]`}
+                              >
+                                <td className="px-2 sm:px-3 py-2.5 align-middle whitespace-nowrap">
+                                  <span className="inline-flex font-mono text-[10px] sm:text-xs font-semibold text-[#032EA1] bg-[#032EA1]/8 px-2 py-0.5 rounded-md border border-[#032EA1]/10 whitespace-nowrap">
+                                    {request.id}
                                   </span>
-                                ) : (
+                        </td>
+                                <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
                                   <span
-                                    className="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 bg-amber-100 text-amber-900 rounded-full text-[10px] sm:text-xs font-semibold border border-amber-200 max-w-full"
-                                    title={request.status}
+                                    className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug line-clamp-2"
+                                    title={request.assetName}
                                   >
-                                    <Clock className="w-3 h-3 shrink-0" aria-hidden />
-                                    <span className="truncate">{request.status}</span>
+                                    {request.assetName}
                                   </span>
-                                )}
-                              </td>
-                              <td className="px-4 py-3">
-                                <button
-                                  type="button"
-                                  className="p-1.5 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
-                                  aria-label="View request"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                        </td>
+                                <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                                  <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-[11px] font-medium text-gray-800 border border-gray-200/90 line-clamp-2">
+                                    {request.disposalMethod}
+                                  </span>
+                        </td>
+                                <td className="px-2 sm:px-3 py-2.5 align-middle whitespace-nowrap">
+                                  <span className="text-xs text-gray-700 tabular-nums">
+                                    {request.submittedDate}
+                                  </span>
+                        </td>
+                                <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                                  {request.status === "Approved" ? (
+                                    <span className="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 bg-emerald-500 text-white rounded-full text-[10px] sm:text-xs font-semibold shadow-sm">
+                                      <CheckCircle className="w-3 h-3 shrink-0" aria-hidden />
+                                      <span className="truncate">Approved</span>
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className="inline-flex items-center gap-0.5 px-1.5 sm:px-2 py-0.5 bg-amber-100 text-amber-900 rounded-full text-[10px] sm:text-xs font-semibold border border-amber-200 max-w-full"
+                                      title={request.status}
+                                    >
+                                      <Clock className="w-3 h-3 shrink-0" aria-hidden />
+                                      <span className="truncate">{request.status}</span>
+                                    </span>
+                                  )}
+                        </td>
+                                <td className="px-2 sm:px-3 py-2.5 align-middle text-center">
+                                  <div className="flex items-center justify-center">
+                                    <button
+                                      type="button"
+                                      className="p-1.5 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                                      aria-label="View request"
+                                    >
+                                      <Eye className="w-4 h-4" />
+                          </button>
+                                  </div>
+                        </td>
+                      </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
                 </div>
+              </div>
 
                 {disposalDrawerOpen && (
                   <>
@@ -1309,8 +1379,8 @@ export function AssetManagement() {
                           id="disposal-drawer-title"
                           className="text-sm font-semibold text-white"
                         >
-                          Submit Disposal Request
-                        </h4>
+                  Submit Disposal Request
+                </h4>
                         <button
                           type="button"
                           onClick={closeDisposalDrawer}
@@ -1323,8 +1393,8 @@ export function AssetManagement() {
                       <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-3">
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Asset <span className="text-red-500">*</span>
-                          </label>
+                      Asset <span className="text-red-500">*</span>
+                    </label>
                           <select
                             value={disposalForm.assetId}
                             onChange={(e) =>
@@ -1332,32 +1402,32 @@ export function AssetManagement() {
                             }
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
                           >
-                            <option value="">Select asset for disposal</option>
-                            {assets.map((asset) => (
-                              <option key={asset.id} value={asset.id}>
-                                {asset.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                      <option value="">Select asset for disposal</option>
+                      {assets.map((asset) => (
+                        <option key={asset.id} value={asset.id}>
+                          {asset.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Justification for Disposal <span className="text-red-500">*</span>
-                          </label>
-                          <textarea
-                            rows={4}
-                            placeholder="Explain why this asset needs to be disposed..."
+                      Justification for Disposal <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      rows={4}
+                      placeholder="Explain why this asset needs to be disposed..."
                             value={disposalForm.justification}
                             onChange={(e) =>
                               setDisposalForm((f) => ({ ...f, justification: e.target.value }))
                             }
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none bg-white"
                           />
-                        </div>
-                        <div>
+                  </div>
+                  <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Proposed Disposal Method <span className="text-red-500">*</span>
-                          </label>
+                      Proposed Disposal Method <span className="text-red-500">*</span>
+                    </label>
                           <select
                             value={disposalForm.disposalMethod}
                             onChange={(e) =>
@@ -1368,18 +1438,18 @@ export function AssetManagement() {
                             }
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
                           >
-                            <option value="">Select disposal method</option>
+                      <option value="">Select disposal method</option>
                             {DISPOSAL_METHOD_OPTIONS.map((opt) => (
                               <option key={opt.value} value={opt.value}>
                                 {opt.label}
                               </option>
                             ))}
-                          </select>
-                        </div>
-                        <div>
+                    </select>
+                  </div>
+                  <div>
                           <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Upload Valuation Document (Optional)
-                          </label>
+                      Upload Valuation Document (Optional)
+                    </label>
                           <input
                             ref={disposalValuationInputRef}
                             type="file"
@@ -1395,14 +1465,14 @@ export function AssetManagement() {
                             onClick={() => disposalValuationInputRef.current?.click()}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 bg-white"
                           >
-                            <Upload className="w-4 h-4" />
+                      <Upload className="w-4 h-4" />
                             {disposalValuationFiles[0]?.name ?? "Choose File"}
-                          </button>
-                        </div>
-                      </div>
+                    </button>
+                  </div>
+                </div>
                       <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
-                        <button
-                          type="button"
+                  <button
+                    type="button"
                           onClick={closeDisposalDrawer}
                           className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
                         >
@@ -1412,11 +1482,11 @@ export function AssetManagement() {
                           type="button"
                           onClick={submitDisposalRequest}
                           className="px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
-                        >
-                          Submit Disposal Request
-                        </button>
-                      </div>
-                    </div>
+                  >
+                    Submit Disposal Request
+                  </button>
+                </div>
+              </div>
                   </>
                 )}
               </div>

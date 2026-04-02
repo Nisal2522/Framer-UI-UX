@@ -11,6 +11,9 @@ import {
   UserCircle,
   TrendingUp,
   CheckCircle,
+  Activity,
+  UserPlus,
+  MapPinned,
 } from "lucide-react";
 import { farmerMemberPortraitUrl } from "../utils/committeePortraits";
 
@@ -157,39 +160,74 @@ export function Members() {
         </button>
       </div>
 
-      {/* Demographics Banner */}
-      <div className="bg-gradient-to-br from-[#032EA1] to-[#021c5e] rounded-xl p-4 shadow-lg text-white">
-        <h3 className="text-base font-semibold mb-2.5">Membership Overview</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div>
-            <p className="text-xs opacity-90">Total Members</p>
-            <p className="text-2xl font-bold mt-0.5">{totalMembers}</p>
+      {/* Member stats strip — stat card style (matches AC Dashboard) */}
+      <div className="rounded-xl bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-4 text-white shadow-lg ring-1 ring-white/10 sm:p-5">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-3">
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+                Total Members
+              </p>
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white">
+                <Activity className="h-3.5 w-3.5 text-blue-600" aria-hidden />
+              </div>
+            </div>
+            <p className="text-xl font-bold tabular-nums sm:text-2xl">{totalMembers}</p>
           </div>
-          <div>
-            <TrendingUp className="w-5 h-5 text-purple-300" />
-            <p className="text-xs opacity-90 mt-1">New This Year</p>
-            <p className="text-2xl font-bold mt-0.5">49</p>
+
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+                New This Year
+              </p>
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white">
+                <UserPlus className="h-3.5 w-3.5 text-emerald-500" aria-hidden />
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xl font-bold tabular-nums sm:text-2xl">49</span>
+              <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-400/20 px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-emerald-100 ring-1 ring-emerald-300/30 sm:text-xs">
+                <TrendingUp className="h-3 w-3 shrink-0" strokeWidth={2.5} aria-hidden />
+                +12.3%
+              </span>
+            </div>
           </div>
-          <div>
-            <p className="text-xs opacity-90">Gender ratio</p>
-            <ul className="text-[11px] opacity-90 mt-1.5 space-y-0.5">
+
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+                Gender ratio
+              </p>
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white">
+                <Users className="h-3.5 w-3.5 text-indigo-600" aria-hidden />
+              </div>
+            </div>
+            <ul className="space-y-0.5 text-[10px] leading-snug text-white/80 sm:text-[11px]">
               <li>
-                <span className="font-medium">Male:</span> {maleCount} (
+                <span className="font-semibold text-white">Male:</span> {maleCount} (
                 {((maleCount / totalMembers) * 100).toFixed(1)}%)
               </li>
               <li>
-                <span className="font-medium">Female:</span> {femaleCount} (
+                <span className="font-semibold text-white">Female:</span> {femaleCount} (
                 {((femaleCount / totalMembers) * 100).toFixed(1)}%)
               </li>
               <li>
-                <span className="font-medium">Other:</span> {OTHER_COUNT} (
+                <span className="font-semibold text-white">Other:</span> {OTHER_COUNT} (
                 {((OTHER_COUNT / totalMembers) * 100).toFixed(1)}%)
               </li>
             </ul>
           </div>
-          <div>
-            <p className="text-xs opacity-90">Total Land Area</p>
-            <p className="text-2xl font-bold mt-0.5">{avgLandArea} Ha</p>
+
+          <div className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">
+                Total Land Area
+              </p>
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white">
+                <MapPinned className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+              </div>
+            </div>
+            <p className="text-xl font-bold tabular-nums sm:text-2xl">{avgLandArea} Ha</p>
           </div>
         </div>
       </div>

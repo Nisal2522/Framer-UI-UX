@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Mail,
   Phone,
@@ -10,16 +10,69 @@ import {
   FileText,
   Upload,
   Trash2,
+  X,
 } from "lucide-react";
 import { CooperativeLocationMap } from "./CooperativeLocationMap";
 
 /** Public asset; must use Vite base URL so GitHub Pages (`/repo/`) resolves correctly. */
 const COOPERATIVE_LOGO_URL = `${import.meta.env.BASE_URL}cooperative-logo.svg`;
 
+type DossierDocRow = {
+  id: string;
+  name: string;
+  uploadDate: string;
+  fileSize: string;
+};
+
+function formatDossierFileSize(bytes: number): string {
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
 export function ACProfile() {
   const [activeTab, setActiveTab] = useState("cooperative-info");
   const [isEditing, setIsEditing] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
+  const [dossierDocs, setDossierDocs] = useState<DossierDocRow[]>([
+    {
+      id: "d1",
+      name: "Constitution",
+      uploadDate: "Mar 15, 2024",
+      fileSize: "2.3 MB",
+    },
+  ]);
+  const [dossierDrawerOpen, setDossierDrawerOpen] = useState(false);
+  const [dossierDocName, setDossierDocName] = useState("");
+  const [dossierSelectedFile, setDossierSelectedFile] = useState<File | null>(null);
+  const dossierFileInputRef = useRef<HTMLInputElement>(null);
+
+  const closeDossierDrawer = () => {
+    setDossierDrawerOpen(false);
+    setDossierDocName("");
+    setDossierSelectedFile(null);
+    if (dossierFileInputRef.current) dossierFileInputRef.current.value = "";
+  };
+
+  const submitDossierDocument = () => {
+    if (!dossierDocName.trim() || !dossierSelectedFile) return;
+    const maxBytes = 10 * 1024 * 1024;
+    if (dossierSelectedFile.size > maxBytes) return;
+    const uploadDate = new Date().toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    setDossierDocs((prev) => [
+      ...prev,
+      {
+        id: `d-${Date.now()}`,
+        name: dossierDocName.trim(),
+        uploadDate,
+        fileSize: formatDossierFileSize(dossierSelectedFile.size),
+      },
+    ]);
+    closeDossierDrawer();
+  };
 
   return (
     <div className="space-y-6">
@@ -543,39 +596,24 @@ export function ACProfile() {
 
           {/* Dossier Tab */}
           {activeTab === "dossier" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Document Dossier</h3>
-
-              {/* Upload Form */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Document Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g., Land Certificate"
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
-                    />
-                  </div>
-                </div>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#032EA1] transition-colors cursor-pointer">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-sm font-medium text-gray-700 mb-1">
-                    Drag and drop to upload here or select file
-                  </p>
-                  <p className="text-xs text-gray-500">PDF, DOC, DOCX, JPG, PNG (Max 10MB)</p>
-                </div>
-                <div className="pt-4 flex justify-end">
+            <div className="relative min-h-[420px] space-y-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Document Dossier</h3>
+                {!dossierDrawerOpen && (
                   <button
                     type="button"
-                    className="flex items-center gap-2 px-6 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
+                    onClick={() => {
+                      setDossierDocName("");
+                      setDossierSelectedFile(null);
+                      if (dossierFileInputRef.current) dossierFileInputRef.current.value = "";
+                      setDossierDrawerOpen(true);
+                    }}
+                    className="flex items-center justify-center gap-2 px-3.5 py-1.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors text-sm font-medium whitespace-nowrap shrink-0"
                   >
                     <Plus className="w-4 h-4" />
                     Add Document
                   </button>
-                </div>
+                )}
               </div>
 
               {/* Document List */}
@@ -583,41 +621,184 @@ export function ACProfile() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                         Document Name
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                         Upload Date
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                         File Size
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    <tr className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-700">
-                        Constitution
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">Mar 15, 2024</td>
-                      <td className="px-4 py-3 text-sm text-gray-700">2.3 MB</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button className="p-1 hover:bg-gray-200 rounded">
-                            <FileText className="w-4 h-4 text-gray-600" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-200 rounded">
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                  <tbody className="divide-y divide-gray-100">
+                    {dossierDocs.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="px-4 py-10 text-center text-sm text-gray-400"
+                        >
+                          No documents yet. Click &quot;Add Document&quot; to upload.
+                        </td>
+                      </tr>
+                    ) : (
+                      dossierDocs.map((doc) => (
+                        <tr key={doc.id} className="hover:bg-blue-50/40 transition-colors">
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                            {doc.name}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-700">{doc.uploadDate}</td>
+                          <td className="px-4 py-3 text-sm text-gray-700">{doc.fileSize}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                className="p-1 hover:bg-gray-200 rounded"
+                                aria-label="View document"
+                              >
+                                <FileText className="w-4 h-4 text-gray-600" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setDossierDocs((prev) => prev.filter((d) => d.id !== doc.id))
+                                }
+                                className="p-1 hover:bg-gray-200 rounded"
+                                aria-label="Remove document"
+                              >
+                                <Trash2 className="w-4 h-4 text-red-600" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
+
+              {/* Add document — overlay drawer (same pattern as Usage History) */}
+              {dossierDrawerOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-[100] bg-black/40"
+                    aria-hidden
+                    onClick={closeDossierDrawer}
+                  />
+                  <div
+                    className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-md flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="dossier-drawer-title"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
+                      <h2
+                        id="dossier-drawer-title"
+                        className="text-sm font-semibold text-white"
+                      >
+                        Add Document
+                      </h2>
+                      <button
+                        type="button"
+                        onClick={closeDossierDrawer}
+                        className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors"
+                        aria-label="Close"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Document Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g., Land Certificate"
+                          value={dossierDocName}
+                          onChange={(e) => setDossierDocName(e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                        />
+                      </div>
+
+                      <input
+                        ref={dossierFileInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,image/jpeg,image/png,.jpg,.png"
+                        className="sr-only"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] ?? null;
+                          setDossierSelectedFile(f);
+                        }}
+                      />
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            dossierFileInputRef.current?.click();
+                          }
+                        }}
+                        onClick={() => dossierFileInputRef.current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const f = e.dataTransfer.files?.[0];
+                          if (f) setDossierSelectedFile(f);
+                        }}
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#032EA1] transition-colors cursor-pointer bg-white"
+                      >
+                        <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                        <p className="text-sm font-medium text-gray-700 mb-1">
+                          Drag and drop to upload here or select file
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PDF, DOC, DOCX, JPG, PNG (Max 10MB)
+                        </p>
+                        {dossierSelectedFile && (
+                          <p className="text-xs text-[#032EA1] font-medium mt-3 truncate px-2">
+                            {dossierSelectedFile.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="px-5 py-3 border-t border-gray-200 bg-white flex justify-end gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={closeDossierDrawer}
+                        className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={submitDossierDocument}
+                        disabled={
+                          !dossierDocName.trim() ||
+                          !dossierSelectedFile ||
+                          dossierSelectedFile.size > 10 * 1024 * 1024
+                        }
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Document
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
