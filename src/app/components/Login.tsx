@@ -40,7 +40,7 @@ export function Login() {
         <div className="relative z-10 flex flex-col justify-start pt-8 px-12 text-white">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+              <div className="bg-white/20 p-3 rounded-lg">
                 <Sprout className="w-10 h-10 text-white" />
               </div>
               <div>
@@ -51,7 +51,7 @@ export function Login() {
           </div>
           
           <div className="space-y-16 max-w-md">
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+            <div className="bg-white/10 p-6 rounded-lg border border-white/20">
               <div className="flex items-start gap-3">
                 <Users className="w-6 h-6 text-blue-200 mt-1 flex-shrink-0" />
                 <div>
@@ -63,7 +63,7 @@ export function Login() {
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg border border-white/20">
+            <div className="bg-white/10 p-6 rounded-lg border border-white/20">
               <div className="flex items-start gap-3">
                 <Shield className="w-6 h-6 text-blue-200 mt-1 flex-shrink-0" />
                 <div>
@@ -92,7 +92,7 @@ export function Login() {
             </div>
           </div>
 
-          <div className="border border-gray-200 shadow-lg bg-white/95 backdrop-blur-sm rounded-lg">
+          <div className="border border-gray-200 shadow-lg bg-white/95 rounded-lg">
             <div className="space-y-1 p-6 pb-4">
               <button
                 type="button"
