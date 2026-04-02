@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Upload, FileText, Tag } from "lucide-react";
 
 interface KnowledgeUploadFormProps {
@@ -7,6 +7,7 @@ interface KnowledgeUploadFormProps {
 
 export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isVisible, setIsVisible] = useState(false);
 
   const availableTags = [
     "Rice", "Vegetables", "Livestock", "Organic", "Climate Resilience",
@@ -22,15 +23,29 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
     }
   };
 
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setIsVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    window.setTimeout(() => onClose(), 220);
+  };
+
   return (
     <>
       <div
-        className="fixed inset-0 z-[100] bg-black/40"
+        className={`fixed inset-0 z-[100] bg-black/40 transition-opacity duration-200 ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
         aria-hidden
-        onClick={onClose}
+        onClick={handleClose}
       />
       <div
-        className="fixed inset-y-0 right-0 z-[110] flex w-full max-w-2xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl"
+        className={`fixed inset-y-0 right-0 z-[110] flex w-full max-w-2xl flex-col border-l border-gray-200 bg-gray-50 shadow-2xl transition-transform duration-200 ease-out ${
+          isVisible ? "translate-x-0" : "translate-x-full"
+        }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="km-upload-drawer-title"
@@ -42,7 +57,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1.5 rounded-lg hover:bg-white/15 text-white/90 transition-colors"
             aria-label="Close"
           >
@@ -361,7 +376,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
         <div className="px-5 py-3 border-t border-gray-200 bg-white flex flex-wrap items-center justify-between gap-2 shrink-0">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
           >
             Cancel

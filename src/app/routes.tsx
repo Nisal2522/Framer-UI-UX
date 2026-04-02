@@ -11,6 +11,12 @@ import { KnowledgeManagement } from "./components/KnowledgeManagement";
 import { Reports } from "./components/Reports";
 import { Login } from "./components/Login";
 import { LandingPage } from "./components/LandingPage";
+import { NationalDashboard } from "./components/admin/NationalDashboard";
+import { ProvincialDashboard } from "./components/admin/ProvincialDashboard";
+import { CommuneVerification } from "./components/admin/CommuneVerification";
+import { AdminBusinessPlanWorkflow } from "./components/admin/AdminBusinessPlanWorkflow";
+import { ProgressReportingAdmin } from "./components/admin/ProgressReportingAdmin";
+import { AdminReportingDashboard } from "./components/admin/AdminReportingDashboard";
 
 const routes = [
   {
@@ -36,6 +42,13 @@ const routes = [
       { path: "assets", Component: AssetManagement },
       { path: "knowledge", Component: KnowledgeManagement },
       { path: "reports", Component: Reports },
+      { path: "admin", Component: NationalDashboard },
+      { path: "admin/provincial", Component: ProvincialDashboard },
+      { path: "admin/commune-verification", Component: CommuneVerification },
+      { path: "admin/business-plans", Component: AdminBusinessPlanWorkflow },
+      { path: "admin/progress-reporting", Component: ProgressReportingAdmin },
+      { path: "admin/knowledge", Component: KnowledgeManagement },
+      { path: "admin/reporting", Component: AdminReportingDashboard },
     ],
   },
 ];

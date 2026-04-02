@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { Sprout, Users, Shield, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import backgroundImage from "../../assets/background.png";
-import faoLogo from "../../assets/fao.jpg";
+import { setPortalUser } from "../auth/portalUser";
 
 export function Login() {
   const navigate = useNavigate();
@@ -14,8 +14,13 @@ export function Login() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt:", { email, userType, rememberMe });
-    navigate("/dashboard");
+    const role = userType === "admin" ? "government_admin" : "cooperative";
+    setPortalUser({ role, email: email.trim() || (role === "government_admin" ? "admin@maff.gov.kh" : "user@coop.local") });
+    if (userType === "admin") {
+      navigate("/dashboard/admin");
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   return (

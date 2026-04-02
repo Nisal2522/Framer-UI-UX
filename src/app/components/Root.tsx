@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from "react-router";
+import { Outlet, NavLink, useLocation, useNavigate } from "react-router";
 import {
   LayoutDashboard,
   Building2,
@@ -16,9 +16,16 @@ import {
   ChevronRight,
   ChevronDown,
   Sprout,
+  MapPinned,
+  Shield,
+  UserCheck,
+  Activity,
+  BarChart3,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ChatbotWidget } from "./ChatbotWidget";
+import { clearPortalUser, getPortalUser, isGovernmentAdmin } from "../auth/portalUser";
+import { useNotifications } from "../context/NotificationContext";
 type LangCode = "EN" | "KH" | "FR" | "ZH" | "TH";
 
 const LANGUAGE_OPTIONS: { code: LangCode; label: string; native: string }[] = [
@@ -29,7 +36,7 @@ const LANGUAGE_OPTIONS: { code: LangCode; label: string; native: string }[] = [
   { code: "TH", label: "Thai", native: "ภาษาไทย" },
 ];
 
-const navigation = [
+const cooperativeNavigation = [
   { name: "AC Dashboard", path: "/dashboard", icon: LayoutDashboard },
   { name: "AC Profile", path: "/dashboard/ac-profile", icon: Building2 },
   { name: "Committee Structure", path: "/dashboard/committee-structure", icon: UserCircle },
@@ -37,7 +44,16 @@ const navigation = [
   { name: "Assets", path: "/dashboard/assets", icon: Package },
   { name: "Business Plans", path: "/dashboard/business-plans", icon: FileText },
   { name: "Knowledge Hub", path: "/dashboard/knowledge", icon: BookOpen },
-  // { name: "Reporting and Analytics", path: "/dashboard/reports", icon: BarChart3 },
+];
+
+const adminNavigation = [
+  { name: "National Dashboard", path: "/dashboard/admin", icon: LayoutDashboard },
+  { name: "Provincial Dashboard", path: "/dashboard/admin/provincial", icon: MapPinned },
+  { name: "Commune Verification", path: "/dashboard/admin/commune-verification", icon: UserCheck },
+  { name: "Business Plan Workflow", path: "/dashboard/admin/business-plans", icon: FileText },
+  { name: "Progress Reporting", path: "/dashboard/admin/progress-reporting", icon: Activity },
+  { name: "Knowledge Hub", path: "/dashboard/admin/knowledge", icon: BookOpen },
+  { name: "GESI / Reporting", path: "/dashboard/admin/reporting", icon: BarChart3 },
 ];
 
 const profileImageUrl =
@@ -45,11 +61,41 @@ const profileImageUrl =
 
 export function Root() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { notifications, unreadCount, markAllRead } = useNotifications();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<LangCode>("EN");
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const portalUser = getPortalUser();
+  const admin = isGovernmentAdmin();
+  const navigation = admin ? adminNavigation : cooperativeNavigation;
+
+  useEffect(() => {
+    if (admin && location.pathname.startsWith("/dashboard/") && !location.pathname.startsWith("/dashboard/admin")) {
+      navigate("/dashboard/admin", { replace: true });
+    }
+  }, [admin, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!admin && location.pathname.startsWith("/dashboard/admin")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [admin, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!notifOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const el = notifRef.current;
+      if (el && !el.contains(e.target as Node)) setNotifOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [notifOpen]);
 
   useEffect(() => {
     if (!languageMenuOpen) return;
@@ -113,7 +159,7 @@ export function Root() {
               <li key={item.name}>
                 <NavLink
                   to={item.path}
-                  end={item.path === "/dashboard"}
+                  end={admin ? item.path === "/dashboard/admin" : item.path === "/dashboard"}
                   title={desktopSidebarCollapsed ? item.name : undefined}
                   className={({ isActive }) =>
                     `flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200 px-2.5 py-2.5 ${
@@ -141,11 +187,11 @@ export function Root() {
         <div className="px-2.5 py-3 border-t border-gray-200">
           <div
             className="flex items-center gap-3 rounded-lg hover:bg-blue-50 cursor-pointer px-2 py-2 overflow-hidden"
-            title={desktopSidebarCollapsed ? "AC User - President" : undefined}
+            title={desktopSidebarCollapsed ? (admin ? "Government Admin" : "AC User - President") : undefined}
           >
             <img
               src={profileImageUrl}
-              alt="AC User profile"
+              alt="User profile"
               className="w-8 h-8 shrink-0 rounded-full object-cover border border-gray-200"
               loading="lazy"
             />
@@ -154,8 +200,12 @@ export function Root() {
                 desktopSidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
               }`}
             >
-              <p className="text-sm font-medium text-gray-900 truncate whitespace-nowrap">AC User</p>
-              <p className="text-xs text-gray-500 truncate whitespace-nowrap">President</p>
+              <p className="text-sm font-medium text-gray-900 truncate whitespace-nowrap">
+                {admin ? "Government Admin" : "AC User"}
+              </p>
+              <p className="text-xs text-gray-500 truncate whitespace-nowrap">
+                {admin ? portalUser?.email ?? "Ministry / FAO" : "President"}
+              </p>
             </div>
           </div>
         </div>
@@ -199,7 +249,7 @@ export function Root() {
                   <li key={item.name}>
                     <NavLink
                       to={item.path}
-                      end={item.path === "/dashboard"}
+                      end={admin ? item.path === "/dashboard/admin" : item.path === "/dashboard"}
                       onClick={() => setSidebarOpen(false)}
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -228,10 +278,10 @@ export function Root() {
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    AC User
+                    {admin ? "Government Admin" : "AC User"}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    President
+                    {admin ? portalUser?.email ?? "Ministry / FAO" : "President"}
                   </p>
                 </div>
               </div>
@@ -256,12 +306,20 @@ export function Root() {
 
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex items-center gap-3">
-                  <Building2 className="w-6 h-6 text-[#032EA1]" />
+                  {admin ? (
+                    <Shield className="w-6 h-6 text-[#032EA1]" />
+                  ) : (
+                    <Building2 className="w-6 h-6 text-[#032EA1]" />
+                  )}
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
-                      Prasat Sambor Rung Roeang Modern Agricultural Cooperative
+                      {admin
+                        ? "Ministry / FAO — National oversight"
+                        : "Prasat Sambor Rung Roeang Modern Agricultural Cooperative"}
                     </p>
-                    <p className="text-xs text-gray-500">AC-KT-2024-157</p>
+                    <p className="text-xs text-gray-500">
+                      {admin ? "Government Admin workspace" : "AC-KT-2024-157"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -338,13 +396,56 @@ export function Root() {
                   </div>
                 )}
               </div>
-              <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <Bell className="w-5 h-5 text-gray-700" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-[#E00025] rounded-full"></span>
-              </button>
+              <div className="relative" ref={notifRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotifOpen((o) => {
+                      const next = !o;
+                      if (next && unreadCount > 0) markAllRead();
+                      return next;
+                    });
+                  }}
+                  className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-expanded={notifOpen}
+                  aria-label="Notifications"
+                >
+                  <Bell className="w-5 h-5 text-gray-700" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 min-w-[8px] h-2 px-0.5 bg-[#E00025] rounded-full" />
+                  )}
+                </button>
+                {notifOpen && (
+                  <div className="absolute right-0 z-50 mt-1.5 w-80 max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white py-2 shadow-lg">
+                    <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                      In-app notifications
+                    </p>
+                    {notifications.length === 0 ? (
+                      <p className="px-3 py-4 text-sm text-gray-500">No notifications yet.</p>
+                    ) : (
+                      <ul className="divide-y divide-gray-100">
+                        {notifications.map((n) => (
+                          <li key={n.id} className="px-3 py-2.5 text-sm">
+                            <p className="font-medium text-gray-900 leading-tight">{n.title}</p>
+                            <p className="text-gray-600 text-xs mt-1 leading-snug">{n.body}</p>
+                            {n.audience && (
+                              <p className="text-[10px] text-gray-400 mt-1">To: {n.audience}</p>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
               <button
-                onClick={() => navigate("/login")}
+                type="button"
+                onClick={() => {
+                  clearPortalUser();
+                  navigate("/login");
+                }}
                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 hover:text-[#E00025]"
+                aria-label="Log out"
               >
                 <LogOut className="w-5 h-5" />
               </button>

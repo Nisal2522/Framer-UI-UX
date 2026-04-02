@@ -1219,15 +1219,15 @@ export function AssetManagement() {
                       </button>
                       <div className="relative w-[220px] sm:w-[260px] min-w-[10rem] max-w-full shrink-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                        <input
-                          type="search"
+                    <input
+                      type="search"
                           value={disposalSearch}
                           onChange={(e) => setDisposalSearch(e.target.value)}
                           placeholder="Search requests..."
                           className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                           aria-label="Search disposal requests"
-                        />
-                      </div>
+                    />
+                  </div>
                       {!disposalDrawerOpen && (
                         <button
                           type="button"
@@ -1243,7 +1243,7 @@ export function AssetManagement() {
                           <Plus className="w-4 h-4" /> New Disposal Request
                         </button>
                       )}
-                    </div>
+                </div>
                   </div>
 
                   <div className="w-full min-w-0 rounded-2xl border border-gray-200/80 bg-white shadow-[0_4px_24px_-4px_rgba(3,46,161,0.08),0_2px_8px_-2px_rgba(0,0,0,0.06)] overflow-hidden flex-1">
