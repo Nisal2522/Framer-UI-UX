@@ -6,7 +6,6 @@ import {
   Package,
   BookOpen,
   Users,
-  BarChart3,
   Bell,
   LogOut,
   Menu,
@@ -38,7 +37,7 @@ const navigation = [
   { name: "Assets", path: "/dashboard/assets", icon: Package },
   { name: "Business Plans", path: "/dashboard/business-plans", icon: FileText },
   { name: "Knowledge Hub", path: "/dashboard/knowledge", icon: BookOpen },
-  { name: "Reporting and Analytics", path: "/dashboard/reports", icon: BarChart3 },
+  // { name: "Reporting and Analytics", path: "/dashboard/reports", icon: BarChart3 },
 ];
 
 const profileImageUrl =
