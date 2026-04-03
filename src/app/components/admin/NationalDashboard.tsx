@@ -40,6 +40,7 @@ import {
   ComposedChart,
   ReferenceArea,
   ReferenceLine,
+  LabelList,
 } from "recharts";
 
 const COLORS = ["#0F2F8F", "#3B5FCC", "#22C55E", "#F59E0B", "#E00025", "#94A3B8"];
@@ -361,12 +362,12 @@ function AssetPerformanceSummaryCard({
 }) {
   const valueM = valueUsd / 1_000_000;
   return (
-    <div className={cn(ASSET_KPI_CARD, "flex h-full flex-col p-6")}>
+    <div className={cn(ASSET_KPI_CARD, "flex h-full flex-col p-5")}>
       <p className="text-sm font-semibold text-gray-900">Asset performance & value</p>
       <p className="mt-0.5 text-xs text-slate-500">Indicative value trend and maintenance vs target</p>
 
-      <div className="mt-5 flex-1 flex flex-col">
-        <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+      <div className="mt-4 flex-1 flex flex-col">
+        <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-3">
           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
             Est. total value (USD, illustrative)
           </p>
@@ -377,7 +378,7 @@ function AssetPerformanceSummaryCard({
             ${valueM.toFixed(1)}M
           </p>
           <p className="mt-1 text-[11px] text-emerald-700 font-medium">+3.1% vs prior year (illustrative)</p>
-          <div className="mt-3 h-[72px] w-full">
+          <div className="mt-2.5 h-[58px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={valueSpark} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <defs>
@@ -406,13 +407,13 @@ function AssetPerformanceSummaryCard({
           </div>
         </div>
 
-        <div className="mt-5 rounded-xl border border-slate-100 bg-white p-4">
+        <div className="mt-4 rounded-xl border border-slate-100 bg-white p-3">
           <div className="flex items-center justify-between gap-2">
             <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Maintenance compliance</p>
             <span className="font-mono text-sm font-bold tabular-nums text-[#0f172a]">{maintenancePct}%</span>
           </div>
           <p className="mt-0.5 text-[11px] text-slate-400">Target {ASSET_MAINT_TARGET_PCT}%</p>
-          <div className="relative mt-3 h-3 w-full rounded-full bg-slate-200">
+          <div className="relative mt-2.5 h-3 w-full rounded-full bg-slate-200">
             <div
               className="absolute left-0 top-0 h-full rounded-full bg-[#0f172a] transition-[width] duration-500"
               style={{ width: `${Math.min(100, maintenancePct)}%` }}
@@ -423,7 +424,7 @@ function AssetPerformanceSummaryCard({
               title={`Target ${ASSET_MAINT_TARGET_PCT}%`}
             />
           </div>
-          <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
+          <p className="mt-2.5 text-[11px] leading-relaxed text-slate-500">
             <span className="text-slate-600">Last updated ~2 hours ago</span>
             <span className="mx-1.5 text-slate-300">·</span>
             <span className="text-emerald-700 font-medium">+3% vs last month (illustrative)</span>
@@ -534,12 +535,71 @@ function PerfLollipopBarShape(
 }
 
 const kmByProvince = [
-  { province: "Battambang", adoption: 78 },
-  { province: "Siem Reap", adoption: 71 },
-  { province: "Kandal", adoption: 84 },
-  { province: "Kampong Cham", adoption: 62 },
-  { province: "Takeo", adoption: 55 },
+  { province: "Battambang", downloadReach: 74, adoption: 78 },
+  { province: "Siem Reap", downloadReach: 69, adoption: 71 },
+  { province: "Kandal", downloadReach: 86, adoption: 84 },
+  { province: "Kampong Cham", downloadReach: 58, adoption: 62 },
+  { province: "Takeo", downloadReach: 48, adoption: 55 },
 ];
+
+/** National benchmarks (dashed lines + bullet markers) — fixed for cross-province comparison. */
+const KM_BENCHMARK_DOWNLOAD = 68;
+const KM_BENCHMARK_ADOPTION = 61;
+
+const KM_BAR_BELOW = "#cbd5e1";
+
+function kmDownloadBarFill(v: number, province: string, provinceFilter: string) {
+  if (provinceFilter !== "All" && provinceFilter !== province) return "#e2e8f0";
+  return v >= KM_BENCHMARK_DOWNLOAD ? "#2563eb" : KM_BAR_BELOW;
+}
+
+function kmAdoptionBarFill(v: number, province: string, provinceFilter: string) {
+  if (provinceFilter !== "All" && provinceFilter !== province) return "#e2e8f0";
+  return v >= KM_BENCHMARK_ADOPTION ? "#0d9488" : KM_BAR_BELOW;
+}
+
+function KnowledgeBulletGraph({
+  label,
+  value,
+  benchmark,
+  benchmarkLabel = "National benchmark",
+}: {
+  label: string;
+  value: number;
+  benchmark: number;
+  benchmarkLabel?: string;
+}) {
+  const v = Math.min(100, Math.max(0, value));
+  const b = Math.min(100, Math.max(0, benchmark));
+  return (
+    <div className="w-full">
+      <div className="mb-1 flex items-baseline justify-between gap-2">
+        <span className="text-xs font-medium text-slate-600">{label}</span>
+        <span className="font-mono text-sm font-bold tabular-nums text-slate-900">{v}%</span>
+      </div>
+      <div className="relative h-3 w-full rounded-full">
+        <div className="absolute inset-0 flex overflow-hidden rounded-full ring-1 ring-slate-200/80">
+          <div className="h-full bg-red-100/90" style={{ width: "50%" }} />
+          <div className="h-full bg-amber-100/90" style={{ width: "25%" }} />
+          <div className="h-full bg-emerald-100/90" style={{ width: "25%" }} />
+        </div>
+        <div
+          className="absolute inset-y-0.5 left-0 rounded-full bg-[#0F2F8F]"
+          style={{ width: `${v}%`, maxWidth: "100%" }}
+        />
+        <div
+          className="pointer-events-none absolute -top-0.5 bottom-0 z-[1] w-0.5 rounded-full bg-slate-900 shadow-sm"
+          style={{ left: `calc(${b}% - 1px)` }}
+          title={`${benchmarkLabel} ${b}%`}
+        />
+      </div>
+      <p className="mt-1 text-[10px] text-slate-500">
+        {benchmarkLabel}:{" "}
+        <span className="font-mono font-semibold tabular-nums text-slate-700">{b}%</span>
+      </p>
+    </div>
+  );
+}
 
 function scale(n: number, f: number) {
   return Math.max(0, Math.round(n * f));
@@ -704,6 +764,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
     () => ({
       materials: provinceFilter === "All" ? 186 : Math.round(24 + (186 - 24) * f),
       acsAccessPct: provinceFilter === "All" ? 68 : Math.min(92, 62 + Math.round(10 * f)),
+      adoptionAvg: provinceFilter === "All" ? 61 : Math.min(88, Math.round(54 + 12 * f)),
     }),
     [provinceFilter, f]
   );
@@ -778,8 +839,14 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
     const geo = provinceGeo.find((p) => p.province === provinceFilter);
     if (!geo) return kmByProvince;
     const adoption = Math.min(90, 55 + (geo.members % 18));
-    return [{ province: geo.province, adoption }];
+    const downloadReach = Math.min(95, adoption + 8 + (geo.acs % 14));
+    return [{ province: geo.province, adoption, downloadReach }];
   }, [provinceFilter]);
+
+  const kmByProvinceChart = useMemo(
+    () => [...kmByProvinceFiltered].sort((a, b) => b.adoption - a.adoption),
+    [kmByProvinceFiltered]
+  );
 
   const title =
     provinceFilter === "All" ? "National Dashboard" : `National Dashboard — ${provinceFilter}`;
@@ -808,9 +875,6 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
-          <p className="mt-1 text-sm text-gray-500 max-w-2xl">
-            National totals at a glance; drill into any province from the map, leaderboard, or filter below.
-          </p>
         </div>
         <div className="flex flex-col gap-1.5 min-w-[200px]">
           <label htmlFor="province-scope" className="text-xs font-medium text-gray-500">
@@ -858,8 +922,8 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
         </div>
 
         {/* Map + provincial leaderboard */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-          <div className="lg:col-span-2 h-[min(420px,55vh)] min-h-[280px] rounded-xl overflow-hidden border border-gray-100 bg-white ring-1 ring-black/[0.04]">
+        <div className="grid grid-cols-1 gap-4 lg:gap-6">
+          <div className="h-[min(420px,55vh)] min-h-[280px] rounded-xl overflow-hidden border border-gray-100 bg-white ring-1 ring-black/[0.04]">
             <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom>
               <MapViewController provinceFilter={provinceFilter} />
               <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -895,7 +959,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
               })}
             </MapContainer>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col min-h-[280px] lg:min-h-0 lg:max-h-[min(420px,55vh)]">
+          {/* <div className="rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col min-h-[280px] lg:min-h-0 lg:max-h-[min(420px,55vh)]">
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/80">
               <h2 className="text-sm font-semibold text-gray-900">Provincial leaderboard</h2>
               <p className="text-xs text-gray-500 mt-0.5">By AC count — click a row to focus</p>
@@ -939,7 +1003,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                 Clear focus — show all provinces
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
         <p className="text-xs text-gray-400">
           Circle size reflects relative AC density (illustrative). Click a province on the map or list to filter charts below.
@@ -1293,13 +1357,13 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
           {provinceFilter === "All" ? "" : ` (${provinceFilter})`}.
         </p>
 
-        <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-stretch">
+        <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-stretch">
           <div className="w-full min-w-0 lg:w-1/2">
-            <div className={cn(ASSET_KPI_CARD, "h-full p-6")}>
+            <div className={cn(ASSET_KPI_CARD, "h-full p-5")}>
               <p className="text-sm font-semibold text-gray-900">Condition mix</p>
               <p className="mt-0.5 text-xs text-slate-500">Share by reported condition (illustrative %)</p>
-              <div className="mt-6 flex flex-col items-stretch gap-8 lg:flex-row lg:items-center lg:gap-10">
-                <div className="relative mx-auto h-[260px] w-full max-w-[300px] shrink-0">
+              <div className="mt-4 flex flex-col items-stretch gap-6 lg:flex-row lg:items-center lg:gap-8">
+                <div className="relative mx-auto h-[220px] w-full max-w-[260px] shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -1331,11 +1395,11 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                     </div>
                   </div>
                 </div>
-                <ul className="min-w-0 flex-1 space-y-3">
+                <ul className="min-w-0 flex-1 space-y-2.5">
                   {assetConditionSlices.map((row) => (
                     <li
                       key={row.name}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3 sm:flex-nowrap"
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5 sm:flex-nowrap"
                     >
                       <div className="flex min-w-0 items-center gap-3">
                         <span
@@ -1466,37 +1530,114 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
         </div>
       </section>
 
-      {/* 6. Knowledge management */}
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      {/* 6. Knowledge management — bullet summary in asset-style card */}
+      <section className="rounded-2xl bg-slate-50 p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
         <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-[#0F2F8F]" />
           Knowledge management
         </h2>
-        <div className="mt-4 grid sm:grid-cols-3 gap-4">
-          <div className="rounded-xl bg-slate-50 border border-gray-100 p-4">
-            <p className="text-xs text-gray-500">Materials in system</p>
-            <p className="text-2xl font-bold">{km.materials}</p>
+        <p className="mt-1 text-sm text-slate-500">
+          National snapshot uses bullet graphs (value vs national benchmark). Adoption by province highlights how each
+          province performs against the national average.
+        </p>
+        <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-stretch">
+          <div className="w-full min-w-0 lg:w-1/2">
+            <div className={cn(ASSET_KPI_CARD, "flex h-full flex-col p-6")}>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">National snapshot</p>
+              <div className="mt-3 rounded-xl border border-slate-100 bg-white px-4 py-3 text-center shadow-sm">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Materials in system</p>
+                <p className="mt-0.5 text-3xl font-bold tabular-nums tracking-tight text-[#0F2F8F]">
+                  {km.materials}
+                </p>
+              </div>
+              <div className="mt-4 space-y-5">
+                <KnowledgeBulletGraph
+                  label="AC download reach"
+                  value={km.acsAccessPct}
+                  benchmark={KM_BENCHMARK_DOWNLOAD}
+                  benchmarkLabel="National benchmark (download)"
+                />
+                <KnowledgeBulletGraph
+                  label="Dissemination adoption (avg.)"
+                  value={km.adoptionAvg}
+                  benchmark={KM_BENCHMARK_ADOPTION}
+                  benchmarkLabel="National benchmark (adoption)"
+                />
+              </div>
+              <p className="mt-4 text-[10px] leading-snug text-slate-400">
+                Bands: intervention 0–50%, medium 50–75%, high 75–100%. Bar shows current scope; vertical marker is
+                the national benchmark.
+              </p>
+            </div>
           </div>
-          <div className="rounded-xl bg-slate-50 border border-gray-100 p-4">
-            <p className="text-xs text-gray-500">ACs with at least one download</p>
-            <p className="text-2xl font-bold">{km.acsAccessPct}%</p>
+
+          <div className="w-full min-w-0 lg:w-1/2">
+            <div className={cn(ASSET_KPI_CARD, "flex h-full flex-col p-6")}>
+              <p className="text-sm font-semibold text-gray-900">Adoption Rate by province (%)</p>
+              <div className="mt-4 flex-1">
+                <div style={{ height: 240 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart
+                      layout="vertical"
+                      data={kmByProvinceChart}
+                      margin={{ left: 6, right: 26, top: 14, bottom: 6 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal vertical={false} />
+                      <XAxis
+                        type="number"
+                        domain={[0, 100]}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 11, fill: "#64748b", fontFamily: "Inter, ui-sans-serif, system-ui" }}
+                        tickFormatter={(v) => `${v}%`}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="province"
+                        width={118}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 11, fill: "#334155", fontFamily: "Inter, ui-sans-serif, system-ui" }}
+                      />
+                      <Tooltip formatter={(v: number) => [`${v}%`, "Adoption"]} />
+                      <ReferenceLine
+                        x={KM_BENCHMARK_ADOPTION}
+                        stroke="#64748b"
+                        strokeWidth={1.5}
+                        strokeDasharray="5 5"
+                      />
+                      <Bar
+                        dataKey="adoption"
+                        name="Adoption"
+                        radius={[0, 6, 6, 0]}
+                        barSize={16}
+                        isAnimationActive={false}
+                      >
+                        {kmByProvinceChart.map((e, i) => (
+                          <Cell
+                            key={`km-prov-${i}`}
+                            fill={kmAdoptionBarFill(e.adoption, e.province, provinceFilter)}
+                          />
+                        ))}
+                        <LabelList
+                          dataKey="adoption"
+                          position="right"
+                          offset={6}
+                          formatter={(v: number | string) => `${v}%`}
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            fill: "#334155",
+                            fontFamily: "Inter, ui-sans-serif, system-ui",
+                          }}
+                        />
+                      </Bar>
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="rounded-xl bg-slate-50 border border-gray-100 p-4">
-            <p className="text-xs text-gray-500">Dissemination adoption (avg.)</p>
-            <p className="text-2xl font-bold">61%</p>
-          </div>
-        </div>
-        <div className="mt-4 h-52">
-          <p className="text-sm font-medium text-gray-700 mb-2">Adoption rate by province (%)</p>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={kmByProvinceFiltered}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-              <XAxis dataKey="province" tick={{ fontSize: 10 }} angle={-16} textAnchor="end" height={58} />
-              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-              <Tooltip />
-              <Bar dataKey="adoption" fill="#3B5FCC" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
         </div>
       </section>
     </div>
