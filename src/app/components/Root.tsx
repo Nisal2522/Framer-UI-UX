@@ -48,7 +48,7 @@ const cooperativeNavigation = [
 const adminNavigation = [
   { name: "National Dashboard", path: "/dashboard/admin", icon: LayoutDashboard },
   { name: "Commune Verification", path: "/dashboard/admin/commune-verification", icon: UserCheck },
-  { name: "Business Plan Workflow", path: "/dashboard/admin/business-plans", icon: FileText },
+  { name: "Business Plan", path: "/dashboard/admin/business-plans", icon: FileText },
   { name: "Progress Reporting", path: "/dashboard/admin/progress-reporting", icon: Activity },
   { name: "Knowledge Hub", path: "/dashboard/admin/knowledge", icon: BookOpen },
   { name: "GESI / Reporting", path: "/dashboard/admin/reporting", icon: BarChart3 },
@@ -311,13 +311,9 @@ export function Root() {
                   )}
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
-                      {admin
-                        ? "Ministry / FAO — National oversight"
-                        : "Prasat Sambor Rung Roeang Modern Agricultural Cooperative"}
+                      {admin ? "Ministry / FAO" : "Prasat Sambor Rung Roeang Modern Agricultural Cooperative"}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {admin ? "Government Admin workspace" : "AC-KT-2024-157"}
-                    </p>
+                    {!admin && <p className="text-xs text-gray-500">AC-KT-2024-157</p>}
                   </div>
                 </div>
               </div>

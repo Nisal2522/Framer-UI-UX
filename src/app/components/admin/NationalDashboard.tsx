@@ -921,43 +921,57 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
           </div>
         </div>
 
-        {/* Map + provincial leaderboard */}
-        <div className="grid grid-cols-1 gap-4 lg:gap-6">
-          <div className="h-[min(420px,55vh)] min-h-[280px] rounded-xl overflow-hidden border border-gray-100 bg-white ring-1 ring-black/[0.04]">
-            <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom>
-              <MapViewController provinceFilter={provinceFilter} />
-              <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              {provinceGeo.map((p) => {
-                const selected = provinceFilter === p.province;
-                const perfHover = perfChartHoverProvince === p.province;
-                const baseR = 12 + Math.min(28, p.acs / 4);
-                return (
-                  <CircleMarker
-                    key={p.province}
-                    center={[p.lat, p.lon]}
-                    radius={perfHover ? baseR + 8 : baseR}
-                    pathOptions={{
-                      color: selected ? "#E00025" : perfHover ? "#059669" : "#0F2F8F",
-                      fillColor: selected ? "#E00025" : perfHover ? "#10b981" : "#3B5FCC",
-                      fillOpacity: selected ? 0.55 : perfHover ? 0.62 : 0.45,
-                      weight: selected ? 4 : perfHover ? 3 : 2,
-                    }}
-                    eventHandlers={{
-                      click: () => setProvinceFilter(p.province),
-                    }}
-                  >
-                    <LeafletTooltip direction="top" offset={[0, -6]} opacity={0.95}>
-                      <div className="text-xs font-medium">
-                        <div>{p.province}</div>
-                        <div>ACs: {p.acs}</div>
-                        <div>Members (approx.): {p.members.toLocaleString()}</div>
-                        <div className="text-[10px] text-gray-500 mt-1">Click to filter dashboard</div>
-                      </div>
-                    </LeafletTooltip>
-                  </CircleMarker>
-                );
-              })}
-            </MapContainer>
+        {/* Map card — aligned with membership statistics card style */}
+        <section className="rounded-2xl bg-[#F3F4F6] p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-gray-200/80 pb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-[#0F2F8F]" />
+                National map overview
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Click a province bubble to filter the dashboard.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:gap-6">
+            <div className="h-[min(420px,55vh)] min-h-[280px] rounded-xl overflow-hidden border border-gray-100 bg-white ring-1 ring-black/[0.04]">
+              <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom>
+                <MapViewController provinceFilter={provinceFilter} />
+                <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                {provinceGeo.map((p) => {
+                  const selected = provinceFilter === p.province;
+                  const perfHover = perfChartHoverProvince === p.province;
+                  const baseR = 12 + Math.min(28, p.acs / 4);
+                  return (
+                    <CircleMarker
+                      key={p.province}
+                      center={[p.lat, p.lon]}
+                      radius={perfHover ? baseR + 8 : baseR}
+                      pathOptions={{
+                        color: selected ? "#E00025" : perfHover ? "#059669" : "#0F2F8F",
+                        fillColor: selected ? "#E00025" : perfHover ? "#10b981" : "#3B5FCC",
+                        fillOpacity: selected ? 0.55 : perfHover ? 0.62 : 0.45,
+                        weight: selected ? 4 : perfHover ? 3 : 2,
+                      }}
+                      eventHandlers={{
+                        click: () => setProvinceFilter(p.province),
+                      }}
+                    >
+                      <LeafletTooltip direction="top" offset={[0, -6]} opacity={0.95}>
+                        <div className="text-xs font-medium">
+                          <div>{p.province}</div>
+                          <div>ACs: {p.acs}</div>
+                          <div>Members (approx.): {p.members.toLocaleString()}</div>
+                          <div className="text-[10px] text-gray-500 mt-1">Click to filter dashboard</div>
+                        </div>
+                      </LeafletTooltip>
+                    </CircleMarker>
+                  );
+                })}
+              </MapContainer>
+            </div>
           </div>
           {/* <div className="rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col min-h-[280px] lg:min-h-0 lg:max-h-[min(420px,55vh)]">
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/80">
@@ -1004,7 +1018,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
               </button>
             </div>
           </div> */}
-        </div>
+        </section>
         {/* <p className="text-xs text-gray-400">
           Circle size reflects relative AC density (illustrative). Click a province on the map or list to filter charts below.
         </p> */}
@@ -1035,7 +1049,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
         <div className="grid grid-cols-12 gap-5 lg:gap-6">
           {/* Row 1: total + trend */}
           <div
-            className={`col-span-12 lg:col-span-3 relative overflow-hidden rounded-2xl p-6 text-white shadow-[0_10px_15px_-3px_rgb(0_0_0/0.2)] ring-1 ring-white/20 bg-gradient-to-br from-[#021c5e] via-[#032EA1] to-[#1e4aa8]`}
+            className={`col-span-12 lg:col-span-3 relative flex h-full flex-col overflow-hidden rounded-2xl p-6 text-white shadow-[0_10px_15px_-3px_rgb(0_0_0/0.2)] ring-1 ring-white/20 bg-gradient-to-br from-[#021c5e] via-[#032EA1] to-[#1e4aa8]`}
           >
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
             <div className="relative flex items-start justify-between gap-2">
@@ -1059,6 +1073,27 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
               </span>
               +2.1% vs prior year (illustrative)
             </p>
+            <div className="relative mt-4 min-h-[110px] flex-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={enrollmentDualData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id={`${chartUid}-miniGlow`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#93c5fd" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="#93c5fd" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area
+                    type="monotone"
+                    dataKey={provinceFilter === "All" ? "national" : "provincial"}
+                    stroke="#bfdbfe"
+                    strokeWidth={2}
+                    fill={`url(#${chartUid}-miniGlow)`}
+                    dot={false}
+                    isAnimationActive={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           <div className={`col-span-12 lg:col-span-9 ${BENTO_CARD} p-5`}>
