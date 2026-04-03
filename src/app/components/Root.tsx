@@ -16,7 +16,6 @@ import {
   ChevronRight,
   ChevronDown,
   Sprout,
-  MapPinned,
   Shield,
   UserCheck,
   Activity,
@@ -48,7 +47,6 @@ const cooperativeNavigation = [
 
 const adminNavigation = [
   { name: "National Dashboard", path: "/dashboard/admin", icon: LayoutDashboard },
-  { name: "Provincial Dashboard", path: "/dashboard/admin/provincial", icon: MapPinned },
   { name: "Commune Verification", path: "/dashboard/admin/commune-verification", icon: UserCheck },
   { name: "Business Plan Workflow", path: "/dashboard/admin/business-plans", icon: FileText },
   { name: "Progress Reporting", path: "/dashboard/admin/progress-reporting", icon: Activity },

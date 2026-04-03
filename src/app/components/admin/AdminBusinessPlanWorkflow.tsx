@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
+  AlertCircle,
   ArrowRight,
+  ChevronDown,
+  ChevronRight,
   FileText,
   GitCompare,
   History,
@@ -59,9 +62,10 @@ const initialPlans: Plan[] = [
     province: "Battambang",
     status: "submitted_support",
     sections: [
-      { key: "exec", title: "Executive summary", reviewed: false, comment: "" },
-      { key: "market", title: "Market & value chain", reviewed: false, comment: "" },
-      { key: "milestones", title: "Milestones & indicators", reviewed: false, comment: "" },
+      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: false, comment: "" },
+      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "" },
+      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "" },
+      { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "" },
     ],
   },
   {
@@ -75,9 +79,10 @@ const initialPlans: Plan[] = [
     province: "Siem Reap",
     status: "pending_ministry",
     sections: [
-      { key: "exec", title: "Executive summary", reviewed: true, comment: "Aligned with prior year." },
-      { key: "market", title: "Market & value chain", reviewed: true, comment: "" },
-      { key: "milestones", title: "Milestones & indicators", reviewed: true, comment: "" },
+      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: true, comment: "Aligned with prior year." },
+      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: true, comment: "" },
+      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: true, comment: "" },
+      { key: "annexes", title: "4. ANNEXES", reviewed: true, comment: "" },
     ],
   },
 ];
@@ -103,6 +108,12 @@ export function AdminBusinessPlanWorkflow() {
   const [compareA, setCompareA] = useState("AC-BB-2024-157");
   const [compareB, setCompareB] = useState("AC-SR-2023-088");
   const [compareYear, setCompareYear] = useState("2026");
+  const [expandedSections, setExpandedSections] = useState<string[]>([
+    "coop_profile",
+    "business_plan",
+    "investment_plan",
+    "annexes",
+  ]);
 
   const selected = useMemo(() => plans.find((p) => p.id === selectedId) ?? null, [plans, selectedId]);
 
@@ -223,6 +234,8 @@ export function AdminBusinessPlanWorkflow() {
   const ministryQueue = plans.filter((p) => p.status === "pending_ministry");
 
   const acOptions = [...new Set(plans.map((p) => p.acCode))];
+  const reviewedCount = selected ? selected.sections.filter((s) => s.reviewed).length : 0;
+  const completionPct = selected ? Math.round((reviewedCount / selected.sections.length) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -298,30 +311,125 @@ export function AdminBusinessPlanWorkflow() {
                     {selected.acName} · {selected.province} · Year {selected.planYear}
                   </p>
                 </div>
-                <div className="space-y-4">
-                  {selected.sections.map((s) => (
-                    <div key={s.key} className="rounded-xl border border-gray-100 p-4 bg-gray-50/50">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="font-medium text-gray-800">{s.title}</p>
-                        <label className="flex items-center gap-2 text-sm text-gray-600">
-                          <input
-                            type="checkbox"
-                            checked={s.reviewed}
-                            onChange={(e) => toggleSectionReviewed(selected.id, s.key, e.target.checked)}
-                            className="rounded border-gray-300 accent-[#0F2F8F]"
-                          />
-                          Reviewed
-                        </label>
-                      </div>
-                      <textarea
-                        value={s.comment}
-                        onChange={(e) => setSectionComment(selected.id, s.key, e.target.value)}
-                        rows={2}
-                        className="mt-2 w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white"
-                        placeholder="Section comments / revision hints…"
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900">Business Plan Status: Under Support Review</p>
+                      <p className="text-xs text-blue-700 mt-1">
+                        Review all sections using the same AC plan template flow, then forward to Ministry / FAO.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                  <h3 className="font-semibold text-gray-900 mb-2">Completion Progress</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-700">Sections Reviewed</span>
+                      <span className="font-semibold text-gray-900">
+                        {reviewedCount} / {selected.sections.length}
+                      </span>
+                    </div>
+                    <div className="bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${completionPct}%` }}
                       />
                     </div>
-                  ))}
+                    <p className="text-xs text-gray-500">Complete all sections before forwarding for final decision.</p>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-[#032EA1]" />
+                        <h3 className="font-semibold text-gray-900">Business Plan Template</h3>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedSections(selected.sections.map((s) => s.key))}
+                          className="px-2.5 py-1 text-xs font-medium border border-gray-300 rounded-md text-gray-700 hover:bg-white transition-colors"
+                        >
+                          Expand all
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedSections([])}
+                          className="px-2.5 py-1 text-xs font-medium border border-gray-300 rounded-md text-gray-700 hover:bg-white transition-colors"
+                        >
+                          Collapse all
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-gray-200">
+                    {selected.sections.map((s) => {
+                      const isOpen = expandedSections.includes(s.key);
+                      return (
+                        <div key={s.key}>
+                          <div className={`w-full px-4 py-3 border-l-4 ${isOpen ? "bg-slate-50" : "bg-white"}`}>
+                            <div className="flex items-center justify-between gap-3">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedSections((prev) =>
+                                    prev.includes(s.key) ? prev.filter((k) => k !== s.key) : [...prev, s.key]
+                                  )
+                                }
+                                className="min-w-0 flex-1 flex items-center gap-3 text-left hover:opacity-90 transition-opacity"
+                              >
+                                {isOpen ? (
+                                  <ChevronDown className="w-5 h-5 text-gray-600 shrink-0" />
+                                ) : (
+                                  <ChevronRight className="w-5 h-5 text-gray-600 shrink-0" />
+                                )}
+                                <span className="font-semibold text-gray-900 truncate">{s.title}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => toggleSectionReviewed(selected.id, s.key, !s.reviewed)}
+                                className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${
+                                  s.reviewed
+                                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                    : "border-amber-200 bg-amber-50 text-amber-700"
+                                }`}
+                              >
+                                {s.reviewed ? "Completed" : "Pending"}
+                              </button>
+                            </div>
+                          </div>
+                          {isOpen && (
+                            <div className="px-4 py-4 bg-white border-t border-gray-100">
+                              <div className="flex items-center justify-end mb-2">
+                                <label className="flex items-center gap-2 text-sm text-gray-600">
+                                  <input
+                                    type="checkbox"
+                                    checked={s.reviewed}
+                                    onChange={(e) => toggleSectionReviewed(selected.id, s.key, e.target.checked)}
+                                    className="rounded border-gray-300 accent-[#0F2F8F]"
+                                  />
+                                  Reviewed
+                                </label>
+                              </div>
+                              <textarea
+                                value={s.comment}
+                                onChange={(e) => setSectionComment(selected.id, s.key, e.target.value)}
+                                rows={2}
+                                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white"
+                                placeholder="Section comments / revision hints…"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="border-t border-gray-100 pt-4 space-y-3">
                   <p className="text-sm font-medium text-gray-800">Send back for revision</p>
