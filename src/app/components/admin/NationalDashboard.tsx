@@ -1005,9 +1005,9 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
             </div>
           </div> */}
         </div>
-        <p className="text-xs text-gray-400">
+        {/* <p className="text-xs text-gray-400">
           Circle size reflects relative AC density (illustrative). Click a province on the map or list to filter charts below.
-        </p>
+        </p> */}
       </section>
 
       {/* 2. Membership statistics — bento grid */}
