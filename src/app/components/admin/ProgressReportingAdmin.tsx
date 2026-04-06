@@ -71,10 +71,6 @@ export function ProgressReportingAdmin() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Progress reporting & monitoring</h1>
-        <p className="mt-1 text-gray-600 max-w-3xl">
-          Periodic progress updates submitted by AC Committees against approved business plan milestones (monthly or quarterly
-          as configured by Ministry). Each row captures completion, resources, challenges, and supporting evidence counts.
-        </p>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">

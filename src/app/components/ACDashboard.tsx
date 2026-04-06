@@ -70,7 +70,7 @@ const cropDistributionData = [
 ];
 
 const livestockData = [
-  { type: "Cattle", expectedYield: 128 }, // heads (illustrative projection)
+  { type: "Cattle", expectedYield: 128 }, // tons/yr (illustrative projection)
   { type: "Poultry", expectedYield: 312 },
   { type: "Pigs", expectedYield: 89 },
   { type: "Goats", expectedYield: 45 },
@@ -556,7 +556,7 @@ export function ACDashboard() {
                     </div>
                     <span className="text-sm font-bold" style={{ color: livestockColors[i] }}>
                       {item.expectedYield}
-                      <span className="text-xs text-gray-400 font-normal ml-1">heads</span>
+                      <span className="text-xs text-gray-400 font-normal ml-1">tons/yr</span>
                     </span>
                   </div>
                   <div className="h-2.5 rounded-full bg-gray-100">

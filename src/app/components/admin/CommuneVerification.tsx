@@ -160,10 +160,6 @@ export function CommuneVerification() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Commune officer verification</h1>
-        <p className="mt-1 text-gray-600 max-w-3xl">
-          Review AC profiles pending initial verification or reverification. Approve to activate, or return with mandatory comments.
-          All actions are logged for Ministry / Admin review.
-        </p>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-6">

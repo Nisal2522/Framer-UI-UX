@@ -542,7 +542,7 @@ export function ACProfile() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Number of Plants
+                      Number of Plants/area
                     </label>
                     <input
                       type="text"
@@ -577,7 +577,7 @@ export function ACProfile() {
                         Expected Yield
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Number of Plants
+                        Number of Plants/area
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                         Actions

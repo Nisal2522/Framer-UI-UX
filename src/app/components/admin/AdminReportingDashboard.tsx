@@ -50,10 +50,6 @@ export function AdminReportingDashboard() {
           GESI & inclusive monitoring
         </div>
         <h1 className="mt-1 text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Reporting dashboard</h1>
-        <p className="mt-1 text-gray-600 max-w-3xl">
-          Age- and gender-disaggregated views across member profiles, business plans, assets, and training modules to support
-          inclusive monitoring, youth tracking, and GESI-focused decisions.
-        </p>
       </div>
 
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

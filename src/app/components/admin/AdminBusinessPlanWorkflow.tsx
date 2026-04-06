@@ -3,8 +3,11 @@ import { toast } from "sonner";
 import {
   AlertCircle,
   ArrowRight,
+  CheckCircle2,
   ChevronDown,
   ChevronRight,
+  Clock3,
+  Download,
   FileText,
   GitCompare,
   History,
@@ -64,10 +67,34 @@ const initialPlans: Plan[] = [
     province: "Battambang",
     status: "submitted_support",
     sections: [
-      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: false, comment: "" },
-      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "" },
-      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "" },
-      { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "" },
+      {
+        key: "coop_profile",
+        title: "1. COOPERATIVE PROFILE",
+        reviewed: false,
+        comment:
+          "Prasat Sambor Rung Roeang Modern AC represents 447 active members across 8 communes. Core operations include collective input purchasing and seasonal rice aggregation.",
+      },
+      {
+        key: "business_plan",
+        title: "2. BUSINESS PLAN",
+        reviewed: false,
+        comment:
+          "FY2026 plan targets 12% productivity growth via improved seed packages, training cycles, and buyer contracts with two regional millers.",
+      },
+      {
+        key: "investment_plan",
+        title: "3. INVESTMENT PLAN",
+        reviewed: false,
+        comment:
+          "Priority investments: post-harvest dryers, moisture meters, and warehouse handling tools. Co-financing split: 70% grant / 30% member contribution.",
+      },
+      {
+        key: "annexes",
+        title: "4. ANNEXES",
+        reviewed: false,
+        comment:
+          "Annex includes member registry summary, baseline yield table, draft procurement schedule, and quotation references.",
+      },
     ],
   },
   {
@@ -81,10 +108,30 @@ const initialPlans: Plan[] = [
     province: "Kampong Thom",
     status: "submitted_support",
     sections: [
-      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: false, comment: "" },
-      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "" },
-      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "" },
-      { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "" },
+      {
+        key: "coop_profile",
+        title: "1. COOPERATIVE PROFILE",
+        reviewed: false,
+        comment: "Stung Sen Agro Cooperative serves 382 members focused on maize and cassava rotation systems.",
+      },
+      {
+        key: "business_plan",
+        title: "2. BUSINESS PLAN",
+        reviewed: false,
+        comment: "Plan expands contract farming and introduces collective drying to reduce post-harvest losses by 10%.",
+      },
+      {
+        key: "investment_plan",
+        title: "3. INVESTMENT PLAN",
+        reviewed: false,
+        comment: "Requested assets include shelling machine upgrades, drying floor extension, and shared transport tools.",
+      },
+      {
+        key: "annexes",
+        title: "4. ANNEXES",
+        reviewed: false,
+        comment: "Supporting docs: buyer MoU draft, baseline production records, and training attendance sheet.",
+      },
     ],
   },
   {
@@ -101,7 +148,12 @@ const initialPlans: Plan[] = [
       { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: true, comment: "Member records updated." },
       { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "Revise market assumptions." },
       { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "Clarify procurement timeline." },
-      { key: "annexes", title: "4. ANNEXES", reviewed: true, comment: "" },
+      {
+        key: "annexes",
+        title: "4. ANNEXES",
+        reviewed: true,
+        comment: "Annex packet uploaded with water-user committee minutes and site photos.",
+      },
     ],
   },
   {
@@ -115,10 +167,30 @@ const initialPlans: Plan[] = [
     province: "Kampong Cham",
     status: "submitted_support",
     sections: [
-      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: false, comment: "" },
-      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "" },
-      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "" },
-      { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "" },
+      {
+        key: "coop_profile",
+        title: "1. COOPERATIVE PROFILE",
+        reviewed: false,
+        comment: "Mekong Harvest Cooperative coordinates post-harvest handling services for 265 rice-producing households.",
+      },
+      {
+        key: "business_plan",
+        title: "2. BUSINESS PLAN",
+        reviewed: false,
+        comment: "Business model introduces village-level collection points and moisture-based pricing incentives.",
+      },
+      {
+        key: "investment_plan",
+        title: "3. INVESTMENT PLAN",
+        reviewed: false,
+        comment: "Proposed budget covers sorting tables, protective storage bins, and quality inspection equipment.",
+      },
+      {
+        key: "annexes",
+        title: "4. ANNEXES",
+        reviewed: false,
+        comment: "Annex includes logistics map, operational calendar, and partnership letters from three buyers.",
+      },
     ],
   },
   {
@@ -132,7 +204,12 @@ const initialPlans: Plan[] = [
     province: "Prey Veng",
     status: "revision_requested",
     sections: [
-      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: true, comment: "" },
+      {
+        key: "coop_profile",
+        title: "1. COOPERATIVE PROFILE",
+        reviewed: true,
+        comment: "Prey Veng Seed Producer AC has 311 members and a certified local seed producer group.",
+      },
       { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: true, comment: "Add updated pricing scenario." },
       { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "Missing maintenance costs." },
       { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "Upload supporting quotations." },
@@ -149,10 +226,30 @@ const initialPlans: Plan[] = [
     province: "Takeo",
     status: "submitted_support",
     sections: [
-      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: false, comment: "" },
-      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "" },
-      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "" },
-      { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "" },
+      {
+        key: "coop_profile",
+        title: "1. COOPERATIVE PROFILE",
+        reviewed: false,
+        comment: "Takeo FreshLink Cooperative links 298 vegetable farmers to district and Phnom Penh wholesale markets.",
+      },
+      {
+        key: "business_plan",
+        title: "2. BUSINESS PLAN",
+        reviewed: false,
+        comment: "Core strategy is to improve shelf-life and scheduling with cold-chain handling and coordinated dispatch.",
+      },
+      {
+        key: "investment_plan",
+        title: "3. INVESTMENT PLAN",
+        reviewed: false,
+        comment: "Investment package requests modular cold rooms, crates, and handling equipment for two hubs.",
+      },
+      {
+        key: "annexes",
+        title: "4. ANNEXES",
+        reviewed: false,
+        comment: "Annex includes produce volume trend, route plan, and letters of intent from buyers.",
+      },
     ],
   },
   {
@@ -166,10 +263,30 @@ const initialPlans: Plan[] = [
     province: "Banteay Meanchey",
     status: "submitted_support",
     sections: [
-      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: false, comment: "" },
-      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "" },
-      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "" },
-      { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "" },
+      {
+        key: "coop_profile",
+        title: "1. COOPERATIVE PROFILE",
+        reviewed: false,
+        comment: "Banteay Meanchey Agro Cluster AC organizes cassava collection and primary processing for 340 members.",
+      },
+      {
+        key: "business_plan",
+        title: "2. BUSINESS PLAN",
+        reviewed: false,
+        comment: "Plan aims to increase value retention via improved chip quality and better negotiated offtake terms.",
+      },
+      {
+        key: "investment_plan",
+        title: "3. INVESTMENT PLAN",
+        reviewed: false,
+        comment: "Requested equipment includes chipping line upgrades, moisture control tools, and yard paving.",
+      },
+      {
+        key: "annexes",
+        title: "4. ANNEXES",
+        reviewed: false,
+        comment: "Annex set contains production baselines, environmental checklist, and indicative quotations.",
+      },
     ],
   },
   {
@@ -185,7 +302,12 @@ const initialPlans: Plan[] = [
     sections: [
       { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: true, comment: "Update member share table." },
       { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "Need stronger buyer contracts." },
-      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "" },
+      {
+        key: "investment_plan",
+        title: "3. INVESTMENT PLAN",
+        reviewed: false,
+        comment: "Provide revised capex table with seed-cleaning line maintenance and depreciation assumptions.",
+      },
       { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "Attach quotation sheets." },
     ],
   },
@@ -200,10 +322,30 @@ const initialPlans: Plan[] = [
     province: "Kampong Speu",
     status: "submitted_support",
     sections: [
-      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: false, comment: "" },
-      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: false, comment: "" },
-      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "" },
-      { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "" },
+      {
+        key: "coop_profile",
+        title: "1. COOPERATIVE PROFILE",
+        reviewed: false,
+        comment: "Kampong Speu Green Water AC serves 226 members in dry-season cropping zones using shared pump assets.",
+      },
+      {
+        key: "business_plan",
+        title: "2. BUSINESS PLAN",
+        reviewed: false,
+        comment: "Business plan scales solar pumping to cut fuel cost and stabilize water availability in peak periods.",
+      },
+      {
+        key: "investment_plan",
+        title: "3. INVESTMENT PLAN",
+        reviewed: false,
+        comment: "Requested support covers pump arrays, control units, and technician training with O&M scheduling.",
+      },
+      {
+        key: "annexes",
+        title: "4. ANNEXES",
+        reviewed: false,
+        comment: "Annex includes borehole mapping, usage projections, and safeguard screening notes.",
+      },
     ],
   },
   {
@@ -217,10 +359,20 @@ const initialPlans: Plan[] = [
     province: "Pursat",
     status: "revision_requested",
     sections: [
-      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: true, comment: "" },
+      {
+        key: "coop_profile",
+        title: "1. COOPERATIVE PROFILE",
+        reviewed: true,
+        comment: "Pursat Collective Storage AC coordinates temporary storage and aggregation for 289 member households.",
+      },
       { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: true, comment: "Clarify utilization assumptions." },
       { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: false, comment: "Update unit cost references." },
-      { key: "annexes", title: "4. ANNEXES", reviewed: false, comment: "" },
+      {
+        key: "annexes",
+        title: "4. ANNEXES",
+        reviewed: false,
+        comment: "Attach final warehouse layout, insurance details, and service fee policy.",
+      },
     ],
   },
   {
@@ -240,6 +392,57 @@ const initialPlans: Plan[] = [
       { key: "annexes", title: "4. ANNEXES", reviewed: true, comment: "" },
     ],
   },
+  {
+    id: "bp-1012",
+    title: "Business Plan FY 2026 — Mechanized land prep",
+    acCode: "AC-KT-2022-114",
+    acName: "Baray Mechanization Cooperative",
+    chairman: "Thy Chansok",
+    planYear: "2026",
+    coopType: "Agricultural",
+    province: "Kampong Thom",
+    status: "pending_ministry",
+    sections: [
+      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: true, comment: "Verified member register and governance structure." },
+      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: true, comment: "Demand forecast validated with service booking records." },
+      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: true, comment: "Capex and O&M assumptions reviewed and accepted." },
+      { key: "annexes", title: "4. ANNEXES", reviewed: true, comment: "Annex pack complete with quotations and safeguards checklist." },
+    ],
+  },
+  {
+    id: "bp-1013",
+    title: "Business Plan FY 2026 — Dry-season rice expansion",
+    acCode: "AC-PV-2023-173",
+    acName: "Prey Veng Delta Rice AC",
+    chairman: "Kosal Mean",
+    planYear: "2026",
+    coopType: "Rice",
+    province: "Prey Veng",
+    status: "pending_ministry",
+    sections: [
+      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: true, comment: "Committee profile and member contribution records confirmed." },
+      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: true, comment: "Buyer commitments and revenue model checked by support team." },
+      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: true, comment: "Irrigation and storage investments aligned with workplan." },
+      { key: "annexes", title: "4. ANNEXES", reviewed: true, comment: "All annex attachments validated and signed." },
+    ],
+  },
+  {
+    id: "bp-1014",
+    title: "Business Plan FY 2026 — Feed mill modernization",
+    acCode: "AC-BB-2021-061",
+    acName: "Battambang Feed Producers AC",
+    chairman: "Vireak Neary",
+    planYear: "2026",
+    coopType: "Livestock",
+    province: "Battambang",
+    status: "pending_ministry",
+    sections: [
+      { key: "coop_profile", title: "1. COOPERATIVE PROFILE", reviewed: true, comment: "Legal profile and board approvals complete." },
+      { key: "business_plan", title: "2. BUSINESS PLAN", reviewed: true, comment: "Market and pricing assumptions cross-checked with prior year data." },
+      { key: "investment_plan", title: "3. INVESTMENT PLAN", reviewed: true, comment: "Equipment specification and financing terms finalized." },
+      { key: "annexes", title: "4. ANNEXES", reviewed: true, comment: "Compliance documents and supplier letters attached." },
+    ],
+  },
 ];
 
 export function AdminBusinessPlanWorkflow() {
@@ -255,6 +458,78 @@ export function AdminBusinessPlanWorkflow() {
       note: "Chairman formal submission",
       planId: "bp-1001",
     },
+    {
+      id: "h1",
+      at: "2026-03-20T13:25:00",
+      actor: "Support Team — Nget Bopha",
+      status: "Under review",
+      note: "Eligibility and mandatory annex checklist started.",
+      planId: "bp-1001",
+    },
+    {
+      id: "h2",
+      at: "2026-03-21T09:18:00",
+      actor: "Support Team — Somaly Chenda",
+      status: "Revision requested",
+      note: "Please revise cashflow assumptions and attach supplier quotation for warehouse materials.",
+      planId: "bp-1001",
+    },
+    {
+      id: "h3",
+      at: "2026-03-22T16:45:00",
+      actor: "Chairman — Sokha Dara",
+      status: "Resubmitted → Support queue",
+      note: "Updated 3-year cashflow and uploaded signed supplier quotations.",
+      planId: "bp-1001",
+    },
+    {
+      id: "h4",
+      at: "2026-03-23T10:32:00",
+      actor: "Support Team — Nget Bopha",
+      status: "Forwarded to Ministry / FAO",
+      note: "All section reviews completed and recommendation submitted.",
+      planId: "bp-1001",
+    },
+    {
+      id: "h5",
+      at: "2026-03-24T14:10:00",
+      actor: "Ministry / FAO — Vanna Meas",
+      status: "Approved",
+      note: "Approved for FY 2026 implementation and disbursement planning.",
+      planId: "bp-1001",
+    },
+    {
+      id: "h6",
+      at: "2026-03-24T09:05:00",
+      actor: "Support Team — Chan Sreypov",
+      status: "Submitted → Support queue",
+      note: "Business plan package received with board signatures.",
+      planId: "bp-1008",
+    },
+    {
+      id: "h7",
+      at: "2026-03-25T11:40:00",
+      actor: "Support Team — Chan Sreypov",
+      status: "Forwarded to Ministry / FAO",
+      note: "Support due diligence passed with minor formatting corrections.",
+      planId: "bp-1008",
+    },
+    {
+      id: "h8",
+      at: "2026-03-26T15:20:00",
+      actor: "Ministry / FAO — Channary Keo",
+      status: "Rejected",
+      note: "Rejected due to unresolved co-financing commitment letter.",
+      planId: "bp-1008",
+    },
+    {
+      id: "h9",
+      at: "2026-03-27T08:55:00",
+      actor: "Support Team — Vichea Rath",
+      status: "Under review",
+      note: "Cross-checking member contribution records before ministry submission.",
+      planId: "bp-1012",
+    },
   ]);
   const [selectedId, setSelectedId] = useState<string | null>("bp-1001");
   const [revisionText, setRevisionText] = useState("");
@@ -265,6 +540,7 @@ export function AdminBusinessPlanWorkflow() {
   const [compareYear, setCompareYear] = useState("2026");
   const [supportSearch, setSupportSearch] = useState("");
   const [supportPage, setSupportPage] = useState(1);
+  const [expandedHistoryPlans, setExpandedHistoryPlans] = useState<string[]>(["bp-1001"]);
   // BusinessPlanTemplate accordion state (matches AC user's template structure)
   const [expandedSections, setExpandedSections] = useState<string[]>(["1"]);
   const [expandedSubsections, setExpandedSubsections] = useState<string[]>([]);
@@ -408,6 +684,31 @@ export function AdminBusinessPlanWorkflow() {
   const supportRangeStart =
     supportQueueFiltered.length === 0 ? 0 : (currentSupportPage - 1) * supportPageSize + 1;
   const supportRangeEnd = Math.min(currentSupportPage * supportPageSize, supportQueueFiltered.length);
+  const historyByPlan = useMemo(() => {
+    const planMap = new Map(plans.map((p) => [p.id, p]));
+    const grouped = new Map<string, HistoryRow[]>();
+    for (const row of history) {
+      if (!grouped.has(row.planId)) grouped.set(row.planId, []);
+      grouped.get(row.planId)!.push(row);
+    }
+    const planHistory = Array.from(grouped.entries())
+      .map(([planId, rows]) => {
+        const timeline = [...rows]
+          .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime())
+          .map((row, index, arr) => {
+            const priorRevisions = arr
+              .slice(0, index + 1)
+              .filter((x) => x.status.toLowerCase().includes("revision requested")).length;
+            const revisionNo = row.status.toLowerCase().includes("revision requested") ? priorRevisions : null;
+            return { ...row, revisionNo, stepNo: index + 1 };
+          });
+        const latestAt = timeline[timeline.length - 1]?.at ?? "";
+        return { plan: planMap.get(planId), timeline, latestAt };
+      })
+      .filter((entry) => entry.plan)
+      .sort((a, b) => new Date(b.latestAt).getTime() - new Date(a.latestAt).getTime());
+    return planHistory;
+  }, [history, plans]);
 
   const acOptions = [...new Set(plans.map((p) => p.acCode))];
   const reviewedCount = selected ? selected.sections.filter((s) => s.reviewed).length : 0;
@@ -475,38 +776,94 @@ export function AdminBusinessPlanWorkflow() {
     "4": "annexes",
   };
 
+  const getHistoryVisual = (status: string) => {
+    const s = status.toLowerCase();
+    if (s.includes("approved")) {
+      return {
+        nodeClass: "bg-emerald-600",
+        cardBorder: "border-emerald-200",
+        cardBg: "bg-emerald-50/50",
+        titleClass: "text-emerald-900",
+        Icon: CheckCircle2,
+      };
+    }
+    if (s.includes("rejected")) {
+      return {
+        nodeClass: "bg-red-600",
+        cardBorder: "border-red-200",
+        cardBg: "bg-red-50/50",
+        titleClass: "text-red-900",
+        Icon: AlertCircle,
+      };
+    }
+    if (s.includes("revision")) {
+      return {
+        nodeClass: "bg-amber-500",
+        cardBorder: "border-amber-200",
+        cardBg: "bg-amber-50/50",
+        titleClass: "text-amber-900",
+        Icon: FileText,
+      };
+    }
+    return {
+      nodeClass: "bg-[#0F2F8F]",
+      cardBorder: "border-blue-200",
+      cardBg: "bg-blue-50/50",
+      titleClass: "text-[#0F2F8F]",
+      Icon: Clock3,
+    };
+  };
+
+  const initialsFromActor = (actor: string) => {
+    const clean = actor.split("—").pop()?.trim() ?? actor;
+    const parts = clean.split(" ").filter(Boolean);
+    if (parts.length === 0) return "NA";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+  };
+  const toggleHistoryPlan = (planId: string) => {
+    setExpandedHistoryPlans((prev) => (prev.includes(planId) ? prev.filter((id) => id !== planId) : [...prev, planId]));
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Business plan management</h1>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-2">
-        {(
-          [
-            ["support", "Support team review", MessageSquare],
-            ["ministry", "Ministry / FAO decision", ShieldCheck],
-            ["history", "Approval history", History],
-            ["compare", "Plan comparison", GitCompare],
-          ] as const
-        ).map(([key, label, Icon]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              tab === key ? "bg-[#0F2F8F] text-white" : "text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            <Icon className="h-4 w-4" />
-            {label}
-          </button>
-        ))}
-      </div>
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="border-b border-gray-200">
+          <div className="flex overflow-x-auto">
+            {(
+              [
+                ["support", "Support Team Review", MessageSquare],
+                ["ministry", "Ministry / FAO Decision", ShieldCheck],
+                ["history", "Approval History", History],
+                ["compare", "Plan Comparison", GitCompare],
+              ] as const
+            ).map(([key, label, Icon]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTab(key)}
+                className={`inline-flex items-center gap-1.5 px-6 py-4 text-sm font-medium whitespace-nowrap transition-colors ${
+                  tab === key
+                    ? "text-[#032EA1] border-b-2 border-[#032EA1]"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="p-4 sm:p-6">
 
       {tab === "support" && (
-        <div className="grid lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-4 space-y-2">
+        <div className="flex overflow-x-auto">
+          <div className="grid w-full min-w-[980px] lg:min-w-0 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-4 space-y-2">
             <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 shadow-sm">
               <div className="mb-3 flex items-center gap-2 px-1">
                 <h2 className="text-sm font-semibold text-gray-900">Review Queue</h2>
@@ -591,8 +948,8 @@ export function AdminBusinessPlanWorkflow() {
                 </button>
               </div>
             </div>
-          </div>
-          <div className="lg:col-span-8 rounded-2xl border border-gray-200 bg-white shadow-sm p-6">
+            </div>
+            <div className="lg:col-span-8 rounded-2xl border border-gray-200 bg-white shadow-sm p-6">
             {!selected || !supportQueue.find((p) => p.id === selected.id) ? (
               <p className="text-sm text-gray-500">Select a submitted plan from the queue.</p>
             ) : (
@@ -824,65 +1181,84 @@ export function AdminBusinessPlanWorkflow() {
                 </div>
               </div>
             )}
+            </div>
           </div>
         </div>
       )}
 
       {tab === "ministry" && (
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gradient-to-r from-slate-800 to-slate-700 text-white text-left">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Plan</th>
-                <th className="px-4 py-3 font-semibold">AC</th>
-                <th className="px-4 py-3 font-semibold">Province</th>
-                <th className="px-4 py-3 font-semibold">Actions</th>
+        <div className="w-full min-w-0 rounded-2xl border border-gray-200/80 bg-white shadow-[0_4px_24px_-4px_rgba(3,46,161,0.08),0_2px_8px_-2px_rgba(0,0,0,0.06)] overflow-hidden">
+          <table className="w-full table-fixed border-collapse text-left text-sm">
+            <colgroup>
+              <col className="w-[30%]" />
+              <col className="w-[14%]" />
+              <col className="w-[20%]" />
+              <col className="w-[12%]" />
+              <col className="w-[24%]" />
+            </colgroup>
+            <thead>
+              <tr className="bg-gradient-to-r from-[#032EA1]/[0.07] via-[#032EA1]/[0.04] to-transparent border-b border-[#032EA1]/15">
+                <th className="px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">Plan</th>
+                <th className="px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">AC</th>
+                <th className="px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">AC Name</th>
+                <th className="px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">Province</th>
+                <th className="px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {ministryQueue.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
                     No plans pending ministry approval.
                   </td>
                 </tr>
               ) : (
-                ministryQueue.map((p) => (
-                  <tr key={p.id} className="hover:bg-gray-50/80">
-                    <td className="px-4 py-3 font-medium text-gray-900">{p.title}</td>
-                    <td className="px-4 py-3 text-gray-600">{p.acCode}</td>
-                    <td className="px-4 py-3 text-gray-600">{p.province}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => ministryApprove(p)}
-                          className="rounded-lg bg-emerald-600 text-white text-xs font-medium px-3 py-1.5 hover:bg-emerald-700"
+                ministryQueue.map((p, rowIdx) => (
+                  <tr
+                    key={p.id}
+                    className={`${rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60"} hover:bg-[#032EA1]/[0.04]`}
+                  >
+                    <td className="px-3 py-2.5 align-middle">
+                      <span className="text-sm font-semibold text-gray-900">{p.title}</span>
+                    </td>
+                    <td className="px-3 py-2.5 align-middle">
+                      <span className="inline-flex font-mono text-xs font-semibold text-[#032EA1] bg-[#032EA1]/8 px-2 py-0.5 rounded-md border border-[#032EA1]/10">
+                        {p.acCode}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 align-middle text-gray-700">{p.acName}</td>
+                    <td className="px-3 py-2.5 align-middle text-gray-700">{p.province}</td>
+                    <td className="px-3 py-2.5 align-middle">
+                      <div className="flex flex-col gap-1.5">
+                        <select
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          className="w-56 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white text-gray-700"
                         >
-                          Approve
-                        </button>
-                        <div className="flex flex-col gap-1">
-                          <select
-                            value={rejectReason}
-                            onChange={(e) => setRejectReason(e.target.value)}
-                            className="text-xs border border-gray-200 rounded-lg px-2 py-1"
+                          {REJECTION_REASONS.map((r) => (
+                            <option key={r} value={r}>
+                              {r}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          value={rejectText}
+                          onChange={(e) => setRejectText(e.target.value)}
+                          placeholder="Explanation (required)"
+                          className="w-56 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5"
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => ministryApprove(p)}
+                            className="rounded-lg bg-emerald-600 text-white text-xs font-medium px-3 py-1.5 hover:bg-emerald-700 shadow-sm"
                           >
-                            {REJECTION_REASONS.map((r) => (
-                              <option key={r} value={r}>
-                                {r}
-                              </option>
-                            ))}
-                          </select>
-                          <input
-                            value={rejectText}
-                            onChange={(e) => setRejectText(e.target.value)}
-                            placeholder="Explanation (required)"
-                            className="text-xs border border-gray-200 rounded-lg px-2 py-1 w-56"
-                          />
+                            Approve
+                          </button>
                           <button
                             type="button"
                             onClick={() => ministryReject(p)}
-                            className="rounded-lg bg-red-600 text-white text-xs font-medium px-3 py-1.5 hover:bg-red-700 w-fit"
+                            className="rounded-lg bg-red-600 text-white text-xs font-medium px-3 py-1.5 hover:bg-red-700 shadow-sm"
                           >
                             Reject
                           </button>
@@ -898,18 +1274,99 @@ export function AdminBusinessPlanWorkflow() {
       )}
 
       {tab === "history" && (
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 max-h-[520px] overflow-y-auto">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">Permanent workflow history</h2>
-          <ul className="space-y-4">
-            {history.map((h) => (
-              <li key={h.id} className="border-l-4 border-[#0F2F8F]/30 pl-4 text-sm">
-                <span className="text-xs text-gray-400">{new Date(h.at).toLocaleString()}</span>
-                <p className="font-medium text-gray-900 mt-1">{h.status}</p>
-                <p className="text-gray-600 text-xs mt-0.5">{h.actor} · Plan {h.planId}</p>
-                <p className="text-gray-500 mt-2">{h.note}</p>
-              </li>
-            ))}
-          </ul>
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6">
+          <div className="mb-5 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-800">Permanent workflow history</h2>
+            <button
+              type="button"
+              onClick={() => toast.message("History export prepared (demo).")}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Download report
+            </button>
+          </div>
+
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
+            {historyByPlan.length === 0 ? (
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+                No workflow history yet.
+              </div>
+            ) : (
+              historyByPlan.map(({ plan, timeline }) => {
+                const isOpen = expandedHistoryPlans.includes(plan!.id);
+                const latest = timeline[timeline.length - 1];
+                return (
+                  <div key={plan!.id} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => toggleHistoryPlan(plan!.id)}
+                      className="flex w-full items-center justify-between gap-3 bg-slate-50 px-4 py-3 text-left hover:bg-slate-100"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-gray-900">{plan!.title}</p>
+                        <p className="mt-0.5 text-xs text-gray-500">
+                          <span className="font-mono">{plan!.id}</span> • {plan!.acCode} • {timeline.length} events
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="hidden rounded-md bg-white px-2 py-0.5 text-[11px] text-slate-600 sm:inline">
+                          Last update: {new Date(latest.at).toLocaleDateString()}
+                        </span>
+                        {isOpen ? (
+                          <ChevronDown className="h-4 w-4 text-gray-500" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-gray-500" />
+                        )}
+                      </div>
+                    </button>
+
+                    {isOpen && (
+                      <div className="p-3">
+                        <div className="relative space-y-2">
+                          <div className="absolute bottom-2 left-[13px] top-2 w-px bg-slate-200" />
+                          {timeline.map((h) => {
+                          const visual = getHistoryVisual(h.status);
+                          const StatusIcon = visual.Icon;
+                          return (
+                            <div key={h.id} className="relative flex gap-3">
+                              <span
+                                className={`relative z-10 mt-3 inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full ring-2 ring-white ${visual.nodeClass}`}
+                              />
+                              <div className={`flex-1 rounded-lg border p-3 ${visual.cardBorder} ${visual.cardBg}`}>
+                                <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                                  <p className={`inline-flex items-center gap-1.5 text-sm font-semibold ${visual.titleClass}`}>
+                                    <StatusIcon className="h-3.5 w-3.5" />
+                                    {h.status}
+                                    {h.revisionNo ? (
+                                      <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+                                        Revision {h.revisionNo}
+                                      </span>
+                                    ) : null}
+                                  </p>
+                                  <time className="text-xs text-slate-500">{new Date(h.at).toLocaleString()}</time>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2 text-xs">
+                                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-100 px-1 font-semibold text-blue-700">
+                                    {initialsFromActor(h.actor)}
+                                  </span>
+                                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-slate-600">{h.actor}</span>
+                                  <span className="text-slate-300">•</span>
+                                  <span className="font-mono text-slate-500">Step {h.stepNo}</span>
+                                </div>
+                                <p className="mt-2 text-xs italic text-slate-500">{h.note}</p>
+                              </div>
+                            </div>
+                          );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
 
@@ -988,6 +1445,8 @@ export function AdminBusinessPlanWorkflow() {
           </p>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -665,7 +665,7 @@ export function Member360Form() {
                           <th className="px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">Land Name</th>
                           <th className="px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">Crop Name</th>
                           <th className="px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">Expected Yield / Year</th>
-                          <th className="px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">No. of Plants</th>
+                          <th className="px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">Number of Plants/area</th>
                           <th className="px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1] text-center">Actions</th>
                         </tr>
                       </thead>
@@ -754,7 +754,7 @@ export function Member360Form() {
                       <input type="text" placeholder="e.g., 3.5 tons/ha" value={cropForm.yield} onChange={(e) => setCropForm((f) => ({ ...f, yield: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white" />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Number of Plants</label>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Number of Plants/area</label>
                       <input type="text" placeholder="e.g., 1000 plants or 500 kg/ha" value={cropForm.plants} onChange={(e) => setCropForm((f) => ({ ...f, plants: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white" />
                     </div>
                   </div>
