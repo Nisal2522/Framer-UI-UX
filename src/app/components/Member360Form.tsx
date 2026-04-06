@@ -86,7 +86,24 @@ export function Member360Form() {
   type DocRow = { docName: string; landName: string; uploadDate: string; fileSize: string; fileName: string };
   const EMPTY_DOC: DocRow = { docName: "", landName: "", uploadDate: "", fileSize: "", fileName: "" };
   const [docRows, setDocRows] = useState<DocRow[]>(
-    isEditMode ? [{ docName: "Land Certificate", landName: "North Rice Field", uploadDate: "Mar 15, 2024", fileSize: "2.3 MB", fileName: "land_certificate.pdf" }] : []
+    isEditMode
+      ? [
+          {
+            docName: "Land Certificate",
+            landName: "North Rice Field",
+            uploadDate: "Mar 15, 2024",
+            fileSize: "2.3 MB",
+            fileName: "land_certificate.pdf",
+          },
+          {
+            docName: "Meeting Minutes - 2026",
+            landName: "—",
+            uploadDate: "Feb 2, 2026",
+            fileSize: "1.1 MB",
+            fileName: "meeting_minutes_2026.pdf",
+          },
+        ]
+      : []
   );
   const [docPanelOpen, setDocPanelOpen] = useState(false);
   const [docPanelVisible, setDocPanelVisible] = useState(false);
