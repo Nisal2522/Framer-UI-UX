@@ -20,6 +20,7 @@ import {
   UserCheck,
   Activity,
   BarChart3,
+  Calendar,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ChatbotWidget } from "./ChatbotWidget";
@@ -35,14 +36,34 @@ const LANGUAGE_OPTIONS: { code: LangCode; label: string; native: string }[] = [
   { code: "TH", label: "Thai", native: "ภาษาไทย" },
 ];
 
-const cooperativeNavigation = [
-  { name: "AC Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { name: "AC Profile", path: "/dashboard/ac-profile", icon: Building2 },
-  { name: "Committee Structure", path: "/dashboard/committee-structure", icon: UserCircle },
-  { name: "Members", path: "/dashboard/farmer-members", icon: Users },
-  { name: "Assets", path: "/dashboard/assets", icon: Package },
-  { name: "Business Plans", path: "/dashboard/business-plans", icon: FileText },
-  { name: "Knowledge Hub", path: "/dashboard/knowledge", icon: BookOpen },
+type CoopNavIcon = typeof LayoutDashboard;
+
+type CooperativeNavEntry =
+  | { kind: "link"; name: string; path: string; icon: CoopNavIcon; end?: boolean }
+  | {
+      kind: "calendar";
+      name: string;
+      icon: typeof Calendar;
+      children: { name: string; path: string }[];
+    };
+
+const cooperativeNav: CooperativeNavEntry[] = [
+  { kind: "link", name: "AC Dashboard", path: "/dashboard", icon: LayoutDashboard, end: true },
+  { kind: "link", name: "AC Profile", path: "/dashboard/ac-profile", icon: Building2 },
+  { kind: "link", name: "Committee Structure", path: "/dashboard/committee-structure", icon: UserCircle },
+  { kind: "link", name: "Members", path: "/dashboard/farmer-members", icon: Users },
+  { kind: "link", name: "Assets", path: "/dashboard/assets", icon: Package },
+  { kind: "link", name: "Business Plans", path: "/dashboard/business-plans", icon: FileText },
+  {
+    kind: "calendar",
+    name: "Calendar",
+    icon: Calendar,
+    children: [
+      { name: "Planting and Harvesting", path: "/dashboard/calendar/harvesting-planning" },
+      { name: "Training", path: "/dashboard/calendar/training" },
+    ],
+  },
+  { kind: "link", name: "Knowledge Hub", path: "/dashboard/knowledge", icon: BookOpen },
 ];
 
 const adminNavigation = [
@@ -66,13 +87,14 @@ export function Root() {
   const [selectedLanguage, setSelectedLanguage] = useState<LangCode>("EN");
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [calendarExpanded, setCalendarExpanded] = useState(() =>
+    location.pathname.startsWith("/dashboard/calendar")
+  );
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   const portalUser = getPortalUser();
   const admin = isGovernmentAdmin();
-  const navigation = admin ? adminNavigation : cooperativeNavigation;
-
   useEffect(() => {
     if (admin && location.pathname.startsWith("/dashboard/") && !location.pathname.startsWith("/dashboard/admin")) {
       navigate("/dashboard/admin", { replace: true });
@@ -84,6 +106,10 @@ export function Root() {
       navigate("/dashboard", { replace: true });
     }
   }, [admin, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (location.pathname.startsWith("/dashboard/calendar")) setCalendarExpanded(true);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!notifOpen) return;
@@ -153,31 +179,118 @@ export function Root() {
         {/* Navigation */}
         <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden px-2.5">
           <ul className="space-y-0.5">
-            {navigation.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  to={item.path}
-                  end={admin ? item.path === "/dashboard/admin" : item.path === "/dashboard"}
-                  title={desktopSidebarCollapsed ? item.name : undefined}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200 px-2.5 py-2.5 ${
-                      isActive
-                        ? "bg-[#0F2F8F] text-white shadow-sm"
-                        : "text-gray-600 hover:bg-blue-50 hover:text-[#0F2F8F]"
-                    }`
+            {admin
+              ? adminNavigation.map((item) => (
+                  <li key={item.name}>
+                    <NavLink
+                      to={item.path}
+                      end={item.path === "/dashboard/admin"}
+                      title={desktopSidebarCollapsed ? item.name : undefined}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200 px-2.5 py-2.5 ${
+                          isActive
+                            ? "bg-[#0F2F8F] text-white shadow-sm"
+                            : "text-gray-600 hover:bg-blue-50 hover:text-[#0F2F8F]"
+                        }`
+                      }
+                    >
+                      <item.icon className="w-[18px] h-[18px] shrink-0" />
+                      <span
+                        className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${
+                          desktopSidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                    </NavLink>
+                  </li>
+                ))
+              : cooperativeNav.map((entry) => {
+                  if (entry.kind === "link") {
+                    return (
+                      <li key={entry.path}>
+                        <NavLink
+                          to={entry.path}
+                          end={entry.end === true}
+                          title={desktopSidebarCollapsed ? entry.name : undefined}
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200 px-2.5 py-2.5 ${
+                              isActive
+                                ? "bg-[#0F2F8F] text-white shadow-sm"
+                                : "text-gray-600 hover:bg-blue-50 hover:text-[#0F2F8F]"
+                            }`
+                          }
+                        >
+                          <entry.icon className="w-[18px] h-[18px] shrink-0" />
+                          <span
+                            className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${
+                              desktopSidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+                            }`}
+                          >
+                            {entry.name}
+                          </span>
+                        </NavLink>
+                      </li>
+                    );
                   }
-                >
-                  <item.icon className="w-[18px] h-[18px] shrink-0" />
-                  <span
-                    className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${
-                      desktopSidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
-                    }`}
-                  >
-                    {item.name}
-                  </span>
-                </NavLink>
-              </li>
-            ))}
+                  const calendarActive = location.pathname.startsWith("/dashboard/calendar");
+                  return (
+                    <li key="calendar" className="space-y-0.5">
+                      <button
+                        type="button"
+                        title={desktopSidebarCollapsed ? entry.name : undefined}
+                        onClick={() => {
+                          if (desktopSidebarCollapsed) {
+                            setDesktopSidebarCollapsed(false);
+                            setCalendarExpanded(true);
+                          } else {
+                            setCalendarExpanded((e) => !e);
+                          }
+                        }}
+                        className={`flex w-full items-center gap-3 rounded-lg text-sm font-medium transition-all duration-200 px-2.5 py-2.5 ${
+                          calendarActive
+                            ? "bg-[#0F2F8F]/12 text-[#0F2F8F]"
+                            : "text-gray-600 hover:bg-blue-50 hover:text-[#0F2F8F]"
+                        }`}
+                      >
+                        <entry.icon className="w-[18px] h-[18px] shrink-0" />
+                        <span
+                          className={`flex-1 min-w-0 text-left whitespace-nowrap overflow-hidden transition-all duration-300 ${
+                            desktopSidebarCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+                          }`}
+                        >
+                          {entry.name}
+                        </span>
+                        {!desktopSidebarCollapsed && (
+                          <ChevronDown
+                            className={`h-4 w-4 shrink-0 transition-transform ${calendarExpanded ? "rotate-180" : ""}`}
+                            aria-hidden
+                          />
+                        )}
+                      </button>
+                      {calendarExpanded && !desktopSidebarCollapsed && (
+                        <ul className="ml-2 mt-0.5 space-y-0.5 border-l border-gray-200 pl-2.5">
+                          {entry.children.map((child) => (
+                            <li key={child.path}>
+                              <NavLink
+                                to={child.path}
+                                className={({ isActive }) =>
+                                  `block rounded-lg text-xs font-medium transition-all duration-200 px-2 py-2 ${
+                                    isActive
+                                      ? "bg-[#0F2F8F] text-white shadow-sm"
+                                      : "text-gray-600 hover:bg-blue-50 hover:text-[#0F2F8F]"
+                                  }`
+                                }
+                              >
+                                {child.name}
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
           </ul>
         </nav>
 
@@ -243,25 +356,91 @@ export function Root() {
             {/* Navigation */}
             <nav className="flex-1 px-3 py-4 overflow-y-auto">
               <ul className="space-y-1">
-                {navigation.map((item) => (
-                  <li key={item.name}>
-                    <NavLink
-                      to={item.path}
-                      end={admin ? item.path === "/dashboard/admin" : item.path === "/dashboard"}
-                      onClick={() => setSidebarOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                          isActive
-                            ? "bg-[#032EA1] text-white shadow-md"
-                            : "text-gray-700 hover:bg-gray-100"
-                        }`
+                {admin
+                  ? adminNavigation.map((item) => (
+                      <li key={item.name}>
+                        <NavLink
+                          to={item.path}
+                          end={item.path === "/dashboard/admin"}
+                          onClick={() => setSidebarOpen(false)}
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              isActive
+                                ? "bg-[#032EA1] text-white shadow-md"
+                                : "text-gray-700 hover:bg-gray-100"
+                            }`
+                          }
+                        >
+                          <item.icon className="w-5 h-5" />
+                          {item.name}
+                        </NavLink>
+                      </li>
+                    ))
+                  : cooperativeNav.map((entry) => {
+                      if (entry.kind === "link") {
+                        return (
+                          <li key={entry.path}>
+                            <NavLink
+                              to={entry.path}
+                              end={entry.end === true}
+                              onClick={() => setSidebarOpen(false)}
+                              className={({ isActive }) =>
+                                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                  isActive
+                                    ? "bg-[#032EA1] text-white shadow-md"
+                                    : "text-gray-700 hover:bg-gray-100"
+                                }`
+                              }
+                            >
+                              <entry.icon className="w-5 h-5" />
+                              {entry.name}
+                            </NavLink>
+                          </li>
+                        );
                       }
-                    >
-                      <item.icon className="w-5 h-5" />
-                      {item.name}
-                    </NavLink>
-                  </li>
-                ))}
+                      const calendarActive = location.pathname.startsWith("/dashboard/calendar");
+                      return (
+                        <li key="calendar" className="space-y-0.5">
+                          <button
+                            type="button"
+                            onClick={() => setCalendarExpanded((e) => !e)}
+                            className={`flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              calendarActive
+                                ? "bg-[#032EA1]/10 text-[#032EA1]"
+                                : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                          >
+                            <entry.icon className="w-5 h-5 shrink-0" />
+                            <span className="flex-1 text-left">{entry.name}</span>
+                            <ChevronDown
+                              className={`h-4 w-4 shrink-0 transition-transform ${calendarExpanded ? "rotate-180" : ""}`}
+                              aria-hidden
+                            />
+                          </button>
+                          {calendarExpanded && (
+                            <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-gray-200 pl-3">
+                              {entry.children.map((child) => (
+                                <li key={child.path}>
+                                  <NavLink
+                                    to={child.path}
+                                    onClick={() => setSidebarOpen(false)}
+                                    className={({ isActive }) =>
+                                      `block rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                                        isActive
+                                          ? "bg-[#032EA1] text-white shadow-md"
+                                          : "text-gray-700 hover:bg-gray-100"
+                                      }`
+                                    }
+                                  >
+                                    {child.name}
+                                  </NavLink>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      );
+                    })}
               </ul>
             </nav>
 

@@ -9,6 +9,7 @@ import {
   Clock3,
   Download,
   FileText,
+  Filter,
   GitCompare,
   History,
   MessageSquare,
@@ -537,7 +538,7 @@ export function AdminBusinessPlanWorkflow() {
   const [rejectText, setRejectText] = useState("");
   const [compareA, setCompareA] = useState("AC-BB-2024-157");
   const [compareB, setCompareB] = useState("AC-SR-2023-088");
-  const [compareYear, setCompareYear] = useState("2026");
+  const [compareSearch, setCompareSearch] = useState("");
   const [supportSearch, setSupportSearch] = useState("");
   const [supportPage, setSupportPage] = useState(1);
   const [expandedHistoryPlans, setExpandedHistoryPlans] = useState<string[]>(["bp-1001"]);
@@ -684,6 +685,20 @@ export function AdminBusinessPlanWorkflow() {
   const supportRangeStart =
     supportQueueFiltered.length === 0 ? 0 : (currentSupportPage - 1) * supportPageSize + 1;
   const supportRangeEnd = Math.min(currentSupportPage * supportPageSize, supportQueueFiltered.length);
+  const compareRows = useMemo(
+    () => [
+      ["Member outreach (households)", "320", "298", "180", "172"],
+      ["Production volume (t)", "1,200", "1,050", "640", "610"],
+      ["Training sessions held", "12", "11", "8", "8"],
+      ["On-time milestone %", "90%", "84%", "88%", "82%"],
+    ],
+    []
+  );
+  const compareVisibleRows = useMemo(() => {
+    const q = compareSearch.trim().toLowerCase();
+    if (!q) return compareRows;
+    return compareRows.filter(([label]) => String(label).toLowerCase().includes(q));
+  }, [compareRows, compareSearch]);
   const historyByPlan = useMemo(() => {
     const planMap = new Map(plans.map((p) => [p.id, p]));
     const grouped = new Map<string, HistoryRow[]>();
@@ -1371,78 +1386,72 @@ export function AdminBusinessPlanWorkflow() {
       )}
 
       {tab === "compare" && (
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 space-y-4">
-          <h2 className="text-sm font-semibold text-gray-900">Side-by-side target vs actual (illustrative)</h2>
-          <div className="flex flex-wrap gap-3">
-            <select
-              value={compareA}
-              onChange={(e) => setCompareA(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2"
-            >
-              {acOptions.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <select
-              value={compareB}
-              onChange={(e) => setCompareB(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2"
-            >
-              {acOptions.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <select
-              value={compareYear}
-              onChange={(e) => setCompareYear(e.target.value)}
-              className="text-sm border border-gray-200 rounded-lg px-3 py-2"
-            >
-              <option>2026</option>
-              <option>2025</option>
-              <option>2024</option>
-            </select>
-            <select className="text-sm border border-gray-200 rounded-lg px-3 py-2">
-              <option>All cooperative types</option>
-              <option>Agricultural</option>
-              <option>Horticulture</option>
-            </select>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-base font-semibold text-slate-900">Side-by-side target vs actual</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                <Filter className="h-4 w-4" />
+                Filter
+              </button>
+              <label className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  value={compareSearch}
+                  onChange={(e) => setCompareSearch(e.target.value)}
+                  placeholder="Search indicators..."
+                  className="h-9 w-[220px] rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition focus:border-[#032EA1]/40 focus:ring-2 focus:ring-[#032EA1]/15"
+                />
+              </label>
+              <button
+                type="button"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#032EA1] px-3 text-sm font-medium text-white transition hover:bg-[#0447D4]"
+              >
+                <Download className="h-4 w-4" />
+                Export
+                <ChevronDown className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border border-gray-100 rounded-xl overflow-hidden">
-              <thead className="bg-gray-100">
+
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="min-w-full text-sm">
+              <thead className="bg-slate-50">
                 <tr>
-                  <th className="text-left px-3 py-2">Indicator</th>
-                  <th className="text-left px-3 py-2">{compareA} target</th>
-                  <th className="text-left px-3 py-2">{compareA} actual</th>
-                  <th className="text-left px-3 py-2">{compareB} target</th>
-                  <th className="text-left px-3 py-2">{compareB} actual</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[#0F2F8F]">Indicator</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[#0F2F8F]">{compareA} target</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[#0F2F8F]">{compareA} actual</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[#0F2F8F]">{compareB} target</th>
+                  <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-[#0F2F8F]">{compareB} actual</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
-                {[
-                  ["Member outreach (households)", "320", "298", "180", "172"],
-                  ["Production volume (t)", "1,200", "1,050", "640", "610"],
-                  ["Training sessions held", "12", "11", "8", "8"],
-                  ["On-time milestone %", "90%", "84%", "88%", "82%"],
-                ].map(([label, aT, aA, bT, bA]) => (
-                  <tr key={label as string} className="hover:bg-gray-50/50">
-                    <td className="px-3 py-2 font-medium text-gray-800">{label}</td>
-                    <td className="px-3 py-2 text-gray-600">{aT}</td>
-                    <td className="px-3 py-2 text-emerald-700">{aA}</td>
-                    <td className="px-3 py-2 text-gray-600">{bT}</td>
-                    <td className="px-3 py-2 text-emerald-700">{bA}</td>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {compareVisibleRows.map(([label, aT, aA, bT, bA]) => (
+                  <tr key={label as string} className="transition-colors hover:bg-slate-50/70">
+                    <td className="px-3 py-2.5 font-medium text-slate-800">{label}</td>
+                    <td className="px-3 py-2.5 text-slate-600">{aT}</td>
+                    <td className="px-3 py-2.5">
+                      <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">{aA}</span>
+                    </td>
+                    <td className="px-3 py-2.5 text-slate-600">{bT}</td>
+                    <td className="px-3 py-2.5">
+                      <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">{bA}</span>
+                    </td>
                   </tr>
                 ))}
+                {compareVisibleRows.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-500">
+                      No indicators match your search.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-gray-400">
-            Filter by province, plan year, and cooperative type when connected to live analytics services.
-          </p>
         </div>
       )}
         </div>

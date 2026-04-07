@@ -1,3 +1,6 @@
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { cn } from "./ui/utils";
 import {
   Users,
   TrendingUp,
@@ -14,6 +17,13 @@ import {
   UserX,
   Activity,
   Heart,
+  GraduationCap,
+  UserPlus,
+  BadgeCheck,
+  Search,
+  Plus,
+  Trash2,
+  X,
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Tooltip as LeafletTooltip, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -113,7 +123,208 @@ const farmerMapMembers = [
   { id: "FM-020", name: "Sim Borey",        lat: 13.14, lon: 103.20, landArea: 6.8, area: "Battambang",       address: "Commune Ek Phnom, District Ek Phnom",           image: "https://images.unsplash.com/photo-1474978528675-4a50a4508dc6?auto=format&fit=crop&w=80&q=80" },
 ];
 
+/** Scheduled trainings — joinedCount updates when members register (demo; wire to API later) */
+type TrainingRow = {
+  id: string;
+  title: string;
+  month: string;
+  day: number;
+  year: number;
+  time: string;
+  location: string;
+  joinedCount: number;
+  capacity: number;
+};
+
+type JoinedMember = {
+  id: string;
+  memberId: string;
+  trainingId: string;
+  name: string;
+  registeredAt: string;
+};
+
+const upcomingTrainings: TrainingRow[] = [
+  {
+    id: "tr-1",
+    title: "GAP refresher — record keeping",
+    month: "Apr",
+    day: 9,
+    year: 2026,
+    time: "08:30 – 12:00",
+    location: "AC meeting hall",
+    joinedCount: 28,
+    capacity: 40,
+  },
+  {
+    id: "tr-2",
+    title: "Post-harvest handling demo",
+    month: "Apr",
+    day: 19,
+    year: 2026,
+    time: "07:00 – 11:00",
+    location: "Central warehouse apron",
+    joinedCount: 45,
+    capacity: 45,
+  },
+  {
+    id: "tr-3",
+    title: "Financial literacy — savings circles",
+    month: "Apr",
+    day: 16,
+    year: 2026,
+    time: "14:00 – 16:30",
+    location: "Commune office (Annex)",
+    joinedCount: 18,
+    capacity: 35,
+  },
+];
+
 export function ACDashboard() {
+  const [trainingRows, setTrainingRows] = useState(upcomingTrainings);
+  const [trainingMembers, setTrainingMembers] = useState<JoinedMember[]>([
+    {
+      id: "jm-1",
+      memberId: "FM-001",
+      trainingId: "tr-1",
+      name: "Sok Pisey",
+      registeredAt: "Apr 4, 2026",
+    },
+    {
+      id: "jm-2",
+      memberId: "FM-012",
+      trainingId: "tr-3",
+      name: "Chan Pisey",
+      registeredAt: "Apr 3, 2026",
+    },
+  ]);
+  const [registerTrainingId, setRegisterTrainingId] = useState<string | null>(null);
+  const [memberSearch, setMemberSearch] = useState("");
+
+  const selectedTraining = useMemo(
+    () => trainingRows.find((t) => t.id === registerTrainingId) ?? null,
+    [trainingRows, registerTrainingId]
+  );
+  const selectedTrainingMembers = useMemo(
+    () => trainingMembers.filter((m) => m.trainingId === registerTrainingId),
+    [trainingMembers, registerTrainingId]
+  );
+  const memberDirectory = useMemo(
+    () => farmerMapMembers.map((member) => ({ id: member.id, name: member.name })),
+    []
+  );
+  const selectedTrainingMemberIds = useMemo(
+    () => new Set(selectedTrainingMembers.map((member) => member.memberId)),
+    [selectedTrainingMembers]
+  );
+  const filteredMembers = useMemo(() => {
+    const keyword = memberSearch.trim().toLowerCase();
+    return memberDirectory.filter((member) => {
+      if (selectedTrainingMemberIds.has(member.id)) return false;
+      if (!keyword) return true;
+      return member.name.toLowerCase().includes(keyword);
+    });
+  }, [memberDirectory, memberSearch, selectedTrainingMemberIds]);
+
+  const availableSeats = selectedTraining
+    ? Math.max(selectedTraining.capacity - selectedTraining.joinedCount, 0)
+    : 0;
+
+  const adjustJoinedCount = (trainingId: string, change: number) => {
+    setTrainingRows((prev) =>
+      prev.map((row) => {
+        if (row.id !== trainingId) return row;
+        const joinedCount = Math.min(row.capacity, Math.max(0, row.joinedCount + change));
+        return { ...row, joinedCount };
+      })
+    );
+  };
+
+  const openRegisterModal = (trainingId: string) => {
+    setRegisterTrainingId(trainingId);
+    setMemberSearch("");
+  };
+
+  const addMemberToTraining = (memberId: string) => {
+    if (!selectedTraining) return;
+    if (availableSeats <= 0) {
+      toast.error("This training is already full.");
+      return;
+    }
+
+    if (selectedTrainingMemberIds.has(memberId)) {
+      toast.error("This member is already registered for the selected training.");
+      return;
+    }
+
+    const member = memberDirectory.find((item) => item.id === memberId);
+    if (!member) return;
+
+    setTrainingMembers((prev) => [
+      {
+        id: `jm-${Date.now()}`,
+        memberId: member.id,
+        trainingId: selectedTraining.id,
+        name: member.name,
+        registeredAt: new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+      },
+      ...prev,
+    ]);
+
+    adjustJoinedCount(selectedTraining.id, 1);
+    toast.success(`Added ${member.name} to ${selectedTraining.title}.`);
+  };
+
+  const addAllMembersToTraining = () => {
+    if (!selectedTraining) return;
+    if (availableSeats <= 0) {
+      toast.error("This training is already full.");
+      return;
+    }
+    if (filteredMembers.length === 0) {
+      toast.message("No members available to add.");
+      return;
+    }
+
+    const membersToAdd = filteredMembers.slice(0, availableSeats);
+    const today = new Date().toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    setTrainingMembers((prev) => [
+      ...membersToAdd.map((member, index) => ({
+        id: `jm-${Date.now()}-${index}`,
+        memberId: member.id,
+        trainingId: selectedTraining.id,
+        name: member.name,
+        registeredAt: today,
+      })),
+      ...prev,
+    ]);
+    adjustJoinedCount(selectedTraining.id, membersToAdd.length);
+    toast.success(
+      membersToAdd.length === filteredMembers.length
+        ? `Added ${membersToAdd.length} members.`
+        : `Added ${membersToAdd.length} members until capacity was reached.`
+    );
+  };
+
+  const removeMemberFromTraining = (joinedMemberId: string) => {
+    if (!selectedTraining) return;
+    const memberToRemove = selectedTrainingMembers.find((member) => member.id === joinedMemberId);
+    if (!memberToRemove) return;
+
+    setTrainingMembers((prev) => prev.filter((member) => member.id !== joinedMemberId));
+    adjustJoinedCount(selectedTraining.id, -1);
+    toast.message(`${memberToRemove.name} removed from this training.`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -208,6 +419,219 @@ export function ACDashboard() {
 
         </div>
       </div>
+
+      {/* Upcoming trainings — executive registration overview */}
+      <section
+        className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm"
+        aria-labelledby="upcoming-trainings-heading"
+      >
+        <div className="relative border-b border-slate-100 bg-white px-3.5 py-3 sm:px-4 sm:py-3.5">
+          <div className="relative flex flex-col gap-3">
+            <div className="min-w-0 flex-1">
+              <h2 id="upcoming-trainings-heading" className="text-xl font-semibold tracking-tight text-slate-900">
+                Upcoming trainings
+              </h2>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2 p-2.5 sm:p-3">
+          {trainingRows.map((t) => {
+            return (
+              <article
+                key={t.id}
+                className="group relative overflow-hidden rounded-lg border border-slate-200/90 bg-white transition duration-200 hover:border-[#032EA1]/25 hover:shadow-sm"
+              >
+                <div className="flex flex-col gap-2.5 p-3 sm:p-3.5 lg:flex-row lg:items-center lg:gap-4">
+                  <div className="flex shrink-0 items-center gap-3 lg:w-[76px] lg:flex-col lg:items-stretch lg:gap-0 lg:pl-0">
+                    <div className="flex h-[4rem] w-[4rem] flex-col items-center justify-center rounded-lg bg-gradient-to-br from-[#032EA1] to-[#0447D4] text-white shadow-sm ring-1 ring-[#032EA1]/25 lg:h-auto lg:min-h-[4.5rem] lg:w-full">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">{t.month}</span>
+                      <span className="text-xl font-bold tabular-nums leading-none">{t.day}</span>
+                      <span className="text-[10px] font-medium tabular-nums text-white/60">{t.year}</span>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-sm font-semibold leading-snug text-slate-900 sm:text-base">{t.title}</h3>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#032EA1]/8 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#032EA1] ring-1 ring-[#032EA1]/15">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#032EA1]" aria-hidden />
+                        Open
+                      </span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 ring-1 ring-slate-200/80">
+                        <Clock className="h-3.5 w-3.5 text-[#032EA1]" aria-hidden />
+                        {t.time}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 ring-1 ring-slate-200/80">
+                        <MapPinned className="h-3.5 w-3.5 text-[#032EA1]" aria-hidden />
+                        <span className="max-w-[220px] truncate sm:max-w-none">{t.location}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => openRegisterModal(t.id)}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-[#032EA1]/20 bg-[#032EA1] px-2.5 py-0.5 text-xs font-semibold text-white transition hover:bg-[#0a3cb0]"
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                        Register
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="w-full shrink-0 border-t border-slate-100 pt-2.5 lg:w-[210px] lg:border-t-0 lg:pt-0 lg:text-right">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 lg:text-right">Registered members</p>
+                    <p className="mt-0.5 text-slate-900">
+                      <span className="text-2xl font-bold tabular-nums text-[#032EA1]">{t.joinedCount}</span>
+                    </p>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {registerTrainingId !== null && (
+        <>
+          <div
+            className="fixed inset-0 z-[100] bg-black/45"
+            onClick={() => setRegisterTrainingId(null)}
+            aria-hidden
+          />
+          <aside className="fixed inset-y-0 right-0 z-[110] w-full max-w-[720px] border-l border-gray-200 bg-white shadow-2xl">
+            <div className="flex h-full flex-col">
+              <div className="flex items-center justify-between bg-[#032EA1] px-5 py-3.5 text-white">
+                <div>
+                  <h3 className="text-sm font-semibold">Register member for training</h3>
+                  <p className="text-xs text-blue-100 mt-0.5">
+                    {selectedTraining
+                      ? `${selectedTraining.title} • ${selectedTraining.month} ${selectedTraining.day}, ${selectedTraining.year} • ${selectedTraining.time}`
+                      : "Select a training session"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRegisterTrainingId(null)}
+                  className="rounded-md p-1 text-white/90 hover:bg-white/10 hover:text-white"
+                  aria-label="Close registration panel"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="grid flex-1 gap-4 overflow-y-auto p-4 lg:grid-cols-2">
+                <section className="rounded-lg border border-gray-200 bg-slate-50/60 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h4 className="text-sm font-semibold text-gray-900">Add members</h4>
+                    <button
+                      type="button"
+                      onClick={addAllMembersToTraining}
+                      disabled={!selectedTraining || availableSeats <= 0 || filteredMembers.length === 0}
+                      className="inline-flex items-center gap-1 rounded-md border border-[#032EA1]/25 bg-white px-2.5 py-1.5 text-xs font-semibold text-[#032EA1] transition hover:bg-[#032EA1]/5 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add All
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">{availableSeats} seats available</p>
+                  <div className="mt-3">
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-600">Search members</span>
+                      <div className="relative">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <input
+                          value={memberSearch}
+                          onChange={(e) => setMemberSearch(e.target.value)}
+                          placeholder="Search by member name"
+                          className="w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-[#032EA1] focus:ring-2 focus:ring-[#032EA1]/20"
+                        />
+                      </div>
+                    </label>
+                  </div>
+                  <div className="mt-3 max-h-[320px] space-y-2 overflow-y-auto pr-1">
+                    {filteredMembers.length === 0 ? (
+                      <p className="rounded-md border border-dashed border-gray-300 bg-white px-3 py-4 text-center text-sm text-gray-500">
+                        No available members match your search.
+                      </p>
+                    ) : (
+                      filteredMembers.map((member) => (
+                        <div key={member.id} className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">{member.name}</p>
+                            <p className="text-[11px] text-gray-500">{member.id}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => addMemberToTraining(member.id)}
+                            disabled={!selectedTraining || availableSeats <= 0}
+                            className="inline-flex items-center gap-1 rounded-md border border-[#032EA1]/25 bg-[#032EA1] px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-[#0a3cb0] disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            Add
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </section>
+
+                <section className="rounded-lg border border-gray-200 bg-white p-4">
+                  <h4 className="text-sm font-semibold text-gray-900">Added members</h4>
+                  <p className="mt-0.5 text-xs text-gray-500">
+                    {selectedTraining ? `${selectedTraining.joinedCount}/${selectedTraining.capacity} registered members` : "No training selected"}
+                  </p>
+                  <div className="mt-3 max-h-[320px] space-y-2 overflow-y-auto pr-1">
+                    {selectedTrainingMembers.length === 0 ? (
+                      <p className="rounded-md border border-dashed border-gray-300 bg-slate-50 px-3 py-4 text-center text-sm text-gray-500">
+                        No member records yet.
+                      </p>
+                    ) : (
+                      selectedTrainingMembers.map((m) => (
+                        <div key={m.id} className="rounded-md border border-gray-200 px-3 py-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-semibold text-gray-900">{m.name}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 ring-1 ring-emerald-200">
+                                <BadgeCheck className="h-3 w-3" />
+                                Added
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => removeMemberFromTraining(m.id)}
+                                className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-700 transition hover:bg-rose-100"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
+                            <span>{m.memberId}</span>
+                            <span className="text-gray-400">{m.registeredAt}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </section>
+              </div>
+
+              <div className="border-t border-gray-200 bg-white px-5 py-3">
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setRegisterTrainingId(null)}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-[#032EA1] px-3 py-2 text-sm font-semibold text-white hover:bg-[#0a3cb0]"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </>
+      )}
 
       {/* 3. Business Plan Status Widget - Critical Priority */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">

@@ -16,6 +16,8 @@ import { CommuneVerification } from "./components/admin/CommuneVerification";
 import { AdminBusinessPlanWorkflow } from "./components/admin/AdminBusinessPlanWorkflow";
 import { ProgressReportingAdmin } from "./components/admin/ProgressReportingAdmin";
 import { AdminReportingDashboard } from "./components/admin/AdminReportingDashboard";
+import { CalendarHarvestingPlanning } from "./components/CalendarHarvestingPlanning";
+import { CalendarTraining } from "./components/CalendarTraining";
 
 const routes = [
   {
@@ -40,6 +42,8 @@ const routes = [
       { path: "business-plans/new", Component: BusinessPlanTemplate },
       { path: "assets", Component: AssetManagement },
       { path: "knowledge", Component: KnowledgeManagement },
+      { path: "calendar/harvesting-planning", Component: CalendarHarvestingPlanning },
+      { path: "calendar/training", Component: CalendarTraining },
       { path: "reports", Component: Reports },
       { path: "admin", Component: NationalDashboard },
       { path: "admin/commune-verification", Component: CommuneVerification },
