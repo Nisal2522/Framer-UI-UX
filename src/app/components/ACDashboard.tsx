@@ -132,6 +132,7 @@ type TrainingRow = {
   year: number;
   time: string;
   location: string;
+  presenter: "GDA" | "FAO" | "MAFF" | "DACP";
   joinedCount: number;
   capacity: number;
 };
@@ -153,6 +154,7 @@ const upcomingTrainings: TrainingRow[] = [
     year: 2026,
     time: "08:30 – 12:00",
     location: "AC meeting hall",
+    presenter: "GDA",
     joinedCount: 28,
     capacity: 40,
   },
@@ -164,6 +166,7 @@ const upcomingTrainings: TrainingRow[] = [
     year: 2026,
     time: "07:00 – 11:00",
     location: "Central warehouse apron",
+    presenter: "FAO",
     joinedCount: 45,
     capacity: 45,
   },
@@ -175,8 +178,21 @@ const upcomingTrainings: TrainingRow[] = [
     year: 2026,
     time: "14:00 – 16:30",
     location: "Commune office (Annex)",
+    presenter: "MAFF",
     joinedCount: 18,
     capacity: 35,
+  },
+  {
+    id: "tr-4",
+    title: "Water management for dry spells",
+    month: "Apr",
+    day: 23,
+    year: 2026,
+    time: "09:00 – 11:00",
+    location: "AC training room",
+    presenter: "DACP",
+    joinedCount: 16,
+    capacity: 30,
   },
 ];
 
@@ -468,19 +484,23 @@ export function ACDashboard() {
                         <MapPinned className="h-3.5 w-3.5 text-[#032EA1]" aria-hidden />
                         <span className="max-w-[220px] truncate sm:max-w-none">{t.location}</span>
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => openRegisterModal(t.id)}
-                        className="inline-flex items-center gap-1.5 rounded-md border border-[#032EA1]/20 bg-[#032EA1] px-2.5 py-0.5 text-xs font-semibold text-white transition hover:bg-[#0a3cb0]"
-                      >
-                        <UserPlus className="h-3.5 w-3.5" />
-                        Register
-                      </button>
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2 py-0.5 text-xs font-semibold text-[#032EA1] ring-1 ring-blue-200/80">
+                        <GraduationCap className="h-3.5 w-3.5" aria-hidden />
+                        Presented by {t.presenter}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="w-full shrink-0 border-t border-slate-100 pt-2.5 lg:w-[210px] lg:border-t-0 lg:pt-0 lg:text-right">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 lg:text-right">Registered members</p>
+                  <div className="w-full shrink-0 border-t border-slate-100 pt-2.5 lg:w-[210px] lg:border-t-0 lg:pt-0">
+                    <button
+                      type="button"
+                      onClick={() => openRegisterModal(t.id)}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-[#032EA1]/20 bg-[#032EA1] px-2.5 py-0.5 text-xs font-semibold text-white transition hover:bg-[#0a3cb0]"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                      Register
+                    </button>
+                    <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Registered members</p>
                     <p className="mt-0.5 text-slate-900">
                       <span className="text-2xl font-bold tabular-nums text-[#032EA1]">{t.joinedCount}</span>
                     </p>
@@ -506,7 +526,7 @@ export function ACDashboard() {
                   <h3 className="text-sm font-semibold">Register member for training</h3>
                   <p className="text-xs text-blue-100 mt-0.5">
                     {selectedTraining
-                      ? `${selectedTraining.title} • ${selectedTraining.month} ${selectedTraining.day}, ${selectedTraining.year} • ${selectedTraining.time}`
+                      ? `${selectedTraining.title} • ${selectedTraining.month} ${selectedTraining.day}, ${selectedTraining.year} • ${selectedTraining.time} • Presenter: ${selectedTraining.presenter}`
                       : "Select a training session"}
                   </p>
                 </div>

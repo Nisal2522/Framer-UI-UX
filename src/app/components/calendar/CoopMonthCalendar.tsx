@@ -8,16 +8,15 @@ import {
   startOfWeek,
   subWeeks,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Clock, MapPin, Video } from "lucide-react";
-import { toast } from "sonner";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../ui/utils";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 
 export type CoopCalendarEvent = {
   id: string;
   date: Date;
   title: string;
   category: string;
+  presenter?: string;
   time?: string;
   location?: string;
   notes?: string;
@@ -96,20 +95,6 @@ export function CoopMonthCalendar({
     for (const c of categories) m[c.key] = c.label;
     return m;
   }, [categories]);
-
-  const [meetingModal, setMeetingModal] = useState<{ day: Date; events: CoopCalendarEvent[] } | null>(null);
-
-  const openMeetingModal = (day: Date, dayEvents: CoopCalendarEvent[]) => {
-    if (dayEvents.length === 0) return;
-    setSelected(day);
-    setMeetingModal({ day, events: dayEvents });
-  };
-
-  const handleJoinMeeting = (e: CoopCalendarEvent) => {
-    const url = e.joinUrl ?? `https://meet.google.com/lookup/${encodeURIComponent(e.id)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-    toast.message("Opening meeting", { description: "Demo link — replace with your video provider URL." });
-  };
 
   const workDays = useMemo(() => {
     const monday = startOfWeek(viewStart, { weekStartsOn: 1 });
@@ -202,16 +187,14 @@ export function CoopMonthCalendar({
                           <button
                             key={e.id}
                             type="button"
-                            onClick={() => {
-                              setSelected(day);
-                              openMeetingModal(day, [e]);
-                            }}
+                            onClick={() => setSelected(day)}
                             className={cn(
                               "absolute left-1.5 right-1.5 rounded-md border px-2 py-1.5 text-left shadow-md transition hover:brightness-110",
                               tinted ? cn(categoryCell[e.category], "border-black/30") : "bg-indigo-600 text-white border-indigo-400"
                             )}
                             style={{ top: `${top + idx * 2}px`, height: `${height}px` }}
                           >
+                            {e.presenter ? <p className="text-[9px] font-bold uppercase tracking-wide text-white/85">Presenter: {e.presenter}</p> : null}
                             <p className="line-clamp-2 text-[11px] font-semibold leading-tight">{e.title}</p>
                             {e.time ? <p className="mt-1 text-[10px] text-white/85">{e.time}</p> : null}
                           </button>
@@ -238,76 +221,6 @@ export function CoopMonthCalendar({
         </div>
       </div>
 
-      <Dialog open={meetingModal !== null} onOpenChange={(open) => !open && setMeetingModal(null)}>
-        <DialogContent className="sm:max-w-lg bg-white border-gray-200 text-gray-900">
-          <DialogHeader>
-            <DialogTitle className="text-[#032EA1]">Meeting details</DialogTitle>
-            <DialogDescription className="text-gray-600">
-              {meetingModal ? format(meetingModal.day, "EEEE, MMMM d, yyyy") : ""}
-            </DialogDescription>
-          </DialogHeader>
-          {meetingModal && (
-            <div className="space-y-4 max-h-[min(60vh,420px)] overflow-y-auto pr-1">
-              {meetingModal.events.map((e) => {
-                const tinted = Boolean(categoryCell[e.category]);
-                return (
-                  <div
-                    key={e.id}
-                    className={cn(
-                      "rounded-xl border p-4 space-y-3",
-                      tinted ? cn(categoryCell[e.category], "border-black/15") : "border-gray-200 bg-slate-50"
-                    )}
-                  >
-                    <div>
-                      <p
-                        className={cn(
-                          "text-xs font-semibold uppercase tracking-wide",
-                          tinted ? "text-white/85" : "text-gray-500"
-                        )}
-                      >
-                        {categoryLabel[e.category] ?? e.category}
-                      </p>
-                      <p className={cn("text-base font-bold leading-snug mt-0.5", tinted ? "text-white" : "text-gray-900")}>
-                        {e.title}
-                      </p>
-                    </div>
-                    {e.time ? (
-                      <p className={cn("flex items-center gap-2 text-sm", tinted ? "text-white/90" : "text-gray-600")}>
-                        <Clock className="h-4 w-4 shrink-0 opacity-90" />
-                        {e.time}
-                      </p>
-                    ) : null}
-                    {e.location ? (
-                      <p className={cn("flex items-center gap-2 text-sm", tinted ? "text-white/90" : "text-gray-600")}>
-                        <MapPin className="h-4 w-4 shrink-0 opacity-90" />
-                        {e.location}
-                      </p>
-                    ) : null}
-                    {e.notes ? (
-                      <p
-                        className={cn(
-                          "text-sm leading-relaxed border-t pt-3",
-                          tinted ? "text-white/90 border-white/25" : "text-gray-600 border-gray-200"
-                        )}
-                      >
-                        {e.notes}
-                      </p>
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={() => handleJoinMeeting(e)}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-[#032EA1] shadow-sm ring-1 ring-black/5 hover:bg-gray-50 transition-colors"
-                    >
-                      <Video className="h-4 w-4" />
-                      Join meeting
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

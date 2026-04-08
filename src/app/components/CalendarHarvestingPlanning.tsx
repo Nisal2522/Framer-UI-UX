@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import { Leaf, Sprout, Wheat } from "lucide-react";
 
 type PhaseBand = {
   start: number;
@@ -99,18 +98,22 @@ export function CalendarHarvestingPlanning() {
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_30px_-16px_rgba(15,23,42,0.35)]">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-[#f8fbff] to-[#eef4ff] px-4 py-3.5">
           <p className="text-sm font-semibold text-[#1f3d7a]">Annual Cycle Overview</p>
-          <div className="flex items-center gap-4 text-xs font-semibold text-slate-700 sm:text-sm">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1">
-              <Sprout className="h-3.5 w-3.5 text-[#1f6f43]" />
-              Planting
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
+              <span className="h-2.5 w-7 rounded-sm bg-[#1f6f43]" />
+              <span>Planting</span>
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1">
-              <Wheat className="h-3.5 w-3.5 text-[#6c4a2f]" />
-              Harvesting
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
+              <span className="h-2.5 w-7 rounded-sm bg-[#6c4a2f]" />
+              <span>Harvesting</span>
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-slate-100 px-2.5 py-1">
-              <Leaf className="h-3.5 w-3.5 text-[#4b5563]" />
-              Growing
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
+              <span className="relative inline-block h-[8px] w-7">
+                <span className="absolute left-0 top-[3px] h-[2px] w-7 bg-[#4b5563]" />
+                <span className="absolute left-0 top-[1px] h-[6px] w-[6px] rounded-full bg-[#374151]" />
+                <span className="absolute right-0 top-[1px] h-[6px] w-[6px] rounded-full bg-[#374151]" />
+              </span>
+              <span>Growing</span>
             </span>
           </div>
         </header>
@@ -172,8 +175,8 @@ export function CalendarHarvestingPlanning() {
 
                         <div className="pointer-events-none absolute inset-y-[22px] left-0 right-0 rounded-md bg-gradient-to-r from-slate-100/50 via-slate-100/70 to-slate-100/50" />
 
-                        <div className="absolute h-3 rounded-md shadow-[0_2px_8px_-2px_rgba(31,111,67,0.55)]" style={segmentStyle(cycle.planting, 26, "#1f6f43")} />
-                        <div className="absolute h-3 rounded-md shadow-[0_2px_8px_-2px_rgba(108,74,47,0.55)]" style={segmentStyle(cycle.harvesting, 26, "#6c4a2f")} />
+                        <div className="absolute h-5 rounded-md shadow-[0_2px_8px_-2px_rgba(31,111,67,0.55)]" style={segmentStyle(cycle.planting, 24, "#1f6f43")} />
+                        <div className="absolute h-5 rounded-md shadow-[0_2px_8px_-2px_rgba(108,74,47,0.55)]" style={segmentStyle(cycle.harvesting, 24, "#6c4a2f")} />
                         <div
                           className="absolute h-[3px] rounded-full bg-[#4b5563] shadow-[0_2px_4px_rgba(15,23,42,0.25)]"
                           style={{
