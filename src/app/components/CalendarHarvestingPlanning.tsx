@@ -31,7 +31,7 @@ const PLANS: CropPlan[] = [
     crop: "Rice",
     cycles: [
       { id: "p1-a", cycle: "A-Cycle", details: "Lowland field (rain-fed)", planting: { start: 4, end: 5 }, growing: { start: 5, end: 8 }, harvesting: { start: 9, end: 10 } },
-      { id: "p1-c", cycle: "C-Cycle", details: "Midland plot (short-cycle)", planting: { start: 2, end: 2 }, growing: { start: 3, end: 4 }, harvesting: { start: 5, end: 5 } },
+      { id: "p1-c", cycle: "B-Cycle", details: "Midland plot (short-cycle)", planting: { start: 2, end: 2 }, growing: { start: 3, end: 4 }, harvesting: { start: 5, end: 5 } },
     ],
   },
   {
@@ -39,7 +39,7 @@ const PLANS: CropPlan[] = [
     region: "Kampong Thom",
     crop: "Cassava",
     cycles: [
-      { id: "p2-b", cycle: "B-Cycle", details: "Upland block (savanna)", planting: { start: 8, end: 9 }, growing: { start: 9, end: 10 }, harvesting: { start: 10, end: 11 } },
+      { id: "p2-b", cycle: "A-Cycle", details: "Upland block (savanna)", planting: { start: 8, end: 9 }, growing: { start: 9, end: 10 }, harvesting: { start: 10, end: 11 } },
     ],
   },
   {
