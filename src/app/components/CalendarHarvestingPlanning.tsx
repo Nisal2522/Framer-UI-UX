@@ -119,10 +119,10 @@ export function CalendarHarvestingPlanning() {
           <table className="min-w-[1180px] border-separate border-spacing-0">
             <thead>
               <tr>
-                <th className="w-44 bg-[#2f62bd] px-3 py-2.5 text-left text-sm font-semibold text-white">Region</th>
-                <th className="w-28 bg-[#2f62bd] px-3 py-2.5 text-left text-sm font-semibold text-white">Crop</th>
-                <th className="w-24 bg-[#2f62bd] px-3 py-2.5 text-left text-sm font-semibold text-white">Cycle</th>
-                <th className="w-56 bg-[#2f62bd] px-3 py-2.5 text-left text-sm font-semibold text-white">Details</th>
+                <th className="w-44 bg-[#1b3768] px-3 py-2.5 text-left text-sm font-semibold text-white">Region</th>
+                <th className="w-28 bg-[#1b3768] px-3 py-2.5 text-left text-sm font-semibold text-white">Crop</th>
+                <th className="w-24 bg-[#1b3768] px-3 py-2.5 text-left text-sm font-semibold text-white">Cycle</th>
+                <th className="w-56 bg-[#1b3768] px-3 py-2.5 text-left text-sm font-semibold text-white">Details</th>
                 <th className="bg-[#1b3768] p-0">
                   <div className="grid grid-cols-12">
                     {MONTHS.map((month) => (
