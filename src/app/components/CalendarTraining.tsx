@@ -9,15 +9,6 @@ const TRAINING_CATEGORIES: CoopCalendarCategory[] = [
 
 const TRAINING_EVENTS: CoopCalendarEvent[] = [
   {
-    id: "t1",
-    date: new Date(2026, 3, 9),
-    title: "GAP refresher — record keeping",
-    category: "classroom",
-    time: "08:30 – 12:00",
-    location: "AC meeting hall",
-    notes: "Bring member ID lists; certificates issued same day (demo).",
-  },
-  {
     id: "t2",
     date: new Date(2026, 3, 11),
     title: "District extension — pest scouting",
@@ -88,6 +79,33 @@ const TRAINING_EVENTS: CoopCalendarEvent[] = [
     time: "10:00",
     location: "AC office",
     notes: "Pre-audit with support partner; gaps logged as actions.",
+  },
+  {
+    id: "t10",
+    date: new Date(2026, 3, 7),
+    title: "Climate-smart planting schedule clinic",
+    category: "extension",
+    time: "08:30 – 10:30",
+    location: "Rice cluster, Block B",
+    notes: "Farmer plot calendars aligned with wet-season windows and irrigation slots.",
+  },
+  {
+    id: "t11",
+    date: new Date(2026, 3, 8),
+    title: "Soil health & compost application practical",
+    category: "demo",
+    time: "10:30 – 12:00",
+    location: "Cassava learning plot",
+    notes: "Hands-on compost mixing, field application rates, and farmer record updates.",
+  },
+  {
+    id: "t12",
+    date: new Date(2026, 3, 10),
+    title: "Water management for dry spells",
+    category: "classroom",
+    time: "09:00 – 11:00",
+    location: "AC training room",
+    notes: "Irrigation timing, water-saving practices, and field scheduling for smallholders.",
   },
 ];
 
