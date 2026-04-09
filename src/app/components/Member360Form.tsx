@@ -39,7 +39,7 @@ type FormData = {
   mobilePhone: string;
   nicPpNo: string;
   address: string;
-  country: string;
+  region: string;
   city: string;
   fieldOfficer: string;
   gender: string;
@@ -177,7 +177,7 @@ export function Member360Form() {
     mobilePhone: "",
     nicPpNo: "",
     address: "",
-    country: "",
+    region: "",
     city: "",
     fieldOfficer: "",
     gender: "",
@@ -197,7 +197,7 @@ export function Member360Form() {
         mobilePhone: memberData.phone,
         nicPpNo: memberData.nationalId,
         address: memberData.village,
-        country: "Cambodia",
+        region: "Cambodia",
         city: memberData.village.replace(" Village", ""),
         fieldOfficer: "",
         gender: memberData.gender.toLowerCase(),
@@ -472,12 +472,12 @@ export function Member360Form() {
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-slate-600">Country</label>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">Region</label>
                         <input
                           type="text"
-                          placeholder="Enter country"
-                          value={formData.country}
-                          onChange={(e) => handleInputChange("country", e.target.value)}
+                          placeholder="Enter region"
+                          value={formData.region}
+                          onChange={(e) => handleInputChange("region", e.target.value)}
                           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-[#032EA1] outline-none"
                         />
                       </div>
