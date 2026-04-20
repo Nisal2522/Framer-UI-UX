@@ -119,7 +119,7 @@ export function CalendarHarvestingPlanning() {
         </header>
 
         <div className="overflow-x-auto">
-          <table className="min-w-[1180px] border-separate border-spacing-0">
+          <table className="w-full min-w-[1180px] border-separate border-spacing-0">
             <thead>
               <tr>
                 <th className="w-44 bg-[#1b3768] px-3 py-2.5 text-left text-sm font-semibold text-white">Region</th>
