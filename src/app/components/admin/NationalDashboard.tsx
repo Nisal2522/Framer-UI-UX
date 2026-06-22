@@ -1,16 +1,14 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useId, type ComponentType } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import {
   Building2,
   UserRound,
-  Ban,
-  LogOut,
-  UserPlus,
   FileText,
   Package,
   BookOpen,
   TrendingUp,
   AlertTriangle,
   Activity,
+  Download,
   Wheat,
   Carrot,
   Bean,
@@ -18,9 +16,13 @@ import {
   CircleDot,
   X,
   ChevronRight,
+  Layers,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import { cn } from "../ui/utils";
-import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip, useMap } from "react-leaflet";
+import L from "leaflet";
+import { MapContainer, TileLayer, Marker, Tooltip as LeafletTooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import {
   PieChart,
@@ -34,28 +36,41 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Area,
-  AreaChart,
   Line,
+  LineChart,
   ComposedChart,
   ReferenceArea,
   ReferenceLine,
-  LabelList,
 } from "recharts";
 
 const COLORS = ["#0F2F8F", "#3B5FCC", "#22C55E", "#F59E0B", "#E00025", "#94A3B8"];
 
 const provinceGeo = [
-  { province: "Battambang", lat: 13.0957, lon: 103.2022, acs: 118, members: 12400 },
-  { province: "Siem Reap", lat: 13.3671, lon: 103.8448, acs: 96, members: 10100 },
-  { province: "Kampong Thom", lat: 12.7117, lon: 104.8885, acs: 84, members: 8900 },
-  { province: "Kampong Cham", lat: 12.0, lon: 105.45, acs: 76, members: 8200 },
-  { province: "Takeo", lat: 10.9929, lon: 104.7847, acs: 62, members: 6400 },
-  { province: "Kampot", lat: 10.6104, lon: 104.1815, acs: 55, members: 5800 },
-  { province: "Prey Veng", lat: 11.4868, lon: 105.3253, acs: 51, members: 5300 },
+  { province: "Phnom Penh", lat: 11.5564, lon: 104.9282, acs: 142, members: 15200 },
   { province: "Banteay Meanchey", lat: 13.7532, lon: 102.9896, acs: 48, members: 4900 },
-  { province: "Pursat", lat: 12.5338, lon: 103.9192, acs: 44, members: 4600 },
+  { province: "Battambang", lat: 13.0957, lon: 103.2022, acs: 118, members: 12400 },
+  { province: "Kampong Cham", lat: 12.0, lon: 105.45, acs: 76, members: 8200 },
+  { province: "Kampong Chhnang", lat: 12.25, lon: 104.67, acs: 42, members: 4400 },
+  { province: "Kampong Speu", lat: 11.45, lon: 104.52, acs: 38, members: 3900 },
+  { province: "Kampong Thom", lat: 12.7117, lon: 104.8885, acs: 84, members: 8900 },
+  { province: "Preah Sihanouk", lat: 10.6282, lon: 103.5234, acs: 33, members: 3400 },
+  { province: "Kampot", lat: 10.6104, lon: 104.1815, acs: 55, members: 5800 },
   { province: "Kandal", lat: 11.2237, lon: 105.1259, acs: 92, members: 9800 },
+  { province: "Kep", lat: 10.4864, lon: 104.3172, acs: 14, members: 1400 },
+  { province: "Koh Kong", lat: 11.6154, lon: 102.9841, acs: 22, members: 2200 },
+  { province: "Kratie", lat: 12.4888, lon: 106.0186, acs: 35, members: 3600 },
+  { province: "Mondulkiri", lat: 12.4539, lon: 107.1874, acs: 18, members: 1800 },
+  { province: "Oddar Meanchey", lat: 14.1601, lon: 103.4977, acs: 26, members: 2600 },
+  { province: "Pailin", lat: 12.8494, lon: 102.6042, acs: 12, members: 1200 },
+  { province: "Preah Vihear", lat: 13.8039, lon: 104.9803, acs: 24, members: 2400 },
+  { province: "Pursat", lat: 12.5338, lon: 103.9192, acs: 44, members: 4600 },
+  { province: "Prey Veng", lat: 11.4868, lon: 105.3253, acs: 51, members: 5300 },
+  { province: "Ratanakiri", lat: 13.7283, lon: 107.0049, acs: 20, members: 2000 },
+  { province: "Siem Reap", lat: 13.3671, lon: 103.8448, acs: 96, members: 10100 },
+  { province: "Stung Treng", lat: 13.5237, lon: 105.9685, acs: 16, members: 1600 },
+  { province: "Svay Rieng", lat: 11.0877, lon: 105.7997, acs: 30, members: 3100 },
+  { province: "Takeo", lat: 10.9929, lon: 104.7847, acs: 62, members: 6400 },
+  { province: "Tboung Khmum", lat: 11.9153, lon: 105.6459, acs: 58, members: 6100 },
 ];
 
 const memberTrend = [
@@ -344,96 +359,6 @@ const ASSET_CONDITION_COLORS: Record<string, string> = {
   Unknown: "#d97706",
 };
 
-const ASSET_KPI_CARD =
-  "relative rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08),0_4px_6px_-4px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.02]";
-
-const ASSET_MAINT_TARGET_PCT = 90;
-
-function AssetPerformanceSummaryCard({
-  valueUsd,
-  maintenancePct,
-  valueSpark,
-  sparkGradientId,
-}: {
-  valueUsd: number;
-  maintenancePct: number;
-  valueSpark: { period: string; m: number }[];
-  sparkGradientId: string;
-}) {
-  const valueM = valueUsd / 1_000_000;
-  return (
-    <div className={cn(ASSET_KPI_CARD, "flex h-full flex-col p-5")}>
-      <p className="text-sm font-semibold text-gray-900">Asset performance & value</p>
-      <p className="mt-0.5 text-xs text-slate-500">Indicative value trend and maintenance vs target</p>
-
-      <div className="mt-4 flex-1 flex flex-col">
-        <div className="rounded-xl border border-slate-100 bg-slate-50/40 p-3">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
-            Est. total value (USD, illustrative)
-          </p>
-          <p
-            className="mt-1 font-mono text-3xl font-bold tabular-nums tracking-tight text-gray-900 cursor-default"
-            title="Breakdown (illustrative): Machinery & equipment ~58% • Buildings & structures ~28% • Vehicles & other ~14%"
-          >
-            ${valueM.toFixed(1)}M
-          </p>
-          <p className="mt-1 text-[11px] text-emerald-700 font-medium">+3.1% vs prior year (illustrative)</p>
-          <div className="mt-2.5 h-[58px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={valueSpark} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id={sparkGradientId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#93c5fd" stopOpacity={0.45} />
-                    <stop offset="100%" stopColor="#93c5fd" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="period" hide />
-                <YAxis hide domain={["auto", "auto"]} />
-                <Tooltip
-                  formatter={(v: number) => [`$${v.toFixed(2)}M`, "Trailing trend"]}
-                  labelFormatter={() => "Value trend"}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="m"
-                  stroke="#2563eb"
-                  strokeWidth={2}
-                  fill={`url(#${sparkGradientId})`}
-                  dot={false}
-                  isAnimationActive={false}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-xl border border-slate-100 bg-white p-3">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Maintenance compliance</p>
-            <span className="font-mono text-sm font-bold tabular-nums text-[#0f172a]">{maintenancePct}%</span>
-          </div>
-          <p className="mt-0.5 text-[11px] text-slate-400">Target {ASSET_MAINT_TARGET_PCT}%</p>
-          <div className="relative mt-2.5 h-3 w-full rounded-full bg-slate-200">
-            <div
-              className="absolute left-0 top-0 h-full rounded-full bg-[#0f172a] transition-[width] duration-500"
-              style={{ width: `${Math.min(100, maintenancePct)}%` }}
-            />
-            <div
-              className="absolute top-1/2 z-10 h-5 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500 shadow-sm ring-2 ring-white"
-              style={{ left: `${ASSET_MAINT_TARGET_PCT}%` }}
-              title={`Target ${ASSET_MAINT_TARGET_PCT}%`}
-            />
-          </div>
-          <p className="mt-2.5 text-[11px] leading-relaxed text-slate-500">
-            <span className="text-slate-600">Last updated ~2 hours ago</span>
-            <span className="mx-1.5 text-slate-300">·</span>
-            <span className="text-emerald-700 font-medium">+3% vs last month (illustrative)</span>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const perfHeat = [
   { province: "Battambang", composite: 86, band: "High" },
@@ -534,72 +459,6 @@ function PerfLollipopBarShape(
   );
 }
 
-const kmByProvince = [
-  { province: "Battambang", downloadReach: 74, adoption: 78 },
-  { province: "Siem Reap", downloadReach: 69, adoption: 71 },
-  { province: "Kandal", downloadReach: 86, adoption: 84 },
-  { province: "Kampong Cham", downloadReach: 58, adoption: 62 },
-  { province: "Takeo", downloadReach: 48, adoption: 55 },
-];
-
-/** National benchmarks (dashed lines + bullet markers) — fixed for cross-province comparison. */
-const KM_BENCHMARK_DOWNLOAD = 68;
-const KM_BENCHMARK_ADOPTION = 61;
-
-const KM_BAR_BELOW = "#cbd5e1";
-
-function kmDownloadBarFill(v: number, province: string, provinceFilter: string) {
-  if (provinceFilter !== "All" && provinceFilter !== province) return "#e2e8f0";
-  return v >= KM_BENCHMARK_DOWNLOAD ? "#2563eb" : KM_BAR_BELOW;
-}
-
-function kmAdoptionBarFill(v: number, province: string, provinceFilter: string) {
-  if (provinceFilter !== "All" && provinceFilter !== province) return "#e2e8f0";
-  return v >= KM_BENCHMARK_ADOPTION ? "#0d9488" : KM_BAR_BELOW;
-}
-
-function KnowledgeBulletGraph({
-  label,
-  value,
-  benchmark,
-  benchmarkLabel = "National benchmark",
-}: {
-  label: string;
-  value: number;
-  benchmark: number;
-  benchmarkLabel?: string;
-}) {
-  const v = Math.min(100, Math.max(0, value));
-  const b = Math.min(100, Math.max(0, benchmark));
-  return (
-    <div className="w-full">
-      <div className="mb-1 flex items-baseline justify-between gap-2">
-        <span className="text-xs font-medium text-slate-600">{label}</span>
-        <span className="font-mono text-sm font-bold tabular-nums text-slate-900">{v}%</span>
-      </div>
-      <div className="relative h-3 w-full rounded-full">
-        <div className="absolute inset-0 flex overflow-hidden rounded-full ring-1 ring-slate-200/80">
-          <div className="h-full bg-red-100/90" style={{ width: "50%" }} />
-          <div className="h-full bg-amber-100/90" style={{ width: "25%" }} />
-          <div className="h-full bg-emerald-100/90" style={{ width: "25%" }} />
-        </div>
-        <div
-          className="absolute inset-y-0.5 left-0 rounded-full bg-[#0F2F8F]"
-          style={{ width: `${v}%`, maxWidth: "100%" }}
-        />
-        <div
-          className="pointer-events-none absolute -top-0.5 bottom-0 z-[1] w-0.5 rounded-full bg-slate-900 shadow-sm"
-          style={{ left: `calc(${b}% - 1px)` }}
-          title={`${benchmarkLabel} ${b}%`}
-        />
-      </div>
-      <p className="mt-1 text-[10px] text-slate-500">
-        {benchmarkLabel}:{" "}
-        <span className="font-mono font-semibold tabular-nums text-slate-700">{b}%</span>
-      </p>
-    </div>
-  );
-}
 
 function scale(n: number, f: number) {
   return Math.max(0, Math.round(n * f));
@@ -607,11 +466,13 @@ function scale(n: number, f: number) {
 
 const TOTAL_MEMBERS_EST = provinceGeo.reduce((s, p) => s + p.members, 0);
 
-function drillDownFactor(provinceFilter: string): number {
-  if (provinceFilter === "All") return 1;
-  const row = provinceGeo.find((p) => p.province === provinceFilter);
-  if (!row) return 1;
-  return Math.max(0.05, row.members / TOTAL_MEMBERS_EST);
+function drillDownFactor(selected: string[]): number {
+  if (selected.length === 0) return 1;
+  const total = selected.reduce((sum, name) => {
+    const row = provinceGeo.find((p) => p.province === name);
+    return sum + (row ? row.members / TOTAL_MEMBERS_EST : 0);
+  }, 0);
+  return Math.min(1, Math.max(0.05, total));
 }
 
 /** Count-up runs only in this subtree so the dashboard (map + charts) does not re-render every frame. */
@@ -655,16 +516,26 @@ function CountUpInteger({ value, className }: { value: number; className?: strin
   return <span className={className}>{display.toLocaleString()}</span>;
 }
 
-function MapViewController({ provinceFilter }: { provinceFilter: string }) {
+function MapViewController({ selected }: { selected: string[] }) {
   const map = useMap();
   useEffect(() => {
-    if (provinceFilter === "All") {
+    if (selected.length === 0) {
       map.setView([12.7, 104.9], 6.3);
-    } else {
-      const p = provinceGeo.find((x) => x.province === provinceFilter);
+    } else if (selected.length === 1) {
+      const p = provinceGeo.find((x) => x.province === selected[0]);
       if (p) map.setView([p.lat, p.lon], 8.5);
+    } else {
+      const pts = selected.flatMap((name) => {
+        const p = provinceGeo.find((x) => x.province === name);
+        return p ? [[p.lat, p.lon] as [number, number]] : [];
+      });
+      if (pts.length > 0) {
+        const avgLat = pts.reduce((s, pt) => s + pt[0], 0) / pts.length;
+        const avgLon = pts.reduce((s, pt) => s + pt[1], 0) / pts.length;
+        map.setView([avgLat, avgLon], 7);
+      }
     }
-  }, [provinceFilter, map]);
+  }, [selected, map]);
   return null;
 }
 
@@ -674,12 +545,22 @@ type Props = {
 };
 
 export function NationalDashboard({ scope = "national", provinceLabel = "Battambang" }: Props) {
-  const initialProvince = scope === "provincial" ? provinceLabel : "All";
-  const [provinceFilter, setProvinceFilter] = useState<string>(initialProvince);
-  const f = drillDownFactor(provinceFilter);
-  const [granularity, setGranularity] = useState<"monthly" | "quarterly">("monthly");
+  const [selectedProvinces, setSelectedProvinces] = useState<string[]>(
+    scope === "provincial" ? [provinceLabel] : []
+  );
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const isNational = selectedProvinces.length === 0;
+  const f = drillDownFactor(selectedProvinces);
+  const provinceDisplayLabel =
+    selectedProvinces.length === 0 ? "National" :
+    selectedProvinces.length === 1 ? selectedProvinces[0] :
+    selectedProvinces.length <= 3 ? selectedProvinces.join(", ") :
+    `${selectedProvinces.length} provinces`;
   const [bpRejectedDrillOpen, setBpRejectedDrillOpen] = useState(false);
   const [perfChartHoverProvince, setPerfChartHoverProvince] = useState<string | null>(null);
+  const [showAllGeo, setShowAllGeo] = useState(false);
+  const [showAllKm, setShowAllKm] = useState(false);
+  const [bpPage, setBpPage] = useState(0);
 
   const acStatsNational = useMemo(
     () => ({
@@ -719,7 +600,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
 
   useEffect(() => {
     setBpRejectedDrillOpen(false);
-  }, [provinceFilter]);
+  }, [selectedProvinces]);
 
   useEffect(() => {
     if (bp.rejected <= 0) setBpRejectedDrillOpen(false);
@@ -727,7 +608,8 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
 
   useEffect(() => {
     setPerfChartHoverProvince(null);
-  }, [provinceFilter]);
+    setBpPage(0);
+  }, [selectedProvinces]);
 
   const assets = useMemo(
     () => ({
@@ -748,66 +630,43 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
     [assets.count]
   );
 
-  const assetValueSparkSeries = useMemo(() => {
-    const endM = assets.valueUsd / 1_000_000;
-    const startM = Math.max(0.3, endM * 0.78);
-    const months = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-    return months.map((period, i) => ({
-      period,
-      m: Math.round((startM + ((endM - startM) * i) / 11 + Math.sin(i * 0.6) * 0.06 * endM) * 100) / 100,
-    }));
-  }, [assets.valueUsd]);
+  const farmerTrend = useMemo(() => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const peakTotal = Math.round(TOTAL_MEMBERS_EST * f);
+    const startFactor = 0.86;
+    return months.map((month, i) => {
+      const progress = i / 11;
+      const smoothed = startFactor + (1 - startFactor) * (progress * progress * (3 - 2 * progress));
+      const variance = Math.sin(i * 1.1) * 0.008;
+      const total = Math.round(peakTotal * (smoothed + variance));
+      const male = Math.round(total * 0.578);
+      const female = total - male;
+      return { month, total, male, female };
+    });
+  }, [f]);
 
-  const assetSparkGradientId = useId().replace(/:/g, "");
 
-  const km = useMemo(
-    () => ({
-      materials: provinceFilter === "All" ? 186 : Math.round(24 + (186 - 24) * f),
-      acsAccessPct: provinceFilter === "All" ? 68 : Math.min(92, 62 + Math.round(10 * f)),
-      adoptionAvg: provinceFilter === "All" ? 61 : Math.min(88, Math.round(54 + 12 * f)),
-    }),
-    [provinceFilter, f]
-  );
+const bpChartData = useMemo(() => {
+    const generate = (name: string) => {
+      const geo = provinceGeo.find((p) => p.province === name);
+      if (!geo) return null;
+      const rate = Math.min(88, 68 + (geo.acs % 12));
+      const submitted = Math.max(12, Math.round(geo.acs * 0.75));
+      const approved = Math.max(10, Math.round(geo.acs * 0.6));
+      return { province: geo.province, submitted, approved, rate };
+    };
 
-  const enrolled = scale(132_400, f);
-  const trendData =
-    granularity === "monthly"
-      ? memberTrend
-      : [
-          { period: "Q1", enrolled: 121500 },
-          { period: "Q2", enrolled: 125200 },
-          { period: "Q3", enrolled: 128900 },
-          { period: "Q4", enrolled: 132400 },
-        ];
+    if (isNational) {
+      return provinceGeo.map((p) => {
+        const existing = bpByProvince.find((b) => b.province === p.province);
+        return existing ?? generate(p.province)!;
+      });
+    }
 
-  const enrollmentDualData = useMemo(
-    () =>
-      trendData.map((d) => ({
-        period: d.period,
-        national: d.enrolled,
-        provincial: provinceFilter === "All" ? d.enrolled : scale(d.enrolled, f),
-      })),
-    [trendData, provinceFilter, f]
-  );
-
-  const chartUid = useId().replace(/:/g, "");
-
-  const bpChartData = useMemo(() => {
-    if (provinceFilter === "All") return bpByProvince;
-    const hit = bpByProvince.find((b) => b.province === provinceFilter);
-    if (hit) return [hit];
-    const geo = provinceGeo.find((p) => p.province === provinceFilter);
-    if (!geo) return bpByProvince;
-    const rate = Math.min(88, 68 + (geo.acs % 12));
-    return [
-      {
-        province: geo.province,
-        submitted: Math.max(12, Math.round(geo.acs * 0.75)),
-        approved: Math.max(10, Math.round(geo.acs * 0.6)),
-        rate,
-      },
-    ];
-  }, [provinceFilter]);
+    const hits = bpByProvince.filter((b) => selectedProvinces.includes(b.province));
+    const missing = selectedProvinces.filter((name) => !bpByProvince.some((b) => b.province === name));
+    return [...hits, ...missing.flatMap((name) => { const e = generate(name); return e ? [e] : []; })];
+  }, [isNational, selectedProvinces]);
 
   /** Ascending so highest rate renders at top of horizontal bar chart (Recharts category order). */
   const bpChartSorted = useMemo(
@@ -816,43 +675,25 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   );
 
   const perfHeatFiltered = useMemo(() => {
-    if (provinceFilter === "All") return perfHeat;
-    const hit = perfHeat.find((h) => h.province === provinceFilter);
-    if (hit) return [hit];
-    const geo = provinceGeo.find((p) => p.province === provinceFilter);
-    if (!geo) return perfHeat;
-    const composite = Math.min(92, 58 + (geo.acs % 25));
-    const band: "High" | "Medium" | "Intervention" =
-      composite >= 75 ? "High" : composite >= 60 ? "Medium" : "Intervention";
-    return [{ province: geo.province, composite, band }];
-  }, [provinceFilter]);
+    if (isNational) return perfHeat;
+    const hits = perfHeat.filter((h) => selectedProvinces.includes(h.province));
+    const missing = selectedProvinces.filter((name) => !perfHeat.some((h) => h.province === name));
+    const generated = missing.flatMap((name) => {
+      const geo = provinceGeo.find((p) => p.province === name);
+      if (!geo) return [];
+      const composite = Math.min(92, 58 + (geo.acs % 25));
+      const band: "High" | "Medium" | "Intervention" = composite >= 75 ? "High" : composite >= 60 ? "Medium" : "Intervention";
+      return [{ province: geo.province, composite, band }];
+    });
+    return [...hits, ...generated];
+  }, [isNational, selectedProvinces]);
 
   const perfHeatSorted = useMemo(
     () => [...perfHeatFiltered].sort((a, b) => b.composite - a.composite),
     [perfHeatFiltered]
   );
 
-  const kmByProvinceFiltered = useMemo(() => {
-    if (provinceFilter === "All") return kmByProvince;
-    const hit = kmByProvince.find((k) => k.province === provinceFilter);
-    if (hit) return [hit];
-    const geo = provinceGeo.find((p) => p.province === provinceFilter);
-    if (!geo) return kmByProvince;
-    const adoption = Math.min(90, 55 + (geo.members % 18));
-    const downloadReach = Math.min(95, adoption + 8 + (geo.acs % 14));
-    return [{ province: geo.province, adoption, downloadReach }];
-  }, [provinceFilter]);
-
-  const kmByProvinceChart = useMemo(
-    () => [...kmByProvinceFiltered].sort((a, b) => b.adoption - a.adoption),
-    [kmByProvinceFiltered]
-  );
-
-  const title =
-    provinceFilter === "All" ? "National Dashboard" : `National Dashboard — ${provinceFilter}`;
-  const scopeLabel = provinceFilter === "All" ? "National" : "Provincial";
-  const membershipPlace =
-    provinceFilter === "All" ? "national level" : provinceFilter;
+const title = isNational ? "National Dashboard" : `National Dashboard — ${provinceDisplayLabel}`;
 
   const leaderboardRows = useMemo(
     () =>
@@ -875,38 +716,100 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
+          <p className="mt-1 text-sm text-gray-500">Consolidated analytics for oversight and policy planning</p>
         </div>
-        <div className="flex flex-col gap-1.5 min-w-[200px]">
-          <label htmlFor="province-scope" className="text-xs font-medium text-gray-500">
-            Province focus
-          </label>
-          <select
-            id="province-scope"
-            value={provinceFilter}
-            onChange={(e) => setProvinceFilter(e.target.value)}
-            className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white shadow-sm"
-          >
-            <option value="All">All provinces (national trends)</option>
-            {provinceGeo.map((p) => (
-              <option key={p.province} value={p.province}>
-                {p.province}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-col gap-1.5 min-w-[240px]">
+          <span className="text-xs font-medium text-gray-500">Province focus</span>
+          <div className="relative">
+            {dropdownOpen && (
+              <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+            )}
+            <button
+              type="button"
+              onClick={() => setDropdownOpen((v) => !v)}
+              className="relative z-50 w-full flex items-center justify-between gap-2 text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white shadow-sm text-left"
+            >
+              <span className="truncate text-gray-800">
+                {isNational
+                  ? "All provinces (national trends)"
+                  : selectedProvinces.length === 1
+                  ? selectedProvinces[0]
+                  : `${selectedProvinces.length} provinces selected`}
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 text-gray-500 shrink-0 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {dropdownOpen && (
+              <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg w-64 max-h-72 overflow-y-auto">
+                <button
+                  type="button"
+                  onClick={() => { setSelectedProvinces([]); setDropdownOpen(false); }}
+                  className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors hover:bg-blue-50 ${isNational ? "bg-blue-50 text-blue-700" : "text-gray-700"}`}
+                >
+                  All provinces (national trends)
+                </button>
+                <div className="h-px bg-gray-100 mx-2" />
+                {provinceGeo.map((p) => {
+                  const checked = selectedProvinces.includes(p.province);
+                  return (
+                    <button
+                      key={p.province}
+                      type="button"
+                      onClick={() =>
+                        setSelectedProvinces((prev) =>
+                          prev.includes(p.province)
+                            ? prev.filter((x) => x !== p.province)
+                            : [...prev, p.province]
+                        )
+                      }
+                      className="w-full text-left px-4 py-2 text-sm flex items-center gap-2.5 transition-colors hover:bg-blue-50"
+                    >
+                      <div
+                        className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                          checked ? "bg-[#032EA1] border-[#032EA1]" : "border-gray-300"
+                        }`}
+                      >
+                        {checked && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <span className={checked ? "font-medium text-[#032EA1]" : "text-gray-700"}>
+                        {p.province}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 1. Global pulse — national KPIs only */}
+      {/* 1. Global pulse — Total ACs, Total MACS, Total Hectares */}
       <section className="space-y-6">
         <div className="rounded-xl bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-4 text-white shadow-lg ring-1 ring-white/10 sm:p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-white/60 mb-3">National totals</p>
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 sm:gap-3">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
             {[
-              { label: "Active", value: acStats.active, icon: Building2, iconColor: "text-emerald-600" },
-              { label: "Inactive", value: acStats.inactive, icon: Activity, iconColor: "text-slate-600" },
-              { label: "Suspended", value: acStats.suspended, icon: Ban, iconColor: "text-amber-600" },
-              { label: "Withdrawn", value: acStats.withdrawn, icon: LogOut, iconColor: "text-red-600" },
-              { label: "New ACs (YTD)", value: acStats.newYtd, icon: UserPlus, iconColor: "text-blue-600" },
+              {
+                label: "Total ACs",
+                value: acStats.active + acStats.inactive + acStats.suspended + acStats.withdrawn,
+                sub: `${acStats.active.toLocaleString()} active`,
+                icon: Building2,
+                iconColor: "text-blue-600",
+              },
+              {
+                label: "Total MACS",
+                value: scale(486, f),
+                sub: "Member cooperatives",
+                icon: UserRound,
+                iconColor: "text-emerald-600",
+              },
+              {
+                label: "Total Hectares",
+                value: scale(78450, f),
+                sub: "Total farming area",
+                icon: Layers,
+                iconColor: "text-teal-600",
+              },
             ].map((c) => (
               <div key={c.label} className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
                 <div className="mb-2 flex items-center justify-between">
@@ -916,13 +819,14 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                   </div>
                 </div>
                 <p className="text-xl font-bold tabular-nums sm:text-2xl">{c.value.toLocaleString()}</p>
+                <p className="mt-1 text-[10px] text-white/55">{c.sub}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Map card — aligned with membership statistics card style */}
-        <section className="rounded-2xl bg-[#F3F4F6] p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
+        <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-gray-200/80 pb-4">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -930,7 +834,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                 National map overview
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                Click a province bubble to filter the dashboard.
+                Click a province pin to filter the dashboard.
               </p>
             </div>
           </div>
@@ -938,28 +842,38 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
           <div className="grid grid-cols-1 gap-4 lg:gap-6">
             <div className="h-[min(420px,55vh)] min-h-[280px] rounded-xl overflow-hidden border border-gray-100 bg-white ring-1 ring-black/[0.04]">
               <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom>
-                <MapViewController provinceFilter={provinceFilter} />
+                <MapViewController selected={selectedProvinces} />
                 <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 {provinceGeo.map((p) => {
-                  const selected = provinceFilter === p.province;
+                  const isSelected = selectedProvinces.includes(p.province);
                   const perfHover = perfChartHoverProvince === p.province;
-                  const baseR = 12 + Math.min(28, p.acs / 4);
+                  const iconSize = Math.round(24 + Math.min(20, p.acs / 6));
+                  const fill = isSelected ? "#032EA1" : perfHover ? "#10b981" : "#E00025";
+                  const stroke = isSelected ? "#001a6e" : perfHover ? "#059669" : "#9b0018";
+                  const pinIcon = L.divIcon({
+                    html: `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.38));display:block">
+                      <path fill="${fill}" stroke="${stroke}" stroke-width="1.4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                      <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.88)"/>
+                    </svg>`,
+                    className: "",
+                    iconSize: [iconSize, iconSize],
+                    iconAnchor: [iconSize / 2, iconSize],
+                    tooltipAnchor: [0, -iconSize + 4],
+                  });
                   return (
-                    <CircleMarker
+                    <Marker
                       key={p.province}
-                      center={[p.lat, p.lon]}
-                      radius={perfHover ? baseR + 8 : baseR}
-                      pathOptions={{
-                        color: selected ? "#E00025" : perfHover ? "#059669" : "#0F2F8F",
-                        fillColor: selected ? "#E00025" : perfHover ? "#10b981" : "#3B5FCC",
-                        fillOpacity: selected ? 0.55 : perfHover ? 0.62 : 0.45,
-                        weight: selected ? 4 : perfHover ? 3 : 2,
-                      }}
+                      position={[p.lat, p.lon]}
+                      icon={pinIcon}
                       eventHandlers={{
-                        click: () => setProvinceFilter(p.province),
+                        click: () =>
+                          setSelectedProvinces((prev) =>
+                            prev.includes(p.province) ? prev.filter((x) => x !== p.province) : [...prev, p.province]
+                          ),
                       }}
                     >
-                      <LeafletTooltip direction="top" offset={[0, -6]} opacity={0.95}>
+                      {/* tooltip placeholder — closed below */}
+                      <LeafletTooltip direction="top" offset={[0, -iconSize + 4]} opacity={0.95}>
                         <div className="text-xs font-medium">
                           <div>{p.province}</div>
                           <div>ACs: {p.acs}</div>
@@ -967,7 +881,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                           <div className="text-[10px] text-gray-500 mt-1">Click to filter dashboard</div>
                         </div>
                       </LeafletTooltip>
-                    </CircleMarker>
+                    </Marker>
                   );
                 })}
               </MapContainer>
@@ -980,7 +894,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
             </div>
             <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
               {leaderboardRows.map((row) => {
-                const active = provinceFilter === row.province;
+                const active = selectedProvinces.includes(row.province);
                 return (
                   <button
                     key={row.province}
@@ -1024,450 +938,444 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
         </p> */}
       </section>
 
-      {/* 2. Membership statistics — bento grid */}
-      <section className="rounded-2xl bg-[#F3F4F6] p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-gray-200/80 pb-5">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <UserRound className="h-5 w-5 text-[#0F2F8F]" />
-              {scopeLabel} membership statistics
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Enrolled farmers, trends, and demographics at {membershipPlace}.
-            </p>
-          </div>
-          <select
-            value={granularity}
-            onChange={(e) => setGranularity(e.target.value as "monthly" | "quarterly")}
-            className="text-sm rounded-xl border-0 bg-white/90 px-3 py-2 shadow-[0_4px_6px_-1px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.06]"
-          >
-            <option value="monthly">Monthly trend</option>
-            <option value="quarterly">Quarterly trend</option>
-          </select>
+      {/* 2. Geographic Distribution */}
+      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
+        <div className="mb-5 border-b border-gray-200/80 pb-4">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <UserRound className="h-5 w-5 text-[#0F2F8F]" />
+            Geographic Distribution
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">Agricultural cooperatives and farmer members by province</p>
         </div>
 
-        <div className="grid grid-cols-12 gap-5 lg:gap-6">
-          {/* Row 1: total + trend */}
-          <div
-            className={`col-span-12 lg:col-span-3 relative flex h-full flex-col overflow-hidden rounded-2xl p-6 text-white shadow-[0_10px_15px_-3px_rgb(0_0_0/0.2)] ring-1 ring-white/20 bg-gradient-to-br from-[#021c5e] via-[#032EA1] to-[#1e4aa8]`}
-          >
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
-            <div className="relative flex items-start justify-between gap-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-white/75">
-                Total enrolled ({provinceFilter === "All" ? "National" : provinceFilter})
-              </p>
-              <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-200 ring-1 ring-white/20">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                </span>
-                Live
-              </span>
-            </div>
-            <p className="relative mt-3 text-3xl font-bold tabular-nums tracking-tight sm:text-4xl">
-              <CountUpInteger value={enrolled} />
-            </p>
-            <p className="relative mt-3 flex items-center gap-1.5 text-xs text-blue-100/90">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 shadow-inner ring-1 ring-white/15">
-                <TrendingUp className="h-4 w-4 text-emerald-300 drop-shadow-sm" />
-              </span>
-              +2.1% vs prior year (illustrative)
-            </p>
-            <div className="relative mt-4 min-h-[110px] flex-1">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={enrollmentDualData} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id={`${chartUid}-miniGlow`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#93c5fd" stopOpacity={0.45} />
-                      <stop offset="100%" stopColor="#93c5fd" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area
-                    type="monotone"
-                    dataKey={provinceFilter === "All" ? "national" : "provincial"}
-                    stroke="#bfdbfe"
-                    strokeWidth={2}
-                    fill={`url(#${chartUid}-miniGlow)`}
-                    dot={false}
-                    isAnimationActive={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className={`col-span-12 lg:col-span-9 ${BENTO_CARD} p-5`}>
-            <p className="text-sm font-medium text-gray-800 mb-1">
-              Enrollment trend
-              {provinceFilter !== "All" && (
-                <span className="font-normal text-gray-500"> — {provinceFilter} vs national</span>
-              )}
-            </p>
-            <div
-              key={`trend-${provinceFilter}-${granularity}`}
-              className="h-56 animate-in fade-in-0 duration-300"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                {provinceFilter === "All" ? (
-                  <AreaChart data={enrollmentDualData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id={`${chartUid}-areaNat`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#3B5FCC" stopOpacity={0.1} />
-                        <stop offset="100%" stopColor="#3B5FCC" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                    <XAxis dataKey="period" tick={{ fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <Tooltip />
-                    <Area
-                      type="basis"
-                      dataKey="national"
-                      name="Enrolled"
-                      stroke="#0F2F8F"
-                      strokeWidth={2.5}
-                      fill={`url(#${chartUid}-areaNat)`}
-                    />
-                  </AreaChart>
-                ) : (
-                  <ComposedChart data={enrollmentDualData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id={`${chartUid}-areaProv`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#0F2F8F" stopOpacity={0.1} />
-                        <stop offset="100%" stopColor="#0F2F8F" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                    <XAxis dataKey="period" tick={{ fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <Tooltip />
-                    <Area
-                      type="basis"
-                      dataKey="provincial"
-                      name={provinceFilter}
-                      stroke="#0F2F8F"
-                      strokeWidth={2.5}
-                      fill={`url(#${chartUid}-areaProv)`}
-                    />
-                    <Line
-                      type="basis"
-                      dataKey="national"
-                      name="National avg."
-                      stroke="#94A3B8"
-                      strokeWidth={2}
-                      strokeDasharray="6 5"
-                      dot={false}
-                    />
-                  </ComposedChart>
-                )}
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Row 2: gender + age */}
-          <div className={`col-span-12 md:col-span-4 ${BENTO_CARD} p-5`}>
-            <p className="text-sm font-medium text-gray-800 mb-3">
-              {provinceFilter === "All"
-                ? "Gender distribution (national)"
-                : `Gender distribution in ${provinceFilter}`}
-            </p>
-            <div
-              key={`gender-${provinceFilter}`}
-              className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-in fade-in-0 duration-300"
-            >
-              <div className="relative mx-auto h-[200px] w-[200px] shrink-0 sm:mx-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={genderNat}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="58%"
-                      outerRadius="82%"
-                      paddingAngle={2}
-                      cornerRadius={6}
-                    >
-                      {genderNat.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v: number) => [`${v}%`, "Share"]} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Total</p>
-                  <p className="text-lg font-bold tabular-nums text-gray-900">
-                    <CountUpInteger value={enrolled} />
-                  </p>
-                </div>
-              </div>
-              <ul className="flex flex-1 flex-col justify-center gap-2.5 text-sm">
-                {genderNat.map((g, i) => (
-                  <li key={g.name} className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                    <span className="text-gray-700">
-                      <span className="font-medium text-gray-900">{g.name}</span>
-                      <span className="text-gray-500"> — {g.value}%</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className={`col-span-12 md:col-span-8 ${BENTO_CARD} p-5`}>
-            <p className="text-sm font-medium text-gray-800 mb-1">
-              {provinceFilter === "All"
-                ? "Age bands (national, disaggregated)"
-                : `Age bands in ${provinceFilter} (disaggregated)`}
-            </p>
-            <div
-              key={`age-${provinceFilter}`}
-              className="h-56 animate-in fade-in-0 duration-300"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ageNat.map((r) => ({ ...r, m: scale(r.m, f), f: scale(r.f, f) }))} barGap={4} barCategoryGap="18%">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                  <XAxis dataKey="bracket" tick={{ fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                  <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                  <Tooltip />
-                  <Legend wrapperStyle={{ paddingTop: 8 }} />
-                  <Bar dataKey="m" name="Male" fill="#0F2F8F" maxBarSize={28} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="f" name="Female" fill="#E00025" maxBarSize={28} radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Row 3: crops */}
-          <div className={`col-span-12 ${BENTO_CARD} p-5`}>
-            <p className="text-sm font-medium text-gray-800 mb-4">
-              {provinceFilter === "All"
-                ? "Primary crop focus (national mix)"
-                : `Primary crop focus in ${provinceFilter}`}
-            </p>
-            <ul
-              key={`crops-${provinceFilter}`}
-              className="space-y-4 animate-in fade-in-0 duration-300"
-            >
-              {cropNat.map((row) => {
-                const Icon = CROP_ICONS[row.crop] ?? CircleDot;
-                return (
-                  <li key={row.crop} className="flex items-center gap-3 sm:gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 shadow-sm ring-1 ring-emerald-100">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-sm font-medium text-gray-900">{row.crop}</span>
-                        <span className="text-sm tabular-nums text-gray-600">{row.pct}%</span>
+        {(() => {
+          const sorted = [...provinceGeo].sort((a, b) => b.acs - a.acs);
+          const maxAcs = sorted[0]?.acs ?? 1;
+          const visible = showAllGeo ? sorted : sorted.slice(0, 10);
+          return (
+            <>
+              <div className="space-y-2">
+                {visible.map((p) => {
+                  const pct = (p.acs / maxAcs) * 100;
+                  const isHighlighted = selectedProvinces.length === 0 || selectedProvinces.includes(p.province);
+                  return (
+                    <div key={p.province} className="flex items-center gap-3">
+                      <div className="w-36 shrink-0 text-sm font-semibold text-gray-700 text-right truncate">
+                        {p.province}
                       </div>
-                      <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-gray-100">
+                      <div className="flex-1 h-8 bg-gray-200/60 rounded-lg overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-700 ease-out motion-reduce:transition-none"
-                          style={{ width: `${row.pct}%` }}
-                        />
+                          className="h-full rounded-lg flex items-center justify-end pr-3 transition-all duration-500"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: isHighlighted ? "#032EA1" : "#cbd5e1",
+                          }}
+                        >
+                          <span className="text-xs font-bold text-white whitespace-nowrap">{p.acs}</span>
+                        </div>
+                      </div>
+                      <div className="w-24 shrink-0 text-sm tabular-nums text-right" style={{ color: isHighlighted ? "#6b7280" : "#d1d5db" }}>
+                        {p.members.toLocaleString()} mbrs
                       </div>
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
+                  );
+                })}
+              </div>
+              {sorted.length > 10 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllGeo((v) => !v)}
+                  className="mt-4 text-sm font-medium text-[#032EA1] hover:text-[#0447D4] transition-colors"
+                >
+                  {showAllGeo ? `Show less` : `Show more (${sorted.length - 10} more)`}
+                </button>
+              )}
+            </>
+          );
+        })()}
       </section>
 
-      {/* 3. Business plan analytics — bento + lifecycle KPIs */}
-      <section className="rounded-2xl bg-slate-50 p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <FileText className="h-5 w-5 text-[#0F2F8F]" />
-          Business plan analytics
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Pipeline lifecycle and provincial approval performance; click <span className="font-medium text-gray-700">Rejected</span>{" "}
-          on the workflow bar for rejection reasons
-          {provinceFilter === "All" ? "" : ` (${provinceFilter} focus where applicable)`}.
-        </p>
-
-        <div className="mt-6 space-y-5">
-          {/* Card 1 — workflow funnel + optional rejection drill-down */}
-          <div className={`${BP_CARD} p-5`}>
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-4">Workflow status</p>
-            <div
-              className={cn(
-                "flex flex-col gap-5 lg:flex-row lg:items-stretch",
-                bpRejectedDrillOpen && bp.rejected > 0 ? "lg:gap-3" : ""
-              )}
-            >
-              <div
-                className={cn(
-                  "min-w-0 motion-safe:transition-[width,max-width] motion-safe:duration-500 motion-safe:ease-out",
-                  bpRejectedDrillOpen && bp.rejected > 0
-                    ? "lg:w-3/5 lg:max-w-[60%] lg:flex-shrink-0"
-                    : "w-full"
-                )}
-              >
-                <WorkflowStatusFunnel
-                  bp={{
-                    submitted: bp.submitted,
-                    approved: bp.approved,
-                    inProgress: bp.inProgress,
-                    rejected: bp.rejected,
-                  }}
-                  rejectedDrillOpen={bpRejectedDrillOpen}
-                  onSegmentClick={handleBpSegmentClick}
-                />
+      {/* 3. Farmer Membership Trend */}
+      {(() => {
+        const ytdGrowth =
+          farmerTrend.length >= 2
+            ? Math.round(((farmerTrend[farmerTrend.length - 1].total / farmerTrend[0].total) - 1) * 1000) / 10
+            : 0;
+        const latestTotal = farmerTrend[farmerTrend.length - 1]?.total ?? 0;
+        const latestFemale = farmerTrend[farmerTrend.length - 1]?.female ?? 0;
+        const femalePct = latestTotal > 0 ? Math.round((latestFemale / latestTotal) * 100) : 0;
+        return (
+          <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
+            {/* Header */}
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-[#0F2F8F]" />
+                  Farmer Membership Trend
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  12-month enrollment — {isNational ? "all 25 provinces" : provinceDisplayLabel}
+                </p>
               </div>
-              {bpRejectedDrillOpen && bp.rejected > 0 && (
-                <>
-                  <div
-                    className="hidden shrink-0 flex-col items-center justify-center gap-1 self-center text-red-400 lg:flex"
-                    aria-hidden
-                  >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-red-500 shadow-sm ring-2 ring-white">
-                      <ChevronRight className="h-5 w-5" strokeWidth={2.5} />
-                    </div>
-                    <div className="h-6 w-0.5 rounded-full bg-gradient-to-b from-red-300/80 to-transparent" />
-                  </div>
-                  <div
-                    className={cn(
-                      "min-w-0 w-full motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-6 motion-safe:duration-500",
-                      "lg:w-2/5 lg:max-w-[40%]"
-                    )}
-                  >
-                    <BpRejectionDrillPanel onClose={() => setBpRejectedDrillOpen(false)} />
-                  </div>
-                </>
-              )}
+              <div className="flex flex-wrap gap-3">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-center min-w-[100px]">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">Total Members</p>
+                  <p className="text-xl font-bold tabular-nums text-gray-900 mt-0.5">{latestTotal.toLocaleString()}</p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-center min-w-[100px]">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-emerald-500">YTD Growth</p>
+                  <p className="text-xl font-bold tabular-nums text-emerald-700 mt-0.5">+{ytdGrowth}%</p>
+                </div>
+                <div className="rounded-xl border border-pink-200 bg-pink-50 px-4 py-2 text-center min-w-[100px]">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-pink-400">Female Share</p>
+                  <p className="text-xl font-bold tabular-nums text-pink-700 mt-0.5">{femalePct}%</p>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Provincial comparison (rejection reasons: drill-down from Rejected segment only) */}
-          <div className={`${BP_CARD} p-5`}>
-            <p className="text-sm font-semibold text-gray-900">Provincial comparison</p>
-            <p className="text-xs text-gray-500 mt-0.5">Approval rate — highest to lowest</p>
-            <div className="mt-4 h-64">
+            {/* Line chart */}
+            <div style={{ height: 260 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={bpChartSorted}
-                  layout="vertical"
-                  margin={{ left: 4, right: 12, top: 8, bottom: 8 }}
-                  barCategoryGap={14}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                  <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} />
-                  <YAxis
-                    type="category"
-                    dataKey="province"
-                    width={108}
-                    tick={{ fontSize: 11 }}
+                <LineChart data={farmerTrend} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tick={{ fontSize: 11, fill: "#94a3b8" }}
                     tickLine={false}
                     axisLine={false}
                   />
-                  <Tooltip formatter={(val: number) => [`${val}%`, "Approval rate"]} />
-                  <Bar
-                    dataKey="rate"
-                    name="Approval rate"
-                    fill={BP_PROVINCE_BLUE}
-                    radius={[0, 6, 6, 0]}
-                    maxBarSize={14}
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#94a3b8" }}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}K` : String(v)}
                   />
-                </BarChart>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
+                    formatter={(value: number, name: string) => [value.toLocaleString(), name]}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: 14, fontSize: 12 }} />
+                  <Line type="monotone" dataKey="total"  name="Total"  stroke="#10b981" strokeWidth={2}   strokeDasharray="6 4" dot={false} />
+                  <Line type="monotone" dataKey="male"   name="Male"   stroke="#032EA1" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="female" name="Female" stroke="#E00025" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
+                </LineChart>
               </ResponsiveContainer>
             </div>
+
+            {/* Gender insight strip */}
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              {[
+                { label: "Male farmers",   value: farmerTrend[farmerTrend.length - 1]?.male.toLocaleString() ?? "—",   color: "#032EA1", bg: "#eff6ff", border: "#bfdbfe" },
+                { label: "Female farmers", value: farmerTrend[farmerTrend.length - 1]?.female.toLocaleString() ?? "—", color: "#E00025", bg: "#fff1f2", border: "#fecdd3" },
+                { label: "New this year",  value: `+${(farmerTrend[farmerTrend.length - 1]?.total - farmerTrend[0]?.total).toLocaleString()}`, color: "#059669", bg: "#f0fdf4", border: "#bbf7d0" },
+              ].map((s) => (
+                <div key={s.label} className="rounded-xl p-3 border" style={{ backgroundColor: s.bg, borderColor: s.border }}>
+                  <p className="text-lg font-bold tabular-nums" style={{ color: s.color }}>{s.value}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* 4. Business Plan Analytics */}
+      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
+        {/* Header */}
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <FileText className="h-5 w-5 text-[#0F2F8F]" />
+              Business Plan Analytics
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">Provincial comparison of business plan performance</p>
+          </div>
+          <div className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
+            <TrendingUp className="h-4 w-4" />
+            {bp.approvalRate}% Approval Rate
           </div>
         </div>
-      </section>
 
-      {/* 4. Asset management — bento KPIs + donut condition mix */}
-      <section className="rounded-2xl bg-slate-50 p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <Package className="h-5 w-5 text-[#0F2F8F]" />
-          Asset management ({provinceFilter === "All" ? "national" : "provincial"})
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Condition distribution, indicative portfolio value trend, and maintenance vs target
-          {provinceFilter === "All" ? "" : ` (${provinceFilter})`}.
-        </p>
-
-        <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-stretch">
-          <div className="w-full min-w-0 lg:w-1/2">
-            <div className={cn(ASSET_KPI_CARD, "h-full p-5")}>
-              <p className="text-sm font-semibold text-gray-900">Condition mix</p>
-              <p className="mt-0.5 text-xs text-slate-500">Share by reported condition (illustrative %)</p>
-              <div className="mt-4 flex flex-col items-stretch gap-6 lg:flex-row lg:items-center lg:gap-8">
-                <div className="relative mx-auto h-[220px] w-full max-w-[260px] shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={assetConditionSlices}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius="58%"
-                        outerRadius="88%"
-                        paddingAngle={2.5}
-                        cornerRadius={7}
-                        stroke="#ffffff"
-                        strokeWidth={2}
-                      >
-                        {assetConditionSlices.map((entry, i) => (
-                          <Cell key={i} fill={entry.fill} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(v: number, name) => [`${v}%`, name]} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center pr-1">
-                    <div className="text-center">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Total assets</p>
-                      <p className="font-mono text-2xl font-bold tabular-nums text-gray-900 sm:text-3xl">
-                        {assets.count.toLocaleString()}
-                      </p>
-                    </div>
+        {/* Paginated grouped bar chart */}
+        {(() => {
+          const BP_PAGE_SIZE = 8;
+          const chartRows = bpChartData.map((d) => {
+            const leftover = d.submitted - d.approved;
+            return {
+              province: d.province.split(" ").pop(),
+              Approved: d.approved,
+              "In Progress": Math.round(leftover * 0.45),
+              Rejected: Math.round(leftover * 0.55),
+            };
+          });
+          const totalPages = Math.ceil(chartRows.length / BP_PAGE_SIZE);
+          const pageRows = chartRows.slice(bpPage * BP_PAGE_SIZE, (bpPage + 1) * BP_PAGE_SIZE);
+          return (
+            <>
+              <div style={{ height: 280 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={pageRows}
+                    margin={{ top: 4, right: 8, left: -16, bottom: 4 }}
+                    barCategoryGap="30%"
+                    barGap={2}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="province" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                    <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8 }} />
+                    <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
+                    <Bar dataKey="Approved" fill="#38bdf8" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                    <Bar dataKey="In Progress" fill="#1e293b" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                    <Bar dataKey="Rejected" fill="#64748b" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              {totalPages > 1 && (
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-gray-400">
+                    Showing {bpPage * BP_PAGE_SIZE + 1}–{Math.min((bpPage + 1) * BP_PAGE_SIZE, chartRows.length)} of {chartRows.length} provinces
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBpPage((p) => Math.max(0, p - 1))}
+                      disabled={bpPage === 0}
+                      className="px-3 py-1 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      ← Prev
+                    </button>
+                    <span className="text-xs font-semibold text-gray-600">
+                      {bpPage + 1} / {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setBpPage((p) => Math.min(totalPages - 1, p + 1))}
+                      disabled={bpPage === totalPages - 1}
+                      className="px-3 py-1 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next →
+                    </button>
                   </div>
                 </div>
-                <ul className="min-w-0 flex-1 space-y-2.5">
-                  {assetConditionSlices.map((row) => (
-                    <li
-                      key={row.name}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5 sm:flex-nowrap"
-                    >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <span
-                          className="h-3.5 w-3.5 shrink-0 rounded-full shadow-sm ring-2 ring-white"
-                          style={{ backgroundColor: row.fill }}
-                        />
-                        <span className="font-semibold text-gray-900">{row.name}</span>
-                      </div>
-                      <p className="text-sm text-slate-600">
-                        <span className="font-mono font-semibold tabular-nums text-gray-900">
-                          {row.estCount.toLocaleString()}
-                        </span>
-                        <span className="text-slate-400"> ({row.value}%)</span>
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+              )}
+            </>
+          );
+        })()}
+
+        {/* Stat cards */}
+        <div className="mt-5 grid grid-cols-3 gap-4">
+          {[
+            { label: "Submitted", value: bp.submitted, pct: 100, barColor: "#1e293b", border: "border-gray-200", bg: "bg-white", textColor: "text-gray-900" },
+            { label: "Approved", value: bp.approved, pct: Math.round((bp.approved / Math.max(1, bp.submitted)) * 100), barColor: "#3b82f6", border: "border-blue-200 ring-1 ring-blue-200", bg: "bg-blue-50", textColor: "text-blue-600" },
+            { label: "Rejected", value: bp.rejected, pct: Math.round((bp.rejected / Math.max(1, bp.submitted)) * 100), barColor: "#94a3b8", border: "border-gray-200", bg: "bg-white", textColor: "text-gray-900" },
+          ].map((s) => (
+            <div key={s.label} className={`rounded-xl p-5 border ${s.border} ${s.bg}`}>
+              <p className={`text-3xl font-bold tabular-nums tracking-tight ${s.textColor}`}>
+                {s.value.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">{s.label}</p>
+              <div className="mt-4 h-1.5 w-full rounded-full bg-gray-100">
+                <div
+                  className="h-full rounded-full transition-[width] duration-700"
+                  style={{ width: `${s.pct}%`, backgroundColor: s.barColor }}
+                />
               </div>
             </div>
-          </div>
-          <div className="w-full min-w-0 lg:w-1/2">
-            <AssetPerformanceSummaryCard
-              valueUsd={assets.valueUsd}
-              maintenancePct={assets.maintenanceCompliance}
-              valueSpark={assetValueSparkSeries}
-              sparkGradientId={assetSparkGradientId}
-            />
-          </div>
+          ))}
         </div>
       </section>
 
+      {/* 4. Asset management + Knowledge Management Stats — side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      {/* Asset management */}
+      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
+        <div className="flex items-center gap-2">
+          <Package className="h-5 w-5 text-[#0F2F8F]" />
+          <h2 className="text-lg font-semibold text-gray-900">Asset Management Overview</h2>
+        </div>
+        <p className="mt-1 text-sm text-slate-500">
+          Reported assets across all cooperatives{isNational ? "" : ` (${provinceDisplayLabel})`}
+        </p>
+
+        {/* Top stat tiles */}
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="rounded-xl bg-[#032EA1] p-4 text-white">
+            <p className="text-xs font-medium opacity-75">Total Assets</p>
+            <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight">{assets.count.toLocaleString()}</p>
+            <p className="mt-1 text-xs opacity-60">Across {isNational ? 25 : selectedProvinces.length} province(s)</p>
+          </div>
+          <div className="rounded-xl bg-[#0f172a] p-4 text-white">
+            <p className="text-xs font-medium opacity-75">Est. Total Value</p>
+            <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight">
+              USD {Math.round(assets.valueUsd / 1_000).toLocaleString()}K
+            </p>
+            <p className="mt-1 text-xs opacity-60">Estimated market value</p>
+          </div>
+        </div>
+
+        {/* Maintenance + at risk */}
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
+              <Activity className="h-4 w-4 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-emerald-700 tabular-nums">{assets.maintenanceCompliance}%</p>
+              <p className="text-xs text-emerald-600">Maintenance compliance</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl bg-red-50 border border-red-100 px-4 py-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-red-600 tabular-nums">
+                {assetConditionSlices
+                  .filter((s) => s.name === "Poor" || s.name === "Unknown")
+                  .reduce((sum, s) => sum + s.estCount, 0)
+                  .toLocaleString()}
+              </p>
+              <p className="text-xs text-red-500">Assets at risk</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Condition breakdown */}
+        <div className="mt-6">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-3">Condition Breakdown</p>
+          {(() => {
+            const condMap: Record<string, { bar: string; bg: string }> = {
+              Good:    { bar: "#22c55e", bg: "#dcfce7" },
+              Fair:    { bar: "#f59e0b", bg: "#fef3c7" },
+              Poor:    { bar: "#ef4444", bg: "#fee2e2" },
+              Unknown: { bar: "#94a3b8", bg: "#f1f5f9" },
+            };
+            return (
+              <>
+                <div className="space-y-2.5">
+                  {assetConditionSlices.map((row) => {
+                    const c = condMap[row.name] ?? { bar: "#94a3b8", bg: "#f1f5f9" };
+                    const label = row.name === "Unknown" ? "Under Repair" : row.name;
+                    return (
+                      <div key={row.name} className="flex items-center gap-3">
+                        <span className="w-24 shrink-0 text-sm font-medium text-gray-600">{label}</span>
+                        <div className="flex-1 h-4 rounded-full overflow-hidden" style={{ backgroundColor: c.bg }}>
+                          <div
+                            className="h-full rounded-full transition-[width] duration-700"
+                            style={{ width: `${row.value}%`, backgroundColor: c.bar }}
+                          />
+                        </div>
+                        <span className="w-9 shrink-0 text-right text-sm font-bold tabular-nums" style={{ color: c.bar }}>
+                          {row.value}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Combined stacked bar */}
+                <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full">
+                  {assetConditionSlices.map((row) => (
+                    <div
+                      key={row.name}
+                      style={{ width: `${row.value}%`, backgroundColor: condMap[row.name]?.bar ?? "#94a3b8" }}
+                    />
+                  ))}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      </section>
+
+      {/* Knowledge Management Stats */}
+      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
+        <h2 className="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-[#0F2F8F]" />
+          Knowledge Management Stats
+        </h2>
+
+        {/* 2×2 stat tiles */}
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { icon: BookOpen,   iconBg: "bg-blue-100",    iconColor: "text-blue-600",    value: "127",   label: "Total Materials" },
+            { icon: Activity,   iconBg: "bg-emerald-100", iconColor: "text-emerald-600", value: "74%",   label: "ACs Accessed" },
+            { icon: Download,   iconBg: "bg-violet-100",  iconColor: "text-violet-600",  value: "3,972", label: "Total Downloads" },
+            { icon: TrendingUp, iconBg: "bg-orange-100",  iconColor: "text-orange-500",  value: "4.7/5", label: "Avg Rating" },
+          ].map(({ icon: Icon, iconBg, iconColor, value, label }) => (
+            <div key={label} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
+                <Icon className={`h-5 w-5 ${iconColor}`} />
+              </div>
+              <div>
+                <p className="text-xl font-bold tabular-nums text-gray-900">{value}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Dissemination Adoption by Province — all 25, show more/less */}
+        <div className="mt-6">
+          <p className="text-sm font-semibold text-gray-900 mb-4">Dissemination Adoption by Province</p>
+          {(() => {
+            const kmAll = [...provinceGeo]
+              .map((p) => ({
+                province: p.province,
+                pct: Math.min(92, 55 + (p.members % 18) + (p.acs % 12)),
+              }))
+              .sort((a, b) => b.pct - a.pct);
+            const KM_INITIAL = 4;
+            const visible = showAllKm ? kmAll : kmAll.slice(0, KM_INITIAL);
+            return (
+              <>
+                <div className="space-y-3">
+                  {visible.map(({ province, pct }) => {
+                    const isHighlighted = selectedProvinces.length === 0 || selectedProvinces.includes(province);
+                    return (
+                      <div key={province} className="flex items-center gap-3">
+                        <span
+                          className="w-32 shrink-0 text-sm font-medium truncate"
+                          style={{ color: isHighlighted ? "#032EA1" : "#9ca3af" }}
+                        >
+                          {province}
+                        </span>
+                        <div className="flex-1 h-3 rounded-full bg-gray-100 overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-[width] duration-700"
+                            style={{ width: `${pct}%`, backgroundColor: isHighlighted ? "#032EA1" : "#cbd5e1" }}
+                          />
+                        </div>
+                        <span
+                          className="w-10 shrink-0 text-right text-sm font-semibold tabular-nums"
+                          style={{ color: isHighlighted ? "#374151" : "#d1d5db" }}
+                        >
+                          {pct}%
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {kmAll.length > KM_INITIAL && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllKm((v) => !v)}
+                    className="mt-4 text-sm font-medium text-[#032EA1] hover:text-[#0447D4] transition-colors"
+                  >
+                    {showAllKm ? "Show less" : `Show more (${kmAll.length - KM_INITIAL} more)`}
+                  </button>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      </section>
+
+      </div>{/* end 2-col grid */}
+
       {/* 5. Performance heatmap — lollipop + band shading + national avg */}
-      <section className="rounded-2xl bg-slate-50 p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
+      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
         <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Activity className="h-5 w-5 text-[#0F2F8F]" />
           Performance heatmap (province / district lens)
@@ -1478,7 +1386,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
         </p>
         <div
           className="mt-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500"
-          key={provinceFilter}
+          key={selectedProvinces.join(",")}
           onMouseLeave={() => setPerfChartHoverProvince(null)}
           style={{ height: Math.max(300, perfHeatSorted.length * 56 + 80) }}
         >
@@ -1565,116 +1473,6 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
         </div>
       </section>
 
-      {/* 6. Knowledge management — bullet summary in asset-style card */}
-      <section className="rounded-2xl bg-slate-50 p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-[#0F2F8F]" />
-          Knowledge management
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          National snapshot uses bullet graphs (value vs national benchmark). Adoption by province highlights how each
-          province performs against the national average.
-        </p>
-        <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-stretch">
-          <div className="w-full min-w-0 lg:w-1/2">
-            <div className={cn(ASSET_KPI_CARD, "flex h-full flex-col p-6")}>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">National snapshot</p>
-              <div className="mt-3 rounded-xl border border-slate-100 bg-white px-4 py-3 text-center shadow-sm">
-                <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Materials in system</p>
-                <p className="mt-0.5 text-3xl font-bold tabular-nums tracking-tight text-[#0F2F8F]">
-                  {km.materials}
-                </p>
-              </div>
-              <div className="mt-4 space-y-5">
-                <KnowledgeBulletGraph
-                  label="AC download reach"
-                  value={km.acsAccessPct}
-                  benchmark={KM_BENCHMARK_DOWNLOAD}
-                  benchmarkLabel="National benchmark (download)"
-                />
-                <KnowledgeBulletGraph
-                  label="Dissemination adoption (avg.)"
-                  value={km.adoptionAvg}
-                  benchmark={KM_BENCHMARK_ADOPTION}
-                  benchmarkLabel="National benchmark (adoption)"
-                />
-              </div>
-              <p className="mt-4 text-[10px] leading-snug text-slate-400">
-                Bands: intervention 0–50%, medium 50–75%, high 75–100%. Bar shows current scope; vertical marker is
-                the national benchmark.
-              </p>
-            </div>
-          </div>
-
-          <div className="w-full min-w-0 lg:w-1/2">
-            <div className={cn(ASSET_KPI_CARD, "flex h-full flex-col p-6")}>
-              <p className="text-sm font-semibold text-gray-900">Adoption Rate by province (%)</p>
-              <div className="mt-4 flex-1">
-                <div style={{ height: 240 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart
-                      layout="vertical"
-                      data={kmByProvinceChart}
-                      margin={{ left: 6, right: 26, top: 14, bottom: 6 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal vertical={false} />
-                      <XAxis
-                        type="number"
-                        domain={[0, 100]}
-                        tickLine={false}
-                        axisLine={false}
-                        tick={{ fontSize: 11, fill: "#64748b", fontFamily: "Inter, ui-sans-serif, system-ui" }}
-                        tickFormatter={(v) => `${v}%`}
-                      />
-                      <YAxis
-                        type="category"
-                        dataKey="province"
-                        width={118}
-                        tickLine={false}
-                        axisLine={false}
-                        tick={{ fontSize: 11, fill: "#334155", fontFamily: "Inter, ui-sans-serif, system-ui" }}
-                      />
-                      <Tooltip formatter={(v: number) => [`${v}%`, "Adoption"]} />
-                      <ReferenceLine
-                        x={KM_BENCHMARK_ADOPTION}
-                        stroke="#64748b"
-                        strokeWidth={1.5}
-                        strokeDasharray="5 5"
-                      />
-                      <Bar
-                        dataKey="adoption"
-                        name="Adoption"
-                        radius={[0, 6, 6, 0]}
-                        barSize={16}
-                        isAnimationActive={false}
-                      >
-                        {kmByProvinceChart.map((e, i) => (
-                          <Cell
-                            key={`km-prov-${i}`}
-                            fill={kmAdoptionBarFill(e.adoption, e.province, provinceFilter)}
-                          />
-                        ))}
-                        <LabelList
-                          dataKey="adoption"
-                          position="right"
-                          offset={6}
-                          formatter={(v: number | string) => `${v}%`}
-                          style={{
-                            fontSize: 11,
-                            fontWeight: 700,
-                            fill: "#334155",
-                            fontFamily: "Inter, ui-sans-serif, system-ui",
-                          }}
-                        />
-                      </Bar>
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
