@@ -807,7 +807,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
             >
               <span className="truncate text-gray-800">
                 {isNational
-                  ? "All provinces (national trends)"
+                  ? "All provinces"
                   : selectedProvinces.length === 1
                   ? selectedProvinces[0]
                   : `${selectedProvinces.length} provinces selected`}
@@ -823,7 +823,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                   onClick={() => { setSelectedProvinces([]); setDropdownOpen(false); }}
                   className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors hover:bg-blue-50 ${isNational ? "bg-blue-50 text-blue-700" : "text-gray-700"}`}
                 >
-                  All provinces (national trends)
+                  All provinces
                 </button>
                 <div className="h-px bg-gray-100 mx-2" />
                 {provinceGeo.map((p) => {
