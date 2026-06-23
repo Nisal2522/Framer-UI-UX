@@ -52,31 +52,31 @@ import {
 const COLORS = ["#0F2F8F", "#3B5FCC", "#22C55E", "#F59E0B", "#E00025", "#94A3B8"];
 
 const provinceGeo = [
-  { province: "Phnom Penh", lat: 11.5564, lon: 104.9282, acs: 142, members: 15200 },
-  { province: "Banteay Meanchey", lat: 13.7532, lon: 102.9896, acs: 48, members: 4900 },
-  { province: "Battambang", lat: 13.0957, lon: 103.2022, acs: 118, members: 12400 },
-  { province: "Kampong Cham", lat: 12.0, lon: 105.45, acs: 76, members: 8200 },
-  { province: "Kampong Chhnang", lat: 12.25, lon: 104.67, acs: 42, members: 4400 },
-  { province: "Kampong Speu", lat: 11.45, lon: 104.52, acs: 38, members: 3900 },
-  { province: "Kampong Thom", lat: 12.7117, lon: 104.8885, acs: 84, members: 8900 },
-  { province: "Preah Sihanouk", lat: 10.6282, lon: 103.5234, acs: 33, members: 3400 },
-  { province: "Kampot", lat: 10.6104, lon: 104.1815, acs: 55, members: 5800 },
-  { province: "Kandal", lat: 11.2237, lon: 105.1259, acs: 92, members: 9800 },
-  { province: "Kep", lat: 10.4864, lon: 104.3172, acs: 14, members: 1400 },
-  { province: "Koh Kong", lat: 11.6154, lon: 102.9841, acs: 22, members: 2200 },
-  { province: "Kratie", lat: 12.4888, lon: 106.0186, acs: 35, members: 3600 },
-  { province: "Mondulkiri", lat: 12.4539, lon: 107.1874, acs: 18, members: 1800 },
-  { province: "Oddar Meanchey", lat: 14.1601, lon: 103.4977, acs: 26, members: 2600 },
-  { province: "Pailin", lat: 12.8494, lon: 102.6042, acs: 12, members: 1200 },
-  { province: "Preah Vihear", lat: 13.8039, lon: 104.9803, acs: 24, members: 2400 },
-  { province: "Pursat", lat: 12.5338, lon: 103.9192, acs: 44, members: 4600 },
-  { province: "Prey Veng", lat: 11.4868, lon: 105.3253, acs: 51, members: 5300 },
-  { province: "Ratanakiri", lat: 13.7283, lon: 107.0049, acs: 20, members: 2000 },
-  { province: "Siem Reap", lat: 13.3671, lon: 103.8448, acs: 96, members: 10100 },
-  { province: "Stung Treng", lat: 13.5237, lon: 105.9685, acs: 16, members: 1600 },
-  { province: "Svay Rieng", lat: 11.0877, lon: 105.7997, acs: 30, members: 3100 },
-  { province: "Takeo", lat: 10.9929, lon: 104.7847, acs: 62, members: 6400 },
-  { province: "Tboung Khmum", lat: 11.9153, lon: 105.6459, acs: 58, members: 6100 },
+  { province: "Phnom Penh",       lat: 11.5564, lon: 104.9282, acs: 142, macs: 20, members: 15200 },
+  { province: "Banteay Meanchey", lat: 13.7532, lon: 102.9896, acs:  48, macs:  7, members:  4900 },
+  { province: "Battambang",       lat: 13.0957, lon: 103.2022, acs: 118, macs: 16, members: 12400 },
+  { province: "Kampong Cham",     lat: 12.0,    lon: 105.45,   acs:  76, macs: 10, members:  8200 },
+  { province: "Kampong Chhnang",  lat: 12.25,   lon: 104.67,   acs:  42, macs:  6, members:  4400 },
+  { province: "Kampong Speu",     lat: 11.45,   lon: 104.52,   acs:  38, macs:  6, members:  3900 },
+  { province: "Kampong Thom",     lat: 12.7117, lon: 104.8885, acs:  84, macs: 11, members:  8900 },
+  { province: "Preah Sihanouk",   lat: 10.6282, lon: 103.5234, acs:  33, macs:  5, members:  3400 },
+  { province: "Kampot",           lat: 10.6104, lon: 104.1815, acs:  55, macs:  8, members:  5800 },
+  { province: "Kandal",           lat: 11.2237, lon: 105.1259, acs:  92, macs: 13, members:  9800 },
+  { province: "Kep",              lat: 10.4864, lon: 104.3172, acs:  14, macs:  3, members:  1400 },
+  { province: "Koh Kong",         lat: 11.6154, lon: 102.9841, acs:  22, macs:  4, members:  2200 },
+  { province: "Kratie",           lat: 12.4888, lon: 106.0186, acs:  35, macs:  5, members:  3600 },
+  { province: "Mondulkiri",       lat: 12.4539, lon: 107.1874, acs:  18, macs:  3, members:  1800 },
+  { province: "Oddar Meanchey",   lat: 14.1601, lon: 103.4977, acs:  26, macs:  4, members:  2600 },
+  { province: "Pailin",           lat: 12.8494, lon: 102.6042, acs:  12, macs:  2, members:  1200 },
+  { province: "Preah Vihear",     lat: 13.8039, lon: 104.9803, acs:  24, macs:  4, members:  2400 },
+  { province: "Pursat",           lat: 12.5338, lon: 103.9192, acs:  44, macs:  7, members:  4600 },
+  { province: "Prey Veng",        lat: 11.4868, lon: 105.3253, acs:  51, macs:  8, members:  5300 },
+  { province: "Ratanakiri",       lat: 13.7283, lon: 107.0049, acs:  20, macs:  3, members:  2000 },
+  { province: "Siem Reap",        lat: 13.3671, lon: 103.8448, acs:  96, macs: 14, members: 10100 },
+  { province: "Stung Treng",      lat: 13.5237, lon: 105.9685, acs:  16, macs:  3, members:  1600 },
+  { province: "Svay Rieng",       lat: 11.0877, lon: 105.7997, acs:  30, macs:  5, members:  3100 },
+  { province: "Takeo",            lat: 10.9929, lon: 104.7847, acs:  62, macs:  9, members:  6400 },
+  { province: "Tboung Khmum",     lat: 11.9153, lon: 105.6459, acs:  58, macs:  8, members:  6100 },
 ];
 
 const memberTrend = [
@@ -630,7 +630,9 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   const [perfChartHoverProvince, setPerfChartHoverProvince] = useState<string | null>(null);
   const [showAllGeo, setShowAllGeo] = useState(false);
   const [showAllKm, setShowAllKm] = useState(false);
-  const [cropFilter, setCropFilter] = useState<string | null>(null);
+  const [cropFilters, setCropFilters] = useState<string[]>([]);
+  const [cropDropdownOpen, setCropDropdownOpen] = useState(false);
+  const [showAllCrops, setShowAllCrops] = useState(false);
   const [bpPage, setBpPage] = useState(0);
 
   const acStatsNational = useMemo(
@@ -920,13 +922,14 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
               <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom>
                 <MapViewController selected={selectedProvinces} />
                 <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                {/* AC pins — red */}
                 {provinceGeo.map((p) => {
                   const isSelected = selectedProvinces.includes(p.province);
                   const perfHover = perfChartHoverProvince === p.province;
                   const iconSize = Math.round(24 + Math.min(20, p.acs / 6));
-                  const fill = isSelected ? "#032EA1" : perfHover ? "#10b981" : "#E00025";
+                  const fill   = isSelected ? "#032EA1" : perfHover ? "#10b981" : "#E00025";
                   const stroke = isSelected ? "#001a6e" : perfHover ? "#059669" : "#9b0018";
-                  const pinIcon = L.divIcon({
+                  const acIcon = L.divIcon({
                     html: `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.38));display:block">
                       <path fill="${fill}" stroke="${stroke}" stroke-width="1.4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                       <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.88)"/>
@@ -938,9 +941,9 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                   });
                   return (
                     <Marker
-                      key={p.province}
+                      key={`ac-${p.province}`}
                       position={[p.lat, p.lon]}
-                      icon={pinIcon}
+                      icon={acIcon}
                       eventHandlers={{
                         click: () =>
                           setSelectedProvinces((prev) =>
@@ -948,19 +951,109 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                           ),
                       }}
                     >
-                      {/* tooltip placeholder — closed below */}
                       <LeafletTooltip direction="top" offset={[0, -iconSize + 4]} opacity={0.95}>
-                        <div className="text-xs font-medium">
-                          <div>{p.province}</div>
-                          <div>ACs: {p.acs}</div>
-                          <div>Members (approx.): {p.members.toLocaleString()}</div>
-                          <div className="text-[10px] text-gray-500 mt-1">Click to filter dashboard</div>
+                        <div className="text-xs font-medium space-y-0.5">
+                          <div className="font-bold text-gray-900">{p.province}</div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-block w-2 h-2 rounded-full bg-[#E00025]" />
+                            <span className="text-gray-700">Agricultural Cooperative (AC)</span>
+                          </div>
+                          <div className="text-gray-600">Members: {p.members.toLocaleString()}</div>
+                          <div className="text-[10px] text-gray-400 mt-1">Click to filter dashboard</div>
+                        </div>
+                      </LeafletTooltip>
+                    </Marker>
+                  );
+                })}
+
+                {/* MAC pins — blue, offset NE so they sit next to AC pins */}
+                {provinceGeo.map((p) => {
+                  const macSize = Math.round(26 + Math.min(14, p.macs / 2));
+                  const macIcon = L.divIcon({
+                    html: `<svg xmlns="http://www.w3.org/2000/svg" width="${macSize}" height="${macSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.38));display:block">
+                      <path fill="#032EA1" stroke="#001a6e" stroke-width="1.4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                      <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.88)"/>
+                    </svg>`,
+                    className: "",
+                    iconSize: [macSize, macSize],
+                    iconAnchor: [macSize / 2, macSize],
+                    tooltipAnchor: [0, -macSize + 4],
+                  });
+                  return (
+                    <Marker
+                      key={`mac-${p.province}`}
+                      position={[p.lat + 0.18, p.lon + 0.22]}
+                      icon={macIcon}
+                      eventHandlers={{
+                        click: () =>
+                          setSelectedProvinces((prev) =>
+                            prev.includes(p.province) ? prev.filter((x) => x !== p.province) : [...prev, p.province]
+                          ),
+                      }}
+                    >
+                      <LeafletTooltip direction="top" offset={[0, -macSize + 4]} opacity={0.95}>
+                        <div className="text-xs font-medium space-y-0.5">
+                          <div className="font-bold text-gray-900">{p.province}</div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-block w-2 h-2 rounded-full bg-[#032EA1]" />
+                            <span className="text-gray-700">Model Agricultural Cooperative (MAC)</span>
+                          </div>
+                          <div className="text-gray-600">Members: {p.members.toLocaleString()}</div>
+                          <div className="text-[10px] text-gray-400 mt-1">Click to filter dashboard</div>
                         </div>
                       </LeafletTooltip>
                     </Marker>
                   );
                 })}
               </MapContainer>
+            </div>{/* end map container div */}
+          </div>{/* end grid div */}
+
+          {/* AC / MAC summary tiles */}
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            {/* AC tile */}
+            <div className="flex items-center gap-4 rounded-xl border border-red-100 bg-red-50/60 px-5 py-4">
+              <svg width="28" height="36" viewBox="0 0 24 24" className="shrink-0">
+                <path fill="#E00025" stroke="#9b0018" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)"/>
+              </svg>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-red-400">
+                  Agricultural Cooperatives
+                </p>
+                <p className="mt-0.5 text-3xl font-bold tabular-nums tracking-tight text-red-700">
+                  {(isNational
+                    ? provinceGeo.reduce((s, p) => s + p.acs, 0)
+                    : provinceGeo.filter(p => selectedProvinces.includes(p.province)).reduce((s, p) => s + p.acs, 0)
+                  ).toLocaleString()}
+                </p>
+                <p className="mt-1 text-xs text-red-400">
+                  {isNational ? "Across all 25 provinces" : `In ${selectedProvinces.length} selected province(s)`}
+                </p>
+              </div>
+            </div>
+
+            {/* MAC tile */}
+            <div className="flex items-center gap-4 rounded-xl border border-blue-100 bg-blue-50/60 px-5 py-4">
+              <svg width="28" height="36" viewBox="0 0 24 24" className="shrink-0">
+                <path fill="#032EA1" stroke="#001a6e" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)"/>
+                <text x="12" y="10.6" textAnchor="middle" fontSize="5.5" fontWeight="800" fill="#032EA1" fontFamily="sans-serif">M</text>
+              </svg>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-500">
+                  Model Agricultural Cooperatives
+                </p>
+                <p className="mt-0.5 text-3xl font-bold tabular-nums tracking-tight text-[#032EA1]">
+                  {(isNational
+                    ? provinceGeo.reduce((s, p) => s + p.macs, 0)
+                    : provinceGeo.filter(p => selectedProvinces.includes(p.province)).reduce((s, p) => s + p.macs, 0)
+                  ).toLocaleString()}
+                </p>
+                <p className="mt-1 text-xs text-blue-400">
+                  {isNational ? "Across all 25 provinces" : `In ${selectedProvinces.length} selected province(s)`}
+                </p>
+              </div>
             </div>
           </div>
           {/* <div className="rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col min-h-[280px] lg:min-h-0 lg:max-h-[min(420px,55vh)]">
@@ -1024,40 +1117,76 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
               Regional Crop Distribution
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              Dominant crop per province based on cooperative registrations — click a crop to filter
+              Dominant crop per province — select one or more crops to filter
             </p>
           </div>
-          {/* Crop filter pills */}
-          <div className="flex flex-wrap gap-2">
+
+          {/* Multi-select crop dropdown */}
+          <div className="relative">
             <button
               type="button"
-              onClick={() => setCropFilter(null)}
-              className={`rounded-full px-3 py-1 text-xs font-semibold border transition-colors ${
-                cropFilter === null
-                  ? "bg-gray-900 border-gray-900 text-white"
-                  : "bg-white border-gray-200 text-gray-600 hover:border-gray-400"
-              }`}
+              onClick={() => setCropDropdownOpen((v) => !v)}
+              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors"
             >
-              All crops
+              <Wheat className="h-4 w-4 text-gray-400" />
+              {cropFilters.length === 0
+                ? "All crops"
+                : cropFilters.length === 1
+                ? cropFilters[0]
+                : `${cropFilters.length} crops selected`}
+              <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${cropDropdownOpen ? "rotate-180" : ""}`} />
             </button>
-            {Object.entries(CROP_COLORS).map(([crop, color]) => {
-              const Icon = CROP_ICONS[crop] ?? CircleDot;
-              const active = cropFilter === crop;
-              return (
+
+            {cropDropdownOpen && (
+              <>
+                {/* backdrop */}
                 <button
-                  key={crop}
                   type="button"
-                  onClick={() => setCropFilter(active ? null : crop)}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold border flex items-center gap-1.5 transition-colors ${
-                    active ? "text-white border-transparent" : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"
-                  }`}
-                  style={active ? { backgroundColor: color, borderColor: color } : {}}
-                >
-                  <Icon className="h-3 w-3" style={active ? {} : { color }} />
-                  {crop}
-                </button>
-              );
-            })}
+                  aria-hidden
+                  className="fixed inset-0 z-10 cursor-default bg-transparent"
+                  onClick={() => setCropDropdownOpen(false)}
+                />
+                <div className="absolute right-0 top-full mt-1.5 z-20 w-56 rounded-xl border border-gray-200 bg-white shadow-xl py-2">
+                  {/* Clear all */}
+                  <button
+                    type="button"
+                    onClick={() => { setCropFilters([]); }}
+                    className="w-full px-3 py-1.5 text-left text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Clear all
+                  </button>
+                  <div className="h-px bg-gray-100 mx-2 my-1" />
+                  {Object.entries(CROP_COLORS).map(([crop, color]) => {
+                    const Icon = CROP_ICONS[crop] ?? CircleDot;
+                    const checked = cropFilters.includes(crop);
+                    return (
+                      <button
+                        key={crop}
+                        type="button"
+                        onClick={() =>
+                          setCropFilters((prev) =>
+                            checked ? prev.filter((c) => c !== crop) : [...prev, crop]
+                          )
+                        }
+                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors text-sm text-left"
+                      >
+                        {/* checkbox */}
+                        <span
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                            checked ? "border-transparent" : "border-gray-300 bg-white"
+                          }`}
+                          style={checked ? { backgroundColor: color } : {}}
+                        >
+                          {checked && <Check className="h-3 w-3 text-white" />}
+                        </span>
+                        <Icon className="h-4 w-4 shrink-0" style={{ color }} />
+                        <span className="text-gray-700">{crop}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -1075,7 +1204,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                   const info = provinceCrops[p.province];
                   const dominant = info?.dominant ?? "Other";
                   const color = CROP_COLORS[dominant] ?? "#94a3b8";
-                  const dimmed = cropFilter !== null && cropFilter !== dominant;
+                  const dimmed = cropFilters.length > 0 && !cropFilters.includes(dominant);
                   const r = 7 + Math.min(14, p.acs / 9);
                   return (
                     <CircleMarker
@@ -1121,65 +1250,94 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
           </div>
 
           {/* Right sidebar — province list by dominant crop */}
-          <div className="lg:col-span-1 flex flex-col gap-4">
-            {/* Crop summary cards */}
-            <div className="grid grid-cols-1 gap-2">
-              {Object.entries(CROP_COLORS).map(([crop, color]) => {
-                const Icon = CROP_ICONS[crop] ?? CircleDot;
-                const provinces = Object.entries(provinceCrops)
-                  .filter(([, v]) => v.dominant === crop)
-                  .map(([name]) => name);
-                const totalAcs = provinces.reduce((s, name) => {
-                  const geo = provinceGeo.find((p) => p.province === name);
-                  return s + (geo?.acs ?? 0);
-                }, 0);
-                const isActive = cropFilter === crop;
-                return (
-                  <button
-                    key={crop}
-                    type="button"
-                    onClick={() => setCropFilter(isActive ? null : crop)}
-                    className={`w-full rounded-xl border p-3 text-left transition-all ${
-                      isActive ? "ring-2" : "hover:border-gray-300"
-                    }`}
-                    style={
-                      isActive
-                        ? { backgroundColor: `${color}12`, borderColor: color, ringColor: color }
-                        : { borderColor: "#e5e7eb", backgroundColor: "#fafafa" }
-                    }
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-                          style={{ backgroundColor: `${color}22` }}
+          <div className="lg:col-span-1 flex flex-col gap-3">
+            {/* Crop summary cards with show more/less */}
+            {(() => {
+              const CROP_INITIAL = 4;
+              const allCropEntries = Object.entries(CROP_COLORS);
+              const visibleEntries = showAllCrops ? allCropEntries : allCropEntries.slice(0, CROP_INITIAL);
+              return (
+                <>
+                  <div className="grid grid-cols-1 gap-2">
+                    {visibleEntries.map(([crop, color]) => {
+                      const Icon = CROP_ICONS[crop] ?? CircleDot;
+                      const provinces = Object.entries(provinceCrops)
+                        .filter(([, v]) => v.dominant === crop)
+                        .map(([name]) => name);
+                      const totalAcs = provinces.reduce((s, name) => {
+                        const geo = provinceGeo.find((p) => p.province === name);
+                        return s + (geo?.acs ?? 0);
+                      }, 0);
+                      const isActive = cropFilters.includes(crop);
+                      return (
+                        <button
+                          key={crop}
+                          type="button"
+                          onClick={() =>
+                            setCropFilters((prev) =>
+                              isActive ? prev.filter((c) => c !== crop) : [...prev, crop]
+                            )
+                          }
+                          className={`w-full rounded-xl border p-3 text-left transition-all ${
+                            isActive ? "ring-2" : "hover:border-gray-300"
+                          }`}
+                          style={
+                            isActive
+                              ? { backgroundColor: `${color}12`, borderColor: color }
+                              : { borderColor: "#e5e7eb", backgroundColor: "#fafafa" }
+                          }
                         >
-                          <Icon className="h-4 w-4" style={{ color }} />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-800">{crop}</span>
-                      </div>
-                      <span className="text-xs font-bold tabular-nums" style={{ color }}>
-                        {provinces.length} prov.
-                      </span>
-                    </div>
-                    <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
-                      <span>{totalAcs} ACs</span>
-                      <span className="text-gray-300">·</span>
-                      <span className="truncate text-[11px]">{provinces.slice(0, 2).join(", ")}{provinces.length > 2 ? ` +${provinces.length - 2}` : ""}</span>
-                    </div>
-                    <div className="mt-2 h-1 w-full rounded-full bg-gray-200">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${Math.round((provinces.length / 25) * 100)}%`,
-                          backgroundColor: color,
-                        }}
-                      />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                                style={{ backgroundColor: `${color}22` }}
+                              >
+                                <Icon className="h-4 w-4" style={{ color }} />
+                              </div>
+                              <span className="text-sm font-semibold text-gray-800">{crop}</span>
+                            </div>
+                            <span className="text-xs font-bold tabular-nums" style={{ color }}>
+                              {provinces.length} prov.
+                            </span>
+                          </div>
+                          <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
+                            <span>{totalAcs} ACs</span>
+                            <span className="text-gray-300">·</span>
+                            <span className="truncate text-[11px]">
+                              {provinces.slice(0, 2).join(", ")}
+                              {provinces.length > 2 ? ` +${provinces.length - 2}` : ""}
+                            </span>
+                          </div>
+                          <div className="mt-2 h-1 w-full rounded-full bg-gray-200">
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${Math.round((provinces.length / 25) * 100)}%`,
+                                backgroundColor: color,
+                              }}
+                            />
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Show more / less */}
+                  {allCropEntries.length > CROP_INITIAL && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllCrops((v) => !v)}
+                      className="text-sm font-medium text-[#032EA1] hover:text-[#0447D4] transition-colors text-left"
+                    >
+                      {showAllCrops
+                        ? "Show less"
+                        : `Show more (${allCropEntries.length - CROP_INITIAL} more)`}
+                    </button>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </section>
