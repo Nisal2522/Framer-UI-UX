@@ -657,6 +657,8 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   const [cropDropdownOpen, setCropDropdownOpen] = useState(false);
   const [showAllCrops, setShowAllCrops] = useState(false);
   const [bpPage, setBpPage] = useState(0);
+  const [showAcPins, setShowAcPins] = useState(true);
+  const [showMacPins, setShowMacPins] = useState(true);
   const [yieldPeriod, setYieldPeriod] = useState<"annual" | "h1" | "h2" | "monthly">("annual");
   const [yieldMonthlyCrop, setYieldMonthlyCrop] = useState("Rice");
 
@@ -948,7 +950,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                 <MapViewController selected={selectedProvinces} />
                 <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 {/* AC pins — red */}
-                {provinceGeo.map((p) => {
+                {showAcPins && provinceGeo.map((p) => {
                   const isSelected = selectedProvinces.includes(p.province);
                   const perfHover = perfChartHoverProvince === p.province;
                   const iconSize = Math.round(24 + Math.min(20, p.acs / 6));
@@ -983,7 +985,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                             <span className="inline-block w-2 h-2 rounded-full bg-[#E00025]" />
                             <span className="text-gray-700">Agricultural Cooperative (AC)</span>
                           </div>
-                          <div className="text-gray-600">Members: {p.members.toLocaleString()}</div>
+                          <div className="text-gray-600">ACs: {p.acs} · Members: {p.members.toLocaleString()}</div>
                           <div className="text-[10px] text-gray-400 mt-1">Click to filter dashboard</div>
                         </div>
                       </LeafletTooltip>
@@ -992,7 +994,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                 })}
 
                 {/* MAC pins — blue, offset NE so they sit next to AC pins */}
-                {provinceGeo.map((p) => {
+                {showMacPins && provinceGeo.map((p) => {
                   const macSize = Math.round(26 + Math.min(14, p.macs / 2));
                   const macIcon = L.divIcon({
                     html: `<svg xmlns="http://www.w3.org/2000/svg" width="${macSize}" height="${macSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.38));display:block">
@@ -1023,7 +1025,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                             <span className="inline-block w-2 h-2 rounded-full bg-[#032EA1]" />
                             <span className="text-gray-700">Model Agricultural Cooperative (MAC)</span>
                           </div>
-                          <div className="text-gray-600">Members: {p.members.toLocaleString()}</div>
+                          <div className="text-gray-600">MACs: {p.macs} · Members: {p.members.toLocaleString()}</div>
                           <div className="text-[10px] text-gray-400 mt-1">Click to filter dashboard</div>
                         </div>
                       </LeafletTooltip>
@@ -1034,25 +1036,41 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
             </div>{/* end map container div */}
           </div>{/* end grid div */}
 
-          {/* AC / MAC summary tiles */}
+          {/* AC / MAC toggle tiles */}
           <div className="mt-4 grid grid-cols-2 gap-4">
-            {/* AC tile */}
-            <div className="flex items-center gap-4 rounded-xl border border-red-100 bg-red-50/60 px-5 py-4">
+            {/* AC toggle */}
+            <button
+              type="button"
+              onClick={() => setShowAcPins((v) => !v)}
+              className={`flex items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 ${
+                showAcPins
+                  ? "border-red-100 bg-red-50/60 opacity-100"
+                  : "border-gray-200 bg-gray-100/60 opacity-50 grayscale"
+              }`}
+            >
               <svg width="28" height="36" viewBox="0 0 24 24" className="shrink-0">
                 <path fill="#E00025" stroke="#9b0018" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                 <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)"/>
               </svg>
               <p className="text-sm font-semibold text-red-600">Agricultural Cooperatives</p>
-            </div>
+            </button>
 
-            {/* MAC tile */}
-            <div className="flex items-center gap-4 rounded-xl border border-blue-100 bg-blue-50/60 px-5 py-4">
+            {/* MAC toggle */}
+            <button
+              type="button"
+              onClick={() => setShowMacPins((v) => !v)}
+              className={`flex items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 ${
+                showMacPins
+                  ? "border-blue-100 bg-blue-50/60 opacity-100"
+                  : "border-gray-200 bg-gray-100/60 opacity-50 grayscale"
+              }`}
+            >
               <svg width="28" height="36" viewBox="0 0 24 24" className="shrink-0">
                 <path fill="#032EA1" stroke="#001a6e" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                 <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)"/>
               </svg>
               <p className="text-sm font-semibold text-[#032EA1]">Model Agricultural Cooperatives</p>
-            </div>
+            </button>
           </div>
           {/* <div className="rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col min-h-[280px] lg:min-h-0 lg:max-h-[min(420px,55vh)]">
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/80">
