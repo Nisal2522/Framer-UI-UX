@@ -40,6 +40,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Area,
   Line,
   LineChart,
   ComposedChart,
@@ -50,31 +51,31 @@ import {
 const COLORS = ["#0F2F8F", "#3B5FCC", "#22C55E", "#F59E0B", "#E00025", "#94A3B8"];
 
 const provinceGeo = [
-  { province: "Phnom Penh",       lat: 11.5564, lon: 104.9282, acs: 142, macs: 20, members: 15200 },
-  { province: "Banteay Meanchey", lat: 13.7532, lon: 102.9896, acs:  48, macs:  7, members:  4900 },
-  { province: "Battambang",       lat: 13.0957, lon: 103.2022, acs: 118, macs: 16, members: 12400 },
-  { province: "Kampong Cham",     lat: 12.0,    lon: 105.45,   acs:  76, macs: 10, members:  8200 },
-  { province: "Kampong Chhnang",  lat: 12.25,   lon: 104.67,   acs:  42, macs:  6, members:  4400 },
-  { province: "Kampong Speu",     lat: 11.45,   lon: 104.52,   acs:  38, macs:  6, members:  3900 },
-  { province: "Kampong Thom",     lat: 12.7117, lon: 104.8885, acs:  84, macs: 11, members:  8900 },
-  { province: "Preah Sihanouk",   lat: 10.6282, lon: 103.5234, acs:  33, macs:  5, members:  3400 },
-  { province: "Kampot",           lat: 10.6104, lon: 104.1815, acs:  55, macs:  8, members:  5800 },
-  { province: "Kandal",           lat: 11.2237, lon: 105.1259, acs:  92, macs: 13, members:  9800 },
-  { province: "Kep",              lat: 10.4864, lon: 104.3172, acs:  14, macs:  3, members:  1400 },
-  { province: "Koh Kong",         lat: 11.6154, lon: 102.9841, acs:  22, macs:  4, members:  2200 },
-  { province: "Kratie",           lat: 12.4888, lon: 106.0186, acs:  35, macs:  5, members:  3600 },
-  { province: "Mondulkiri",       lat: 12.4539, lon: 107.1874, acs:  18, macs:  3, members:  1800 },
-  { province: "Oddar Meanchey",   lat: 14.1601, lon: 103.4977, acs:  26, macs:  4, members:  2600 },
-  { province: "Pailin",           lat: 12.8494, lon: 102.6042, acs:  12, macs:  2, members:  1200 },
-  { province: "Preah Vihear",     lat: 13.8039, lon: 104.9803, acs:  24, macs:  4, members:  2400 },
-  { province: "Pursat",           lat: 12.5338, lon: 103.9192, acs:  44, macs:  7, members:  4600 },
-  { province: "Prey Veng",        lat: 11.4868, lon: 105.3253, acs:  51, macs:  8, members:  5300 },
-  { province: "Ratanakiri",       lat: 13.7283, lon: 107.0049, acs:  20, macs:  3, members:  2000 },
-  { province: "Siem Reap",        lat: 13.3671, lon: 103.8448, acs:  96, macs: 14, members: 10100 },
-  { province: "Stung Treng",      lat: 13.5237, lon: 105.9685, acs:  16, macs:  3, members:  1600 },
-  { province: "Svay Rieng",       lat: 11.0877, lon: 105.7997, acs:  30, macs:  5, members:  3100 },
-  { province: "Takeo",            lat: 10.9929, lon: 104.7847, acs:  62, macs:  9, members:  6400 },
-  { province: "Tboung Khmum",     lat: 11.9153, lon: 105.6459, acs:  58, macs:  8, members:  6100 },
+  { province: "Phnom Penh", lat: 11.5564, lon: 104.9282, acs: 142, macs: 20, members: 15200 },
+  { province: "Banteay Meanchey", lat: 13.7532, lon: 102.9896, acs: 48, macs: 7, members: 4900 },
+  { province: "Battambang", lat: 13.0957, lon: 103.2022, acs: 118, macs: 16, members: 12400 },
+  { province: "Kampong Cham", lat: 12.0, lon: 105.45, acs: 76, macs: 10, members: 8200 },
+  { province: "Kampong Chhnang", lat: 12.25, lon: 104.67, acs: 42, macs: 6, members: 4400 },
+  { province: "Kampong Speu", lat: 11.45, lon: 104.52, acs: 38, macs: 6, members: 3900 },
+  { province: "Kampong Thom", lat: 12.7117, lon: 104.8885, acs: 84, macs: 11, members: 8900 },
+  { province: "Preah Sihanouk", lat: 10.6282, lon: 103.5234, acs: 33, macs: 5, members: 3400 },
+  { province: "Kampot", lat: 10.6104, lon: 104.1815, acs: 55, macs: 8, members: 5800 },
+  { province: "Kandal", lat: 11.2237, lon: 105.1259, acs: 92, macs: 13, members: 9800 },
+  { province: "Kep", lat: 10.4864, lon: 104.3172, acs: 14, macs: 3, members: 1400 },
+  { province: "Koh Kong", lat: 11.6154, lon: 102.9841, acs: 22, macs: 4, members: 2200 },
+  { province: "Kratie", lat: 12.4888, lon: 106.0186, acs: 35, macs: 5, members: 3600 },
+  { province: "Mondulkiri", lat: 12.4539, lon: 107.1874, acs: 18, macs: 3, members: 1800 },
+  { province: "Oddar Meanchey", lat: 14.1601, lon: 103.4977, acs: 26, macs: 4, members: 2600 },
+  { province: "Pailin", lat: 12.8494, lon: 102.6042, acs: 12, macs: 2, members: 1200 },
+  { province: "Preah Vihear", lat: 13.8039, lon: 104.9803, acs: 24, macs: 4, members: 2400 },
+  { province: "Pursat", lat: 12.5338, lon: 103.9192, acs: 44, macs: 7, members: 4600 },
+  { province: "Prey Veng", lat: 11.4868, lon: 105.3253, acs: 51, macs: 8, members: 5300 },
+  { province: "Ratanakiri", lat: 13.7283, lon: 107.0049, acs: 20, macs: 3, members: 2000 },
+  { province: "Siem Reap", lat: 13.3671, lon: 103.8448, acs: 96, macs: 14, members: 10100 },
+  { province: "Stung Treng", lat: 13.5237, lon: 105.9685, acs: 16, macs: 3, members: 1600 },
+  { province: "Svay Rieng", lat: 11.0877, lon: 105.7997, acs: 30, macs: 5, members: 3100 },
+  { province: "Takeo", lat: 10.9929, lon: 104.7847, acs: 62, macs: 9, members: 6400 },
+  { province: "Tboung Khmum", lat: 11.9153, lon: 105.6459, acs: 58, macs: 8, members: 6100 },
 ];
 
 const memberTrend = [
@@ -127,21 +128,21 @@ const YIELD_3Y: Record<string, {
   y2026: { h1: number; h2: number; annual: number };
   confidence: number; color: string; bg: string; border: string;
 }> = {
-  Rice:       { y2024:{h1:1.56,h2:1.91,annual:3.47}, y2025:{h1:1.72,h2:2.10,annual:3.82}, y2026:{h1:1.87,h2:2.28,annual:4.15}, confidence:85, color:"#f59e0b", bg:"#fefce8", border:"#fde68a" },
-  Cassava:    { y2024:{h1:8.5, h2:11.6,annual:20.1}, y2025:{h1:9.5, h2:12.9,annual:22.4}, y2026:{h1:10.5,h2:14.3,annual:24.8}, confidence:78, color:"#10b981", bg:"#f0fdf4", border:"#bbf7d0" },
-  Maize:      { y2024:{h1:1.64,h2:2.22,annual:3.86}, y2025:{h1:1.78,h2:2.40,annual:4.18}, y2026:{h1:1.92,h2:2.60,annual:4.52}, confidence:82, color:"#f97316", bg:"#fff7ed", border:"#fed7aa" },
-  Vegetables: { y2024:{h1:3.56,h2:4.36,annual:7.92}, y2025:{h1:3.88,h2:4.76,annual:8.64}, y2026:{h1:4.22,h2:5.16,annual:9.38}, confidence:74, color:"#22c55e", bg:"#f0fdf4", border:"#bbf7d0" },
-  Other:      { y2024:{h1:0.97,h2:1.24,annual:2.21}, y2025:{h1:1.06,h2:1.35,annual:2.41}, y2026:{h1:1.16,h2:1.48,annual:2.64}, confidence:68, color:"#94a3b8", bg:"#f8fafc", border:"#e2e8f0" },
+  Rice: { y2024: { h1: 1.56, h2: 1.91, annual: 3.47 }, y2025: { h1: 1.72, h2: 2.10, annual: 3.82 }, y2026: { h1: 1.87, h2: 2.28, annual: 4.15 }, confidence: 85, color: "#f59e0b", bg: "#fefce8", border: "#fde68a" },
+  Cassava: { y2024: { h1: 8.5, h2: 11.6, annual: 20.1 }, y2025: { h1: 9.5, h2: 12.9, annual: 22.4 }, y2026: { h1: 10.5, h2: 14.3, annual: 24.8 }, confidence: 78, color: "#10b981", bg: "#f0fdf4", border: "#bbf7d0" },
+  Maize: { y2024: { h1: 1.64, h2: 2.22, annual: 3.86 }, y2025: { h1: 1.78, h2: 2.40, annual: 4.18 }, y2026: { h1: 1.92, h2: 2.60, annual: 4.52 }, confidence: 82, color: "#f97316", bg: "#fff7ed", border: "#fed7aa" },
+  Vegetables: { y2024: { h1: 3.56, h2: 4.36, annual: 7.92 }, y2025: { h1: 3.88, h2: 4.76, annual: 8.64 }, y2026: { h1: 4.22, h2: 5.16, annual: 9.38 }, confidence: 74, color: "#22c55e", bg: "#f0fdf4", border: "#bbf7d0" },
+  Other: { y2024: { h1: 0.97, h2: 1.24, annual: 2.21 }, y2025: { h1: 1.06, h2: 1.35, annual: 2.41 }, y2026: { h1: 1.16, h2: 1.48, annual: 2.64 }, confidence: 68, color: "#94a3b8", bg: "#f8fafc", border: "#e2e8f0" },
 };
 
-const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const YIELD_MONTHLY_IDX: Record<string, number[]> = {
-  Rice:       [0.135,0.115,0.075,0.055,0.050,0.055,0.065,0.070,0.082,0.100,0.113,0.085],
-  Cassava:    [0.077,0.088,0.098,0.108,0.092,0.072,0.068,0.072,0.090,0.102,0.086,0.047],
-  Maize:      [0.058,0.068,0.112,0.133,0.102,0.058,0.048,0.052,0.072,0.122,0.115,0.060],
-  Vegetables: [0.092,0.100,0.100,0.090,0.082,0.072,0.072,0.072,0.082,0.090,0.090,0.064],
-  Other:      [0.088,0.088,0.088,0.082,0.082,0.082,0.082,0.082,0.082,0.088,0.082,0.082],
+  Rice: [0.135, 0.115, 0.075, 0.055, 0.050, 0.055, 0.065, 0.070, 0.082, 0.100, 0.113, 0.085],
+  Cassava: [0.077, 0.088, 0.098, 0.108, 0.092, 0.072, 0.068, 0.072, 0.090, 0.102, 0.086, 0.047],
+  Maize: [0.058, 0.068, 0.112, 0.133, 0.102, 0.058, 0.048, 0.052, 0.072, 0.122, 0.115, 0.060],
+  Vegetables: [0.092, 0.100, 0.100, 0.090, 0.082, 0.072, 0.072, 0.072, 0.082, 0.090, 0.090, 0.064],
+  Other: [0.088, 0.088, 0.088, 0.082, 0.082, 0.082, 0.082, 0.082, 0.082, 0.088, 0.082, 0.082],
 };
 
 const CROP_COLORS: Record<string, string> = {
@@ -153,45 +154,45 @@ const CROP_COLORS: Record<string, string> = {
 };
 
 const provinceCrops: Record<string, { dominant: string; secondary: string; pct: number }> = {
-  "Phnom Penh":       { dominant: "Vegetables", secondary: "Other",      pct: 55 },
-  "Banteay Meanchey": { dominant: "Rice",        secondary: "Maize",      pct: 68 },
-  "Battambang":       { dominant: "Rice",        secondary: "Maize",      pct: 72 },
-  "Kampong Cham":     { dominant: "Cassava",     secondary: "Maize",      pct: 58 },
-  "Kampong Chhnang":  { dominant: "Rice",        secondary: "Vegetables", pct: 65 },
-  "Kampong Speu":     { dominant: "Rice",        secondary: "Maize",      pct: 60 },
-  "Kampong Thom":     { dominant: "Rice",        secondary: "Cassava",    pct: 55 },
-  "Preah Sihanouk":   { dominant: "Vegetables",  secondary: "Other",      pct: 48 },
-  "Kampot":           { dominant: "Vegetables",  secondary: "Rice",       pct: 44 },
-  "Kandal":           { dominant: "Vegetables",  secondary: "Rice",       pct: 52 },
-  "Kep":              { dominant: "Vegetables",  secondary: "Other",      pct: 60 },
-  "Koh Kong":         { dominant: "Cassava",     secondary: "Vegetables", pct: 50 },
-  "Kratie":           { dominant: "Cassava",     secondary: "Other",      pct: 62 },
-  "Mondulkiri":       { dominant: "Maize",       secondary: "Cassava",    pct: 58 },
-  "Oddar Meanchey":   { dominant: "Maize",       secondary: "Rice",       pct: 54 },
-  "Pailin":           { dominant: "Maize",       secondary: "Cassava",    pct: 65 },
-  "Preah Vihear":     { dominant: "Maize",       secondary: "Cassava",    pct: 56 },
-  "Pursat":           { dominant: "Rice",        secondary: "Maize",      pct: 62 },
-  "Prey Veng":        { dominant: "Rice",        secondary: "Vegetables", pct: 70 },
-  "Ratanakiri":       { dominant: "Cassava",     secondary: "Maize",      pct: 64 },
-  "Siem Reap":        { dominant: "Rice",        secondary: "Vegetables", pct: 58 },
-  "Stung Treng":      { dominant: "Rice",        secondary: "Cassava",    pct: 55 },
-  "Svay Rieng":       { dominant: "Rice",        secondary: "Cassava",    pct: 64 },
-  "Takeo":            { dominant: "Rice",        secondary: "Vegetables", pct: 66 },
-  "Tboung Khmum":     { dominant: "Cassava",     secondary: "Maize",      pct: 60 },
+  "Phnom Penh": { dominant: "Vegetables", secondary: "Other", pct: 55 },
+  "Banteay Meanchey": { dominant: "Rice", secondary: "Maize", pct: 68 },
+  "Battambang": { dominant: "Rice", secondary: "Maize", pct: 72 },
+  "Kampong Cham": { dominant: "Cassava", secondary: "Maize", pct: 58 },
+  "Kampong Chhnang": { dominant: "Rice", secondary: "Vegetables", pct: 65 },
+  "Kampong Speu": { dominant: "Rice", secondary: "Maize", pct: 60 },
+  "Kampong Thom": { dominant: "Rice", secondary: "Cassava", pct: 55 },
+  "Preah Sihanouk": { dominant: "Vegetables", secondary: "Other", pct: 48 },
+  "Kampot": { dominant: "Vegetables", secondary: "Rice", pct: 44 },
+  "Kandal": { dominant: "Vegetables", secondary: "Rice", pct: 52 },
+  "Kep": { dominant: "Vegetables", secondary: "Other", pct: 60 },
+  "Koh Kong": { dominant: "Cassava", secondary: "Vegetables", pct: 50 },
+  "Kratie": { dominant: "Cassava", secondary: "Other", pct: 62 },
+  "Mondulkiri": { dominant: "Maize", secondary: "Cassava", pct: 58 },
+  "Oddar Meanchey": { dominant: "Maize", secondary: "Rice", pct: 54 },
+  "Pailin": { dominant: "Maize", secondary: "Cassava", pct: 65 },
+  "Preah Vihear": { dominant: "Maize", secondary: "Cassava", pct: 56 },
+  "Pursat": { dominant: "Rice", secondary: "Maize", pct: 62 },
+  "Prey Veng": { dominant: "Rice", secondary: "Vegetables", pct: 70 },
+  "Ratanakiri": { dominant: "Cassava", secondary: "Maize", pct: 64 },
+  "Siem Reap": { dominant: "Rice", secondary: "Vegetables", pct: 58 },
+  "Stung Treng": { dominant: "Rice", secondary: "Cassava", pct: 55 },
+  "Svay Rieng": { dominant: "Rice", secondary: "Cassava", pct: 64 },
+  "Takeo": { dominant: "Rice", secondary: "Vegetables", pct: 66 },
+  "Tboung Khmum": { dominant: "Cassava", secondary: "Maize", pct: 60 },
 };
 
 
 const ASSET_TYPE_META: Record<string, { color: string; bg: string; textColor: string; pct: number }> = {
-  Equipment:      { color: "#032EA1", bg: "#eff6ff", textColor: "#1e40af", pct: 55 },
-  Vehicle:        { color: "#0891b2", bg: "#ecfeff", textColor: "#0e7490", pct: 20 },
-  Building:       { color: "#7c3aed", bg: "#f5f3ff", textColor: "#6d28d9", pct: 15 },
+  Equipment: { color: "#032EA1", bg: "#eff6ff", textColor: "#1e40af", pct: 55 },
+  Vehicle: { color: "#0891b2", bg: "#ecfeff", textColor: "#0e7490", pct: 20 },
+  Building: { color: "#7c3aed", bg: "#f5f3ff", textColor: "#6d28d9", pct: 15 },
   Infrastructure: { color: "#059669", bg: "#ecfdf5", textColor: "#047857", pct: 10 },
 };
 
 const ASSET_TYPE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
-  Equipment:      Package,
-  Vehicle:        Truck,
-  Building:       Warehouse,
+  Equipment: Package,
+  Vehicle: Truck,
+  Building: Warehouse,
   Infrastructure: Layers,
 };
 
@@ -199,15 +200,15 @@ const ASSET_SUBTYPES: {
   name: string; type: string; baseCount: number; goodPct: number;
   pearlFunded: boolean; icon: ComponentType<{ className?: string }>;
 }[] = [
-  { name: "Water Pump System",      type: "Equipment",      baseCount: 3240, goodPct: 71, pearlFunded: true,  icon: Droplets },
-  { name: "Weighing Scale",         type: "Equipment",      baseCount: 2190, goodPct: 82, pearlFunded: true,  icon: Scale    },
-  { name: "Rice Mill Machine",      type: "Equipment",      baseCount: 1860, goodPct: 68, pearlFunded: false, icon: Wheat    },
-  { name: "Solar Drying System",    type: "Equipment",      baseCount: 1420, goodPct: 79, pearlFunded: true,  icon: Zap      },
-  { name: "Tractor",                type: "Vehicle",        baseCount: 1840, goodPct: 62, pearlFunded: false, icon: Wrench   },
-  { name: "Irrigation Pipeline",    type: "Infrastructure", baseCount: 1270, goodPct: 75, pearlFunded: true,  icon: Layers   },
-  { name: "Seed Storage Warehouse", type: "Building",       baseCount: 1120, goodPct: 71, pearlFunded: false, icon: Warehouse},
-  { name: "Delivery Truck",         type: "Vehicle",        baseCount:  980, goodPct: 58, pearlFunded: false, icon: Truck    },
-];
+    { name: "Water Pump System", type: "Equipment", baseCount: 3240, goodPct: 71, pearlFunded: true, icon: Droplets },
+    { name: "Weighing Scale", type: "Equipment", baseCount: 2190, goodPct: 82, pearlFunded: true, icon: Scale },
+    { name: "Rice Mill Machine", type: "Equipment", baseCount: 1860, goodPct: 68, pearlFunded: false, icon: Wheat },
+    { name: "Solar Drying System", type: "Equipment", baseCount: 1420, goodPct: 79, pearlFunded: true, icon: Zap },
+    { name: "Tractor", type: "Vehicle", baseCount: 1840, goodPct: 62, pearlFunded: false, icon: Wrench },
+    { name: "Irrigation Pipeline", type: "Infrastructure", baseCount: 1270, goodPct: 75, pearlFunded: true, icon: Layers },
+    { name: "Seed Storage Warehouse", type: "Building", baseCount: 1120, goodPct: 71, pearlFunded: false, icon: Warehouse },
+    { name: "Delivery Truck", type: "Vehicle", baseCount: 980, goodPct: 58, pearlFunded: false, icon: Truck },
+  ];
 
 const assetConditions = [
   { name: "Good", value: 52 },
@@ -215,6 +216,40 @@ const assetConditions = [
   { name: "Poor", value: 12 },
   { name: "Unknown", value: 5 },
 ];
+
+const ASSET_USAGE_DATA: Record<string, { utilizationPct: number; avgHoursMonth: number; idlePct: number; overused: boolean }> = {
+  "Water Pump System": { utilizationPct: 78, avgHoursMonth: 140, idlePct: 12, overused: false },
+  "Weighing Scale": { utilizationPct: 91, avgHoursMonth: 164, idlePct: 5, overused: true },
+  "Rice Mill Machine": { utilizationPct: 63, avgHoursMonth: 113, idlePct: 24, overused: false },
+  "Solar Drying System": { utilizationPct: 84, avgHoursMonth: 151, idlePct: 9, overused: false },
+  "Tractor": { utilizationPct: 56, avgHoursMonth: 101, idlePct: 32, overused: false },
+  "Irrigation Pipeline": { utilizationPct: 71, avgHoursMonth: 128, idlePct: 18, overused: false },
+  "Seed Storage Warehouse": { utilizationPct: 88, avgHoursMonth: 158, idlePct: 7, overused: false },
+  "Delivery Truck": { utilizationPct: 47, avgHoursMonth: 85, idlePct: 42, overused: false },
+};
+
+const ASSET_DISPOSAL_DATA = {
+  yearly: [
+    { year: "2022", count: 312, valueK: 84 },
+    { year: "2023", count: 428, valueK: 112 },
+    { year: "2024", count: 516, valueK: 138 },
+    { year: "2025", count: 394, valueK: 105 },
+    { year: "2026", count: 187, valueK: 51 },
+  ],
+  byReason: [
+    { reason: "End-of-life", count: 892, pct: 49 },
+    { reason: "Severe damage", count: 437, pct: 24 },
+    { reason: "Obsolete/upgraded", count: 310, pct: 17 },
+    { reason: "Lost / stolen", count: 128, pct: 7 },
+    { reason: "Other", count: 70, pct: 3 },
+  ],
+  byType: [
+    { type: "Equipment", disposed: 924, replaced: 680 },
+    { type: "Vehicle", disposed: 512, replaced: 340 },
+    { type: "Infrastructure", disposed: 284, replaced: 190 },
+    { type: "Building", disposed: 117, replaced: 88 },
+  ],
+};
 
 /** Navy / slate / green / amber — executive condition palette */
 const ASSET_CONDITION_COLORS: Record<string, string> = {
@@ -418,9 +453,9 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   const f = drillDownFactor(selectedProvinces);
   const provinceDisplayLabel =
     selectedProvinces.length === 0 ? "National" :
-    selectedProvinces.length === 1 ? selectedProvinces[0] :
-    selectedProvinces.length <= 3 ? selectedProvinces.join(", ") :
-    `${selectedProvinces.length} provinces`;
+      selectedProvinces.length === 1 ? selectedProvinces[0] :
+        selectedProvinces.length <= 3 ? selectedProvinces.join(", ") :
+          `${selectedProvinces.length} provinces`;
   const [perfChartHoverProvince, setPerfChartHoverProvince] = useState<string | null>(null);
   const [showAllGeo, setShowAllGeo] = useState(false);
   const [showAllKm, setShowAllKm] = useState(false);
@@ -434,6 +469,10 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   const [yieldMonthlyCrop, setYieldMonthlyCrop] = useState("Rice");
   const [yieldRangeFrom, setYieldRangeFrom] = useState(6);
   const [yieldRangeTo, setYieldRangeTo] = useState(11);
+  const [assetTab, setAssetTab] = useState<"inventory" | "usage" | "disposal">("inventory");
+  const [harvestCrop, setHarvestCrop] = useState("Rice");
+  const [harvestFromMonth, setHarvestFromMonth] = useState(0);
+  const [harvestToMonth, setHarvestToMonth] = useState(11);
 
   const acStatsNational = useMemo(
     () => ({
@@ -455,7 +494,6 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   const assets = useMemo(
     () => ({
       count: scale(18420, f),
-      valueUsd: scale(42_800_000, f),
       maintenanceCompliance: 81,
     }),
     [f]
@@ -511,7 +549,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
     [perfHeatFiltered]
   );
 
-const title = isNational ? "National Dashboard" : `National Dashboard — ${provinceDisplayLabel}`;
+  const title = isNational ? "National Dashboard" : `National Dashboard — ${provinceDisplayLabel}`;
 
   return (
     <div className="space-y-10">
@@ -535,8 +573,8 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                 {isNational
                   ? "All provinces"
                   : selectedProvinces.length === 1
-                  ? selectedProvinces[0]
-                  : `${selectedProvinces.length} provinces selected`}
+                    ? selectedProvinces[0]
+                    : `${selectedProvinces.length} provinces selected`}
               </span>
               <ChevronDown
                 className={`h-4 w-4 text-gray-500 shrink-0 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
@@ -568,9 +606,8 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                       className="w-full text-left px-4 py-2 text-sm flex items-center gap-2.5 transition-colors hover:bg-blue-50"
                     >
                       <div
-                        className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
-                          checked ? "bg-[#032EA1] border-[#032EA1]" : "border-gray-300"
-                        }`}
+                        className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? "bg-[#032EA1] border-[#032EA1]" : "border-gray-300"
+                          }`}
                       >
                         {checked && <Check className="w-3 h-3 text-white" />}
                       </div>
@@ -651,7 +688,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                   const isSelected = selectedProvinces.includes(p.province);
                   const perfHover = perfChartHoverProvince === p.province;
                   const iconSize = Math.round(24 + Math.min(20, p.acs / 6));
-                  const fill   = isSelected ? "#032EA1" : perfHover ? "#10b981" : "#E00025";
+                  const fill = isSelected ? "#032EA1" : perfHover ? "#10b981" : "#E00025";
                   const stroke = isSelected ? "#001a6e" : perfHover ? "#059669" : "#9b0018";
                   const acIcon = L.divIcon({
                     html: `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.38));display:block">
@@ -739,15 +776,14 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
             <button
               type="button"
               onClick={() => setShowAcPins((v) => !v)}
-              className={`flex items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 ${
-                showAcPins
+              className={`flex items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 ${showAcPins
                   ? "border-red-100 bg-red-50/60 opacity-100"
                   : "border-gray-200 bg-gray-100/60 opacity-50 grayscale"
-              }`}
+                }`}
             >
               <svg width="28" height="36" viewBox="0 0 24 24" className="shrink-0">
-                <path fill="#E00025" stroke="#9b0018" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)"/>
+                <path fill="#E00025" stroke="#9b0018" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)" />
               </svg>
               <p className="text-sm font-semibold text-red-600">Agricultural Cooperatives</p>
             </button>
@@ -756,15 +792,14 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
             <button
               type="button"
               onClick={() => setShowMacPins((v) => !v)}
-              className={`flex items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 ${
-                showMacPins
+              className={`flex items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 ${showMacPins
                   ? "border-blue-100 bg-blue-50/60 opacity-100"
                   : "border-gray-200 bg-gray-100/60 opacity-50 grayscale"
-              }`}
+                }`}
             >
               <svg width="28" height="36" viewBox="0 0 24 24" className="shrink-0">
-                <path fill="#032EA1" stroke="#001a6e" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)"/>
+                <path fill="#032EA1" stroke="#001a6e" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)" />
               </svg>
               <p className="text-sm font-semibold text-[#032EA1]">Model Agricultural Cooperatives</p>
             </button>
@@ -790,8 +825,8 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                 : yieldPeriod === "actual-vs-forecast"
                   ? `2026 H1 confirmed actuals vs H2 forecast${isNational ? "" : ` · ${provinceDisplayLabel}`}`
                   : yieldPeriod === "period-select"
-                  ? `Custom period forecast — select any month range${isNational ? "" : ` · ${provinceDisplayLabel}`}`
-                  : `Annual yield trend · 2024–2026 forecast${isNational ? "" : ` · ${provinceDisplayLabel}`}`}
+                    ? `Custom period forecast — select any month range${isNational ? "" : ` · ${provinceDisplayLabel}`}`
+                    : `Annual yield trend · 2024–2026 forecast${isNational ? "" : ` · ${provinceDisplayLabel}`}`}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -807,8 +842,8 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                   {cropFilters.length === 0
                     ? "All crops"
                     : cropFilters.length === 1
-                    ? cropFilters[0]
-                    : `${cropFilters.length} crops selected`}
+                      ? cropFilters[0]
+                      : `${cropFilters.length} crops selected`}
                   <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${cropDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
                 {cropDropdownOpen && (
@@ -843,9 +878,8 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                             className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors text-sm text-left"
                           >
                             <span
-                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                                checked ? "border-transparent" : "border-gray-300 bg-white"
-                              }`}
+                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${checked ? "border-transparent" : "border-gray-300 bg-white"
+                                }`}
                               style={checked ? { backgroundColor: color } : {}}
                             >
                               {checked && <Check className="h-3 w-3 text-white" />}
@@ -865,18 +899,16 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
               <button
                 type="button"
                 onClick={() => setCropSectionTab("distribution")}
-                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                  cropSectionTab === "distribution" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                }`}
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${cropSectionTab === "distribution" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
               >
                 Crop Distribution
               </button>
               <button
                 type="button"
                 onClick={() => setCropSectionTab("yield")}
-                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                  cropSectionTab === "yield" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                }`}
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${cropSectionTab === "yield" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
               >
                 Yield Prediction
               </button>
@@ -969,9 +1001,8 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                                 isActive ? prev.filter((c) => c !== crop) : [...prev, crop]
                               )
                             }
-                            className={`w-full rounded-xl border p-3 text-left transition-all ${
-                              isActive ? "ring-2" : "hover:border-gray-300"
-                            }`}
+                            className={`w-full rounded-xl border p-3 text-left transition-all ${isActive ? "ring-2" : "hover:border-gray-300"
+                              }`}
                             style={
                               isActive
                                 ? { backgroundColor: `${color}12`, borderColor: color }
@@ -1033,14 +1064,14 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
         {cropSectionTab === "yield" && (() => {
           const crops = Object.keys(YIELD_3Y);
           const pKey = "annual" as const;
-const avgGrowth = (crops.reduce((s, c) => {
+          const avgGrowth = (crops.reduce((s, c) => {
             const d = YIELD_3Y[c];
             return s + ((d.y2026[pKey] - d.y2025[pKey]) / d.y2025[pKey]) * 100;
           }, 0) / crops.length).toFixed(1);
           const chartData = crops.map((c) => ({
             name: c === "Vegetables" ? "Veg." : c,
-            "2024 Actual":   YIELD_3Y[c].y2024[pKey],
-            "2025 Actual":   YIELD_3Y[c].y2025[pKey],
+            "2024 Actual": YIELD_3Y[c].y2024[pKey],
+            "2025 Actual": YIELD_3Y[c].y2025[pKey],
             "2026 Forecast": YIELD_3Y[c].y2026[pKey],
           }));
           const monthlyData = MONTHS_SHORT.map((m, i) => {
@@ -1055,20 +1086,20 @@ const avgGrowth = (crops.reduce((s, c) => {
           });
           const avfChartData = crops.map((c) => ({
             name: c === "Vegetables" ? "Veg." : c,
-            "H1 Actual":   YIELD_3Y[c].y2026.h1,
+            "H1 Actual": YIELD_3Y[c].y2026.h1,
             "H2 Forecast": YIELD_3Y[c].y2026.h2,
           }));
 
           const LAST_ACTUAL_MONTH = 5; // June 2026 is the last confirmed month
           const psFrom = yieldRangeFrom;
-          const psTo   = Math.max(yieldRangeFrom, yieldRangeTo);
+          const psTo = Math.max(yieldRangeFrom, yieldRangeTo);
           const computePeriodYield = (crop: string, fM: number, tM: number, yr: "y2024" | "y2025" | "y2026") => {
             const idx = YIELD_MONTHLY_IDX[crop] ?? [];
             const s = idx.slice(fM, tM + 1).reduce((acc: number, v: number) => acc + v, 0);
             return +(YIELD_3Y[crop][yr].annual * s).toFixed(2);
           };
-          const rangeIsAllActual   = psTo   <= LAST_ACTUAL_MONTH;
-          const rangeIsAllForecast = psFrom >  LAST_ACTUAL_MONTH;
+          const rangeIsAllActual = psTo <= LAST_ACTUAL_MONTH;
+          const rangeIsAllForecast = psFrom > LAST_ACTUAL_MONTH;
           const psCards = crops.map((c) => {
             const v26 = computePeriodYield(c, psFrom, psTo, "y2026");
             const v25 = computePeriodYield(c, psFrom, psTo, "y2025");
@@ -1083,15 +1114,15 @@ const avgGrowth = (crops.reduce((s, c) => {
           }));
 
           const PERIOD_TABS = [
-            { key: "annual",             label: "Annual" },
-            { key: "period-select",      label: "Period Select" },
+            { key: "annual", label: "Annual" },
+            { key: "period-select", label: "Period Select" },
             { key: "actual-vs-forecast", label: "Actual vs Forecast" },
-            { key: "monthly",            label: "Monthly Y2Y" },
+            { key: "monthly", label: "Monthly Y2Y" },
           ] as const;
           return (
             <>
               <div className="flex flex-wrap gap-2 mb-5">
-<span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
                   <TrendingUp className="h-3.5 w-3.5" />
                   Avg ↑{avgGrowth}% 2025→2026
                 </span>
@@ -1102,9 +1133,8 @@ const avgGrowth = (crops.reduce((s, c) => {
                 {PERIOD_TABS.map((t) => (
                   <button key={t.key} type="button"
                     onClick={() => setYieldPeriod(t.key)}
-                    className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                      yieldPeriod === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                    }`}>
+                    className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${yieldPeriod === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                      }`}>
                     {t.label}
                   </button>
                 ))}
@@ -1196,7 +1226,7 @@ const avgGrowth = (crops.reduce((s, c) => {
                             formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
                           />
                           <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
-                          <Bar dataKey="H1 Actual"   fill="#3b82f6" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                          <Bar dataKey="H1 Actual" fill="#3b82f6" radius={[3, 3, 0, 0]} maxBarSize={20} />
                           <Bar dataKey="H2 Forecast" fill="#cbd5e1" radius={[3, 3, 0, 0]} maxBarSize={20} />
                         </BarChart>
                       </ResponsiveContainer>
@@ -1220,7 +1250,7 @@ const avgGrowth = (crops.reduce((s, c) => {
                         const inRange = i >= psFrom && i <= psTo;
                         const isActual = i <= LAST_ACTUAL_MONTH;
                         const isFrom = i === psFrom;
-                        const isTo   = i === psTo && psTo !== psFrom;
+                        const isTo = i === psTo && psTo !== psFrom;
                         return (
                           <button key={m} type="button"
                             title={`${m} 2026 — ${isActual ? "Actual" : "Forecast"}`}
@@ -1232,11 +1262,10 @@ const avgGrowth = (crops.reduce((s, c) => {
                                 setYieldRangeTo(i);
                               }
                             }}
-                            className={`flex-1 py-2.5 border-r last:border-r-0 border-gray-200 transition-colors ${
-                              inRange
+                            className={`flex-1 py-2.5 border-r last:border-r-0 border-gray-200 transition-colors ${inRange
                                 ? isActual ? "bg-blue-500 text-white" : "bg-slate-500 text-white"
                                 : isActual ? "bg-blue-50 text-blue-400 hover:bg-blue-100" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                            }`}>
+                              }`}>
                             <span className="block text-[11px] font-semibold">{m}</span>
                             <span className="block text-[8px] mt-0.5 opacity-70">
                               {isFrom ? "from" : isTo ? "to" : " "}
@@ -1246,13 +1275,12 @@ const avgGrowth = (crops.reduce((s, c) => {
                       })}
                     </div>
                     <div className="flex flex-wrap items-center gap-3 mt-3">
-                      <span className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${
-                        rangeIsAllActual
+                      <span className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${rangeIsAllActual
                           ? "border-blue-200 bg-blue-50 text-blue-700"
                           : rangeIsAllForecast
                             ? "border-gray-200 bg-gray-100 text-gray-600"
                             : "border-violet-200 bg-violet-50 text-violet-700"
-                      }`}>
+                        }`}>
                         {rangeIsAllActual ? "Confirmed actual data" : rangeIsAllForecast ? "Forecast data" : "Mixed: actual + forecast"}
                       </span>
                       <span className="text-xs font-medium text-gray-700">
@@ -1411,8 +1439,8 @@ const avgGrowth = (crops.reduce((s, c) => {
                             formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
                           />
                           <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
-                          <Bar dataKey="2024 Actual"   fill="#cbd5e1" radius={[3, 3, 0, 0]} maxBarSize={18} />
-                          <Bar dataKey="2025 Actual"   fill="#6b9bda" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                          <Bar dataKey="2024 Actual" fill="#cbd5e1" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                          <Bar dataKey="2025 Actual" fill="#6b9bda" radius={[3, 3, 0, 0]} maxBarSize={18} />
                           <Bar dataKey="2026 Forecast" fill="#032EA1" radius={[3, 3, 0, 0]} maxBarSize={18} />
                         </BarChart>
                       </ResponsiveContainer>
@@ -1428,9 +1456,8 @@ const avgGrowth = (crops.reduce((s, c) => {
                       return (
                         <button key={c} type="button"
                           onClick={() => setYieldMonthlyCrop(c)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                            active ? "text-white border-transparent shadow-sm" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-                          }`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${active ? "text-white border-transparent shadow-sm" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                            }`}
                           style={active ? { backgroundColor: YIELD_3Y[c].color, borderColor: YIELD_3Y[c].color } : {}}>
                           <Icon className="h-3.5 w-3.5" />
                           {c}
@@ -1455,8 +1482,8 @@ const avgGrowth = (crops.reduce((s, c) => {
                           <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
                           <ReferenceLine x="Jun" stroke="#e2e8f0" strokeDasharray="4 3"
                             label={{ value: "H1|H2", fontSize: 9, fill: "#94a3b8", position: "insideTopRight" }} />
-                          <Line dataKey="2024"  stroke="#cbd5e1" strokeWidth={2} dot={false} />
-                          <Line dataKey="2025"  stroke="#6b9bda" strokeWidth={2} dot={false} />
+                          <Line dataKey="2024" stroke="#cbd5e1" strokeWidth={2} dot={false} />
+                          <Line dataKey="2025" stroke="#6b9bda" strokeWidth={2} dot={false} />
                           <Line dataKey="2026F" stroke="#032EA1" strokeWidth={2.5} dot={false} strokeDasharray="6 3" />
                         </LineChart>
                       </ResponsiveContainer>
@@ -1485,6 +1512,326 @@ const avgGrowth = (crops.reduce((s, c) => {
           );
         })()}
       </section>
+
+      {/* Harvest Forecasting */}
+      {(() => {
+        const HARVEST_LAST_ACTUAL = 5;
+        const hd = YIELD_3Y[harvestCrop];
+        const idxArr = YIELD_MONTHLY_IDX[harvestCrop] ?? [];
+
+        const allMonthData = MONTHS_SHORT.map((m, i) => {
+          const idx = idxArr[i] ?? 0;
+          const isAct = i <= HARVEST_LAST_ACTUAL;
+          const v26 = +(hd.y2026.annual * idx).toFixed(3);
+          const v25 = +(hd.y2025.annual * idx).toFixed(3);
+          const v24 = +(hd.y2024.annual * idx).toFixed(3);
+          const variance = v25 > 0 ? +((v26 - v25) / v25 * 100).toFixed(1) : 0;
+          const confFactor = isAct ? 0 : (1 - hd.confidence / 100) * 0.9;
+          return {
+            month: m,
+            actual: isAct ? v26 : null,
+            forecast: !isAct ? v26 : null,
+            ly2025: v25,
+            ly2024: v24,
+            variance,
+            lowerBound: isAct ? v26 : +(v26 * (1 - confFactor)).toFixed(3),
+            bandWidth: isAct ? 0 : +(v26 * confFactor * 2).toFixed(3),
+            isAct,
+          };
+        });
+
+        const rangeData = allMonthData.slice(harvestFromMonth, harvestToMonth + 1);
+        const totalActual = rangeData.reduce((s, d) => s + (d.actual ?? 0), 0);
+        const totalForecast = rangeData.reduce((s, d) => s + (d.forecast ?? 0), 0);
+        const total2025 = rangeData.reduce((s, d) => s + d.ly2025, 0);
+        const totalYield = +(totalActual + totalForecast).toFixed(2);
+        const growthVsLy = total2025 > 0 ? +((totalYield - total2025) / total2025 * 100).toFixed(1) : 0;
+        const atRiskMonths = rangeData.filter((d) => d.variance < -5);
+        const peakEntry = rangeData.length > 0
+          ? rangeData.reduce((mx, d) => (d.actual ?? d.forecast ?? 0) > (mx.actual ?? mx.forecast ?? 0) ? d : mx, rangeData[0])
+          : null;
+
+        const insights: { level: "warn" | "success" | "info"; title: string; body: string }[] = [];
+        if (atRiskMonths.length > 0) {
+          insights.push({
+            level: "warn",
+            title: `${atRiskMonths.length} month${atRiskMonths.length > 1 ? "s" : ""} below 2025 baseline`,
+            body: `${atRiskMonths.map((d) => d.month).join(", ")} — projected below target. Consider field intervention or resource reallocation.`,
+          });
+        }
+        if (growthVsLy >= 0) {
+          insights.push({
+            level: "success",
+            title: `${harvestCrop} on track · +${growthVsLy}% vs 2025`,
+            body: "Period forecast outperforms last year. Maintain input supply levels and pre-position logistics for peak collection.",
+          });
+        } else {
+          insights.push({
+            level: "warn",
+            title: `${harvestCrop} behind target · ${growthVsLy}% vs 2025`,
+            body: "Period total below last year's harvest. Review input supply, weather impact, and cooperative field reports.",
+          });
+        }
+        if (peakEntry) {
+          insights.push({
+            level: "info",
+            title: `Peak harvest expected: ${peakEntry.month} 2026`,
+            body: "Pre-position storage capacity, transport, and market linkages at least 3 weeks before peak collection.",
+          });
+        }
+        insights.push({
+          level: hd.confidence >= 80 ? "success" : hd.confidence >= 65 ? "info" : "warn",
+          title: `${hd.confidence}% forecast confidence`,
+          body: hd.confidence >= 80
+            ? "High confidence — model supported by field data. Suitable for policy decisions."
+            : hd.confidence >= 65
+              ? "Moderate confidence — include contingency plans when allocating resources."
+              : "Low confidence — additional ground-truth verification recommended.",
+        });
+
+        return (
+          <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
+
+            {/* Header */}
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-6 border-b border-gray-200/80 pb-5">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-flex items-center rounded-md bg-[#032EA1] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                    MAFF · Official
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Live Forecast
+                  </span>
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-[#0F2F8F]" />
+                  Harvest Forecasting
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Predictive harvest analytics — 2026 projections based on seasonal indices and cooperative field baselines
+                </p>
+              </div>
+              {/* Crop selector */}
+              <div className="flex flex-wrap gap-2">
+                {Object.keys(YIELD_3Y).map((crop) => {
+                  const Icon = CROP_ICONS[crop] ?? CircleDot;
+                  const active = harvestCrop === crop;
+                  const cd = YIELD_3Y[crop];
+                  return (
+                    <button
+                      key={crop}
+                      type="button"
+                      onClick={() => setHarvestCrop(crop)}
+                      className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-all ${active ? "border-transparent text-white shadow-sm" : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                        }`}
+                      style={active ? { backgroundColor: cd.color } : {}}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {crop}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* KPI row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Period Yield</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">
+                  {totalYield} <span className="text-xs font-normal text-gray-400">MT/ha</span>
+                </p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{MONTHS_SHORT[harvestFromMonth]}–{MONTHS_SHORT[harvestToMonth]} 2026</p>
+              </div>
+              <div className={`rounded-xl border px-4 py-3 ${growthVsLy >= 0 ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
+                <p className={`text-[10px] font-semibold uppercase tracking-wide ${growthVsLy >= 0 ? "text-emerald-500" : "text-red-400"}`}>vs 2025</p>
+                <p className={`mt-1 text-2xl font-bold tabular-nums ${growthVsLy >= 0 ? "text-emerald-700" : "text-red-600"}`}>
+                  {growthVsLy >= 0 ? "+" : ""}{growthVsLy}%
+                </p>
+                <p className={`text-[11px] mt-0.5 ${growthVsLy >= 0 ? "text-emerald-500" : "text-red-400"}`}>
+                  {growthVsLy >= 0 ? "Outperforming" : "Below target"}
+                </p>
+              </div>
+              <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-400">Forecast Confidence</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-blue-700">{hd.confidence}%</p>
+                <div className="mt-1.5 h-1 w-full rounded-full bg-blue-200">
+                  <div className="h-full rounded-full bg-blue-500" style={{ width: `${hd.confidence}%` }} />
+                </div>
+              </div>
+              <div className={`rounded-xl border px-4 py-3 ${atRiskMonths.length === 0 ? "border-gray-200 bg-gray-50" : "border-amber-200 bg-amber-50"}`}>
+                <p className={`text-[10px] font-semibold uppercase tracking-wide ${atRiskMonths.length === 0 ? "text-gray-400" : "text-amber-500"}`}>
+                  At-Risk Months
+                </p>
+                <p className={`mt-1 text-2xl font-bold tabular-nums ${atRiskMonths.length === 0 ? "text-gray-600" : "text-amber-700"}`}>
+                  {atRiskMonths.length}
+                </p>
+                <p className={`text-[11px] mt-0.5 truncate ${atRiskMonths.length === 0 ? "text-gray-400" : "text-amber-500"}`}>
+                  {atRiskMonths.length === 0 ? "All months on track" : atRiskMonths.map((d) => d.month).join(", ")}
+                </p>
+              </div>
+            </div>
+
+            {/* Month range picker */}
+            <div className="mb-6">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Select Forecast Period</p>
+              <div className="flex rounded-xl overflow-hidden border border-gray-200">
+                {MONTHS_SHORT.map((m, i) => {
+                  const inRange = i >= harvestFromMonth && i <= harvestToMonth;
+                  const isAct2 = i <= HARVEST_LAST_ACTUAL;
+                  const isFrom = i === harvestFromMonth;
+                  const isTo = i === harvestToMonth && harvestToMonth !== harvestFromMonth;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      title={`${m} — ${isAct2 ? "Actual" : "Forecast"}`}
+                      onClick={() => {
+                        if (i <= harvestFromMonth) { setHarvestFromMonth(i); setHarvestToMonth(i); }
+                        else { setHarvestToMonth(i); }
+                      }}
+                      className={`flex-1 py-2.5 border-r last:border-r-0 border-gray-200 transition-colors ${inRange
+                          ? isAct2 ? "bg-[#032EA1] text-white" : "bg-slate-500 text-white"
+                          : isAct2 ? "bg-blue-50 text-blue-400 hover:bg-blue-100" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                        }`}
+                    >
+                      <span className="block text-[11px] font-semibold">{m}</span>
+                      <span className="block text-[8px] mt-0.5 opacity-70">
+                        {isFrom ? "from" : isTo ? "to" : isAct2 ? "act" : "est"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-[10px] text-gray-400">
+                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-[#032EA1]" />Jan–Jun confirmed actual</span>
+                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-slate-500" />Jul–Dec forecast</span>
+                <span className="ml-auto font-medium text-gray-500">
+                  {MONTHS_SHORT[harvestFromMonth]}–{MONTHS_SHORT[harvestToMonth]} 2026 · {harvestToMonth - harvestFromMonth + 1} month{harvestToMonth - harvestFromMonth !== 0 ? "s" : ""}
+                </span>
+              </div>
+            </div>
+
+            {/* Main forecast chart */}
+            <div className="mb-6">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">
+                {harvestCrop} — Monthly Harvest: Actual vs Forecast with Confidence Band (MT/ha)
+              </p>
+              <div style={{ height: 270 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={rangeData} margin={{ top: 8, right: 16, left: -12, bottom: 4 }} barCategoryGap="28%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
+                      formatter={(v: number | null, name: string) => v != null ? [`${v} MT/ha`, name] : ["-", name]}
+                    />
+                    <Legend wrapperStyle={{ paddingTop: 12, fontSize: 11 }} />
+                    {/* Confidence band — stacked invisible base + visible band */}
+                    <Area type="monotone" dataKey="lowerBound" stackId="ci" fill="transparent" stroke="none" legendType="none" tooltipType="none" />
+                    <Area type="monotone" dataKey="bandWidth" stackId="ci" fill="#dbeafe" fillOpacity={0.55} stroke="none" name="Confidence band" legendType="square" />
+                    {/* Historical baselines */}
+                    <Line type="monotone" dataKey="ly2025" name="2025 Actual" stroke="#f59e0b" strokeDasharray="5 3" strokeWidth={1.5} dot={false} />
+                    <Line type="monotone" dataKey="ly2024" name="2024 Actual" stroke="#cbd5e1" strokeDasharray="3 2" strokeWidth={1.2} dot={false} />
+                    {/* Current year bars */}
+                    <Bar dataKey="actual" name="2026 Actual" fill="#032EA1" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                    <Bar dataKey="forecast" name="2026 Forecast" fill="#94a3b8" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Bottom 3-col: Variance | YoY | Insights */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+              {/* Variance analysis */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Variance vs 2025 (%)</p>
+                <div style={{ height: 210 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={rangeData} margin={{ top: 4, right: 8, left: -22, bottom: 4 }} barCategoryGap="30%">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 11 }}
+                        formatter={(v: number) => [`${v > 0 ? "+" : ""}${v}%`, "vs 2025"]}
+                      />
+                      <ReferenceLine y={0} stroke="#e2e8f0" strokeWidth={1.5} />
+                      <Bar dataKey="variance" radius={[3, 3, 0, 0]} maxBarSize={16}>
+                        {rangeData.map((entry, idx) => (
+                          <Cell key={idx} fill={entry.variance >= 0 ? "#22c55e" : "#ef4444"} fillOpacity={Math.abs(entry.variance) > 10 ? 1 : 0.65} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex gap-4 mt-1.5 text-[10px] text-gray-400">
+                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-emerald-400" />Above 2025</span>
+                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-red-400" />Below 2025</span>
+                </div>
+              </div>
+
+              {/* YoY Comparison */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Year-over-Year Comparison</p>
+                <div style={{ height: 210 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={rangeData} margin={{ top: 4, right: 8, left: -22, bottom: 4 }} barCategoryGap="20%" barGap={1}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 11 }}
+                        formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
+                      />
+                      <Legend wrapperStyle={{ paddingTop: 8, fontSize: 10 }} />
+                      <Bar dataKey="ly2024" name="2024" fill="#e2e8f0" radius={[2, 2, 0, 0]} maxBarSize={10} />
+                      <Bar dataKey="ly2025" name="2025" fill="#6b9bda" radius={[2, 2, 0, 0]} maxBarSize={10} />
+                      <Bar dataKey="actual" name="2026 Actual" fill="#032EA1" radius={[2, 2, 0, 0]} maxBarSize={10} />
+                      <Bar dataKey="forecast" name="2026 Forecast" fill="#94a3b8" radius={[2, 2, 0, 0]} maxBarSize={10} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Decision support insights */}
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Decision Support</p>
+                <div className="flex flex-col gap-2.5">
+                  {insights.map((ins, idx) => {
+                    const s = ins.level === "warn"
+                      ? { bg: "bg-amber-50", border: "border-l-amber-400", title: "text-amber-700", dot: "bg-amber-400" }
+                      : ins.level === "success"
+                        ? { bg: "bg-emerald-50", border: "border-l-emerald-400", title: "text-emerald-700", dot: "bg-emerald-400" }
+                        : { bg: "bg-blue-50", border: "border-l-[#032EA1]", title: "text-[#032EA1]", dot: "bg-[#032EA1]" };
+                    return (
+                      <div key={idx} className={`rounded-lg border-l-4 p-3 ${s.bg} ${s.border}`}>
+                        <div className="flex items-start gap-2">
+                          <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${s.dot}`} />
+                          <div>
+                            <p className={`text-[11px] font-semibold leading-snug ${s.title}`}>{ins.title}</p>
+                            <p className="text-[10px] leading-relaxed text-gray-500 mt-0.5">{ins.body}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+
+            <p className="mt-5 text-[10px] text-gray-400 border-t border-gray-100 pt-4">
+              Forecast derived from 2-year (2024–2025) seasonal harvest indices applied to cooperative field-reported annual projections.
+              Confidence band represents ±{Math.round((1 - hd.confidence / 100) * 90)}% forecast uncertainty.
+              MAFF Provincial Extension data integrated. Projections reviewed quarterly.
+            </p>
+          </section>
+        );
+      })()}
 
       {/* 2. Geographic Distribution */}
       <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
@@ -1604,8 +1951,8 @@ const avgGrowth = (crops.reduce((s, c) => {
                     formatter={(value: number, name: string) => [value.toLocaleString(), name]}
                   />
                   <Legend wrapperStyle={{ paddingTop: 14, fontSize: 12 }} />
-                  <Line type="monotone" dataKey="total"  name="Total"  stroke="#10b981" strokeWidth={2}   strokeDasharray="6 4" dot={false} />
-                  <Line type="monotone" dataKey="male"   name="Male"   stroke="#032EA1" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="total" name="Total" stroke="#10b981" strokeWidth={2} strokeDasharray="6 4" dot={false} />
+                  <Line type="monotone" dataKey="male" name="Male" stroke="#032EA1" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
                   <Line type="monotone" dataKey="female" name="Female" stroke="#E00025" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
@@ -1614,9 +1961,9 @@ const avgGrowth = (crops.reduce((s, c) => {
             {/* Gender insight strip */}
             <div className="mt-5 grid grid-cols-3 gap-3">
               {[
-                { label: "Male farmers",   value: farmerTrend[farmerTrend.length - 1]?.male.toLocaleString() ?? "—",   color: "#032EA1", bg: "#eff6ff", border: "#bfdbfe" },
+                { label: "Male farmers", value: farmerTrend[farmerTrend.length - 1]?.male.toLocaleString() ?? "—", color: "#032EA1", bg: "#eff6ff", border: "#bfdbfe" },
                 { label: "Female farmers", value: farmerTrend[farmerTrend.length - 1]?.female.toLocaleString() ?? "—", color: "#E00025", bg: "#fff1f2", border: "#fecdd3" },
-                { label: "New this year",  value: `+${(farmerTrend[farmerTrend.length - 1]?.total - farmerTrend[0]?.total).toLocaleString()}`, color: "#059669", bg: "#f0fdf4", border: "#bbf7d0" },
+                { label: "New this year", value: `+${(farmerTrend[farmerTrend.length - 1]?.total - farmerTrend[0]?.total).toLocaleString()}`, color: "#059669", bg: "#f0fdf4", border: "#bbf7d0" },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl p-3 border" style={{ backgroundColor: s.bg, borderColor: s.border }}>
                   <p className="text-lg font-bold tabular-nums" style={{ color: s.color }}>{s.value}</p>
@@ -1639,24 +1986,13 @@ const avgGrowth = (crops.reduce((s, c) => {
           Reported assets across all cooperatives{isNational ? "" : ` (${provinceDisplayLabel})`}
         </p>
 
-        {/* Top stat tiles */}
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        {/* Stat tiles — single row */}
+        <div className="mt-5 grid grid-cols-3 gap-3">
           <div className="rounded-xl bg-[#032EA1] p-4 text-white">
             <p className="text-xs font-medium opacity-75">Total Assets</p>
-            <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight">{assets.count.toLocaleString()}</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums tracking-tight">{assets.count.toLocaleString()}</p>
             <p className="mt-1 text-xs opacity-60">Across {isNational ? 25 : selectedProvinces.length} province(s)</p>
           </div>
-          <div className="rounded-xl bg-[#0f172a] p-4 text-white">
-            <p className="text-xs font-medium opacity-75">Est. Total Value</p>
-            <p className="mt-1 text-3xl font-bold tabular-nums tracking-tight">
-              USD {Math.round(assets.valueUsd / 1_000).toLocaleString()}K
-            </p>
-            <p className="mt-1 text-xs opacity-60">Estimated market value</p>
-          </div>
-        </div>
-
-        {/* Maintenance + at risk */}
-        <div className="mt-3 grid grid-cols-2 gap-3">
           <div className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
               <Activity className="h-4 w-4 text-emerald-600" />
@@ -1687,9 +2023,9 @@ const avgGrowth = (crops.reduce((s, c) => {
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-3">Condition Breakdown</p>
           {(() => {
             const condMap: Record<string, { bar: string; bg: string }> = {
-              Good:    { bar: "#22c55e", bg: "#dcfce7" },
-              Fair:    { bar: "#f59e0b", bg: "#fef3c7" },
-              Poor:    { bar: "#ef4444", bg: "#fee2e2" },
+              Good: { bar: "#22c55e", bg: "#dcfce7" },
+              Fair: { bar: "#f59e0b", bg: "#fef3c7" },
+              Poor: { bar: "#ef4444", bg: "#fee2e2" },
               Unknown: { bar: "#94a3b8", bg: "#f1f5f9" },
             };
             return (
@@ -1714,15 +2050,6 @@ const avgGrowth = (crops.reduce((s, c) => {
                     );
                   })}
                 </div>
-                {/* Combined stacked bar */}
-                <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full">
-                  {assetConditionSlices.map((row) => (
-                    <div
-                      key={row.name}
-                      style={{ width: `${row.value}%`, backgroundColor: condMap[row.name]?.bar ?? "#94a3b8" }}
-                    />
-                  ))}
-                </div>
               </>
             );
           })()}
@@ -1732,137 +2059,335 @@ const avgGrowth = (crops.reduce((s, c) => {
 
       {/* Asset Type Overview */}
       <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
+
         {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-5 border-b border-gray-200/80 pb-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Package className="h-5 w-5 text-[#0F2F8F]" />
               Asset Type Overview
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              Equipment count by category across all cooperatives{isNational ? "" : ` · ${provinceDisplayLabel}`}
+              {assetTab === "inventory"
+                ? `Equipment count by category across all cooperatives${isNational ? "" : ` · ${provinceDisplayLabel}`}`
+                : assetTab === "usage"
+                  ? "Utilization rates and operational hours per asset category"
+                  : "Disposed and retired assets — reasons, trends, and replacement status"}
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 border border-blue-100">
-              PEARL funded
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-600 border border-gray-200">
-              Own / Other
-            </span>
+          {/* Tab switcher */}
+          <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
+            {(["inventory", "usage", "disposal"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setAssetTab(t)}
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap capitalize ${assetTab === t ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
+              >
+                {t === "inventory" ? "Asset Inventory" : t === "usage" ? "Usage Summary" : "Disposal Summary"}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Type category tiles */}
-        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {Object.entries(ASSET_TYPE_META).map(([type, meta]) => {
-            const Icon = ASSET_TYPE_ICONS[type] ?? Package;
-            const typeCount = Math.round(assets.count * (meta.pct / 100));
-            return (
-              <div
-                key={type}
-                className="rounded-xl border p-4 flex flex-col gap-2"
-                style={{ backgroundColor: meta.bg, borderColor: `${meta.color}22` }}
-              >
-                <div className="flex items-center justify-between">
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: `${meta.color}18` }}
-                  >
-                    <Icon className="h-4 w-4" style={{ color: meta.color }} />
+        {/* ── Tab 1: Asset Inventory ── */}
+        {assetTab === "inventory" && (
+          <>
+            {/* Type category tiles */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {Object.entries(ASSET_TYPE_META).map(([type, meta]) => {
+                const Icon = ASSET_TYPE_ICONS[type] ?? Package;
+                const typeCount = Math.round(assets.count * (meta.pct / 100));
+                return (
+                  <div key={type} className="rounded-xl border p-4 flex flex-col gap-2"
+                    style={{ backgroundColor: meta.bg, borderColor: `${meta.color}22` }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg"
+                        style={{ backgroundColor: `${meta.color}18` }}>
+                        <Icon className="h-4 w-4" style={{ color: meta.color }} />
+                      </div>
+                      <span className="text-[11px] font-bold tabular-nums" style={{ color: meta.color }}>{meta.pct}%</span>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold tabular-nums tracking-tight" style={{ color: meta.textColor }}>
+                        {typeCount.toLocaleString()}
+                      </p>
+                      <p className="text-xs font-medium text-gray-500 mt-0.5">{type}</p>
+                    </div>
+                    <div className="h-1 w-full rounded-full bg-gray-200/60">
+                      <div className="h-full rounded-full" style={{ width: `${meta.pct}%`, backgroundColor: meta.color }} />
+                    </div>
                   </div>
-                  <span
-                    className="text-[11px] font-bold tabular-nums"
-                    style={{ color: meta.color }}
-                  >
-                    {meta.pct}%
-                  </span>
+                );
+              })}
+            </div>
+
+            {/* Key asset subtypes grid */}
+            <div className="mt-7">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-4">Key Asset Categories</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {assetSubtypeRows.map((row) => {
+                  const Icon = row.icon;
+                  const meta = ASSET_TYPE_META[row.type] ?? ASSET_TYPE_META["Equipment"];
+                  const atRisk = Math.round(row.count * ((100 - row.goodPct) / 100));
+                  return (
+                    <div key={row.name} className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 flex flex-col gap-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: meta.bg }}>
+                          <Icon className="h-[18px] w-[18px]" style={{ color: meta.color }} />
+                        </div>
+                        {row.pearlFunded && (
+                          <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-blue-600 border border-blue-100">
+                            PEARL
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold tabular-nums tracking-tight text-gray-900">{row.count.toLocaleString()}</p>
+                        <p className="text-xs font-medium text-gray-500 mt-0.5 leading-snug">{row.name}</p>
+                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: meta.color }}>{row.type}</p>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                          <span>Good condition</span>
+                          <span className="font-semibold text-gray-600">{row.goodPct}%</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
+                          <div className="h-full rounded-full" style={{
+                            width: `${row.goodPct}%`,
+                            backgroundColor: row.goodPct >= 75 ? "#22c55e" : row.goodPct >= 60 ? "#f59e0b" : "#ef4444",
+                          }} />
+                        </div>
+                        <p className="text-[10px] text-red-400 mt-1">{atRisk.toLocaleString()} need attention</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── Tab 2: Asset Usage Summary ── */}
+        {assetTab === "usage" && (() => {
+          const usageRows = assetSubtypeRows.map((r) => ({
+            ...r,
+            ...(ASSET_USAGE_DATA[r.name] ?? { utilizationPct: 70, avgHoursMonth: 126, idlePct: 15, overused: false }),
+          }));
+          const avgUtil = Math.round(usageRows.reduce((s, r) => s + r.utilizationPct, 0) / usageRows.length);
+          const overusedCount = usageRows.filter((r) => r.overused).length;
+          const underusedCount = usageRows.filter((r) => r.utilizationPct < 55).length;
+          const chartData = usageRows.map((r) => ({
+            name: r.name.replace(" System", "").replace(" Machine", ""),
+            utilization: r.utilizationPct,
+            idle: r.idlePct,
+          }));
+          return (
+            <>
+              {/* KPIs */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Avg Utilization</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">{avgUtil}%</p>
+                  <div className="mt-1.5 h-1 w-full rounded-full bg-gray-200">
+                    <div className="h-full rounded-full bg-[#032EA1]" style={{ width: `${avgUtil}%` }} />
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold tabular-nums tracking-tight" style={{ color: meta.textColor }}>
-                    {typeCount.toLocaleString()}
+                <div className={`rounded-xl border px-4 py-3 ${overusedCount > 0 ? "border-amber-200 bg-amber-50" : "border-gray-200 bg-gray-50"}`}>
+                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${overusedCount > 0 ? "text-amber-500" : "text-gray-400"}`}>Overutilized</p>
+                  <p className={`mt-1 text-2xl font-bold tabular-nums ${overusedCount > 0 ? "text-amber-700" : "text-gray-600"}`}>{overusedCount}</p>
+                  <p className="text-[11px] mt-0.5 text-gray-400">asset types</p>
+                </div>
+                <div className={`rounded-xl border px-4 py-3 ${underusedCount > 0 ? "border-red-100 bg-red-50" : "border-gray-200 bg-gray-50"}`}>
+                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${underusedCount > 0 ? "text-red-400" : "text-gray-400"}`}>Underutilized</p>
+                  <p className={`mt-1 text-2xl font-bold tabular-nums ${underusedCount > 0 ? "text-red-600" : "text-gray-600"}`}>{underusedCount}</p>
+                  <p className="text-[11px] mt-0.5 text-gray-400">below 55% target</p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-500">Total Hours/Month</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-emerald-700">
+                    {usageRows.reduce((s, r) => s + r.avgHoursMonth * r.count, 0).toLocaleString()}
                   </p>
-                  <p className="text-xs font-medium text-gray-500 mt-0.5">{type}</p>
-                </div>
-                {/* mini fill bar */}
-                <div className="h-1 w-full rounded-full bg-gray-200/60">
-                  <div
-                    className="h-full rounded-full"
-                    style={{ width: `${meta.pct}%`, backgroundColor: meta.color }}
-                  />
+                  <p className="text-[11px] mt-0.5 text-emerald-500">across all assets</p>
                 </div>
               </div>
-            );
-          })}
-        </div>
 
+              {/* Utilization chart */}
+              <div className="mb-6">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Utilization & Idle Rate by Asset Type (%)</p>
+                <div style={{ height: 220 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 4, right: 16, left: -12, bottom: 4 }} barCategoryGap="25%" barGap={2}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                      <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} domain={[0, 100]} />
+                      <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 11 }}
+                        formatter={(v: number, name: string) => [`${v}%`, name]} />
+                      <Legend wrapperStyle={{ paddingTop: 10, fontSize: 11 }} />
+                      <ReferenceLine y={75} stroke="#22c55e" strokeDasharray="4 3" strokeWidth={1.2} label={{ value: "75% target", fontSize: 9, fill: "#22c55e", position: "insideTopRight" }} />
+                      <Bar dataKey="utilization" name="Utilization %" radius={[3, 3, 0, 0]} maxBarSize={22}>
+                        {chartData.map((entry, idx) => (
+                          <Cell key={idx} fill={entry.utilization >= 75 ? "#032EA1" : entry.utilization >= 55 ? "#f59e0b" : "#ef4444"} />
+                        ))}
+                      </Bar>
+                      <Bar dataKey="idle" name="Idle %" fill="#e2e8f0" radius={[3, 3, 0, 0]} maxBarSize={22} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
 
-        {/* Key asset subtypes grid */}
-        <div className="mt-7">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-4">
-            Key Asset Categories
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {assetSubtypeRows.map((row) => {
-              const Icon = row.icon;
-              const meta = ASSET_TYPE_META[row.type] ?? ASSET_TYPE_META["Equipment"];
-              const atRisk = Math.round(row.count * ((100 - row.goodPct) / 100));
-              return (
-                <div
-                  key={row.name}
-                  className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 flex flex-col gap-3"
-                >
-                  {/* Icon + pearl badge */}
-                  <div className="flex items-start justify-between">
-                    <div
-                      className="flex h-9 w-9 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: meta.bg }}
-                    >
-                      <Icon className="h-4.5 w-4.5 h-[18px] w-[18px]" style={{ color: meta.color }} />
+              {/* Per-asset detail rows */}
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Per-Asset Breakdown</p>
+              <div className="space-y-2.5">
+                {usageRows.map((row) => {
+                  const Icon = row.icon;
+                  const meta = ASSET_TYPE_META[row.type] ?? ASSET_TYPE_META["Equipment"];
+                  const utilColor = row.utilizationPct >= 75 ? "#22c55e" : row.utilizationPct >= 55 ? "#f59e0b" : "#ef4444";
+                  return (
+                    <div key={row.name} className="flex items-center gap-4 rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: meta.bg }}>
+                        <Icon className="h-4 w-4" style={{ color: meta.color }} />
+                      </div>
+                      <div className="w-40 shrink-0">
+                        <p className="text-xs font-semibold text-gray-800 leading-snug">{row.name}</p>
+                        <p className="text-[10px] text-gray-400">{row.avgHoursMonth} hrs/month avg</p>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between text-[10px] mb-1">
+                          <span className="font-semibold" style={{ color: utilColor }}>{row.utilizationPct}% utilized</span>
+                          <span className="text-gray-400">{row.idlePct}% idle</span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden flex">
+                          <div className="h-full rounded-l-full" style={{ width: `${row.utilizationPct}%`, backgroundColor: utilColor }} />
+                          <div className="h-full bg-gray-300" style={{ width: `${row.idlePct}%` }} />
+                        </div>
+                      </div>
+                      <div className="shrink-0 flex gap-2">
+                        {row.overused && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-bold uppercase text-amber-700">Overused</span>
+                        )}
+                        {row.utilizationPct < 55 && (
+                          <span className="rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase text-red-600">Underused</span>
+                        )}
+                        {row.pearlFunded && (
+                          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold uppercase text-blue-600 border border-blue-100">PEARL</span>
+                        )}
+                      </div>
                     </div>
-                    {row.pearlFunded && (
-                      <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-blue-600 border border-blue-100">
-                        PEARL
-                      </span>
-                    )}
-                  </div>
+                  );
+                })}
+              </div>
+            </>
+          );
+        })()}
 
-                  {/* Count + name */}
-                  <div>
-                    <p className="text-2xl font-bold tabular-nums tracking-tight text-gray-900">
-                      {row.count.toLocaleString()}
-                    </p>
-                    <p className="text-xs font-medium text-gray-500 mt-0.5 leading-snug">{row.name}</p>
-                    <p
-                      className="text-[10px] mt-0.5 font-medium"
-                      style={{ color: meta.color }}
-                    >
-                      {row.type}
-                    </p>
-                  </div>
+        {/* ── Tab 3: Disposal Summary ── */}
+        {assetTab === "disposal" && (() => {
+          const totalDisposed = ASSET_DISPOSAL_DATA.byType.reduce((s, r) => s + r.disposed, 0);
+          const totalReplaced = ASSET_DISPOSAL_DATA.byType.reduce((s, r) => s + r.replaced, 0);
+          const replacementRate = Math.round((totalReplaced / totalDisposed) * 100);
+          const ytdDisposed = ASSET_DISPOSAL_DATA.yearly[4].count;
+          const ytdValue = ASSET_DISPOSAL_DATA.yearly[4].valueK;
+          return (
+            <>
+              {/* KPIs */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Total Disposed</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">{totalDisposed.toLocaleString()}</p>
+                  <p className="text-[11px] mt-0.5 text-gray-400">all-time records</p>
+                </div>
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-500">YTD 2026</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-amber-700">{ytdDisposed}</p>
+                  <p className="text-[11px] mt-0.5 text-amber-500">Jan–Jun 2026</p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-500">Replacement Rate</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-emerald-700">{replacementRate}%</p>
+                  <p className="text-[11px] mt-0.5 text-emerald-500">{totalReplaced.toLocaleString()} replaced</p>
+                </div>
+                <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-400">Value Recovered YTD</p>
+                  <p className="mt-1 text-2xl font-bold tabular-nums text-blue-700">USD {ytdValue}K</p>
+                  <p className="text-[11px] mt-0.5 text-blue-400">from disposal/salvage</p>
+                </div>
+              </div>
 
-                  {/* Condition bar */}
-                  <div>
-                    <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
-                      <span>Good condition</span>
-                      <span className="font-semibold text-gray-600">{row.goodPct}%</span>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${row.goodPct}%`,
-                          backgroundColor: row.goodPct >= 75 ? "#22c55e" : row.goodPct >= 60 ? "#f59e0b" : "#ef4444",
-                        }}
-                      />
-                    </div>
-                    <p className="text-[10px] text-red-400 mt-1">{atRisk.toLocaleString()} need attention</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Yearly trend chart */}
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Annual Disposal Trend</p>
+                  <div style={{ height: 200 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={ASSET_DISPOSAL_DATA.yearly} margin={{ top: 4, right: 8, left: -12, bottom: 4 }} barCategoryGap="35%">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="year" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                        <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
+                          formatter={(v: number, name: string) => [name === "valueK" ? `USD ${v}K` : v, name === "valueK" ? "Value Recovered" : "Assets Disposed"]} />
+                        <Legend wrapperStyle={{ paddingTop: 10, fontSize: 11 }} />
+                        <Bar dataKey="count" name="Assets Disposed" fill="#032EA1" radius={[3, 3, 0, 0]} maxBarSize={28} />
+                        <Bar dataKey="valueK" name="Value (USD K)" fill="#6b9bda" radius={[3, 3, 0, 0]} maxBarSize={28} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+
+                {/* By reason + by type */}
+                <div className="flex flex-col gap-5">
+                  {/* Disposal by reason */}
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">By Disposal Reason</p>
+                    <div className="space-y-2">
+                      {ASSET_DISPOSAL_DATA.byReason.map((row) => (
+                        <div key={row.reason} className="flex items-center gap-3">
+                          <span className="w-36 shrink-0 text-xs text-gray-600 truncate">{row.reason}</span>
+                          <div className="flex-1 h-5 rounded-lg bg-gray-100 overflow-hidden">
+                            <div className="h-full rounded-lg flex items-center justify-end pr-2 transition-all duration-500"
+                              style={{ width: `${row.pct}%`, backgroundColor: row.pct >= 30 ? "#032EA1" : row.pct >= 15 ? "#6b9bda" : "#cbd5e1" }}>
+                              <span className="text-[10px] font-bold text-white">{row.pct}%</span>
+                            </div>
+                          </div>
+                          <span className="w-12 shrink-0 text-right text-xs tabular-nums text-gray-500">{row.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* By asset type — replacement status */}
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Disposed vs Replaced by Type</p>
+                    <div className="space-y-2">
+                      {ASSET_DISPOSAL_DATA.byType.map((row) => {
+                        const Icon = ASSET_TYPE_ICONS[row.type] ?? Package;
+                        const meta = ASSET_TYPE_META[row.type] ?? ASSET_TYPE_META["Equipment"];
+                        const repRate = Math.round((row.replaced / row.disposed) * 100);
+                        return (
+                          <div key={row.type} className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2">
+                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: meta.bg }}>
+                              <Icon className="h-3.5 w-3.5" style={{ color: meta.color }} />
+                            </div>
+                            <span className="w-28 shrink-0 text-xs font-semibold text-gray-700">{row.type}</span>
+                            <div className="flex-1 flex items-center gap-2 text-[10px] text-gray-500">
+                              <span className="tabular-nums text-gray-700 font-medium">{row.disposed} disposed</span>
+                              <span className="text-gray-300">·</span>
+                              <span className="tabular-nums text-emerald-600 font-medium">{row.replaced} replaced</span>
+                            </div>
+                            <span className={`shrink-0 text-[11px] font-bold tabular-nums ${repRate >= 80 ? "text-emerald-600" : repRate >= 60 ? "text-amber-600" : "text-red-500"}`}>
+                              {repRate}%
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          );
+        })()}
 
       </section>
 
@@ -1870,12 +2395,12 @@ const avgGrowth = (crops.reduce((s, c) => {
       <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
         <h2 className="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-[#0F2F8F]" />
-          Knowledge Management Stats
+          Knowledge Management
         </h2>
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { icon: BookOpen, iconBg: "bg-blue-100",   iconColor: "text-blue-600",   value: "127",   label: "Total Materials" },
+            { icon: BookOpen, iconBg: "bg-blue-100", iconColor: "text-blue-600", value: "127", label: "Total Materials" },
             { icon: Download, iconBg: "bg-violet-100", iconColor: "text-violet-600", value: "3,972", label: "Total Downloads" },
           ].map(({ icon: Icon, iconBg, iconColor, value, label }) => (
             <div key={label} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4">
