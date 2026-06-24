@@ -430,8 +430,10 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   const [cropSectionTab, setCropSectionTab] = useState<"distribution" | "yield">("distribution");
   const [showAcPins, setShowAcPins] = useState(true);
   const [showMacPins, setShowMacPins] = useState(true);
-  const [yieldPeriod, setYieldPeriod] = useState<"annual" | "h1" | "h2" | "monthly">("annual");
+  const [yieldPeriod, setYieldPeriod] = useState<"annual" | "period-select" | "monthly" | "actual-vs-forecast">("annual");
   const [yieldMonthlyCrop, setYieldMonthlyCrop] = useState("Rice");
+  const [yieldRangeFrom, setYieldRangeFrom] = useState(6);
+  const [yieldRangeTo, setYieldRangeTo] = useState(11);
 
   const acStatsNational = useMemo(
     () => ({
@@ -785,7 +787,11 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
             <p className="mt-1 text-sm text-gray-500">
               {cropSectionTab === "distribution"
                 ? "Dominant crop per province — select one or more crops to filter"
-                : `H1 (Jan–Jun) & H2 (Jul–Dec) harvest period breakdown${isNational ? "" : ` · ${provinceDisplayLabel}`}`}
+                : yieldPeriod === "actual-vs-forecast"
+                  ? `2026 H1 confirmed actuals vs H2 forecast${isNational ? "" : ` · ${provinceDisplayLabel}`}`
+                  : yieldPeriod === "period-select"
+                  ? `Custom period forecast — select any month range${isNational ? "" : ` · ${provinceDisplayLabel}`}`
+                  : `Annual yield trend · 2024–2026 forecast${isNational ? "" : ` · ${provinceDisplayLabel}`}`}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -1026,9 +1032,8 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
         {/* Tab 2: Annual Yield Prediction */}
         {cropSectionTab === "yield" && (() => {
           const crops = Object.keys(YIELD_3Y);
-          const pKey = (yieldPeriod === "monthly" ? "annual" : yieldPeriod) as "annual" | "h1" | "h2";
-          const avgConfidence = Math.round(crops.reduce((s, c) => s + YIELD_3Y[c].confidence, 0) / crops.length);
-          const avgGrowth = (crops.reduce((s, c) => {
+          const pKey = "annual" as const;
+const avgGrowth = (crops.reduce((s, c) => {
             const d = YIELD_3Y[c];
             return s + ((d.y2026[pKey] - d.y2025[pKey]) / d.y2025[pKey]) * 100;
           }, 0) / crops.length).toFixed(1);
@@ -1048,27 +1053,49 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
               "2026F": +(d.y2026.annual * idx).toFixed(2),
             };
           });
+          const avfChartData = crops.map((c) => ({
+            name: c === "Vegetables" ? "Veg." : c,
+            "H1 Actual":   YIELD_3Y[c].y2026.h1,
+            "H2 Forecast": YIELD_3Y[c].y2026.h2,
+          }));
+
+          const LAST_ACTUAL_MONTH = 5; // June 2026 is the last confirmed month
+          const psFrom = yieldRangeFrom;
+          const psTo   = Math.max(yieldRangeFrom, yieldRangeTo);
+          const computePeriodYield = (crop: string, fM: number, tM: number, yr: "y2024" | "y2025" | "y2026") => {
+            const idx = YIELD_MONTHLY_IDX[crop] ?? [];
+            const s = idx.slice(fM, tM + 1).reduce((acc: number, v: number) => acc + v, 0);
+            return +(YIELD_3Y[crop][yr].annual * s).toFixed(2);
+          };
+          const rangeIsAllActual   = psTo   <= LAST_ACTUAL_MONTH;
+          const rangeIsAllForecast = psFrom >  LAST_ACTUAL_MONTH;
+          const psCards = crops.map((c) => {
+            const v26 = computePeriodYield(c, psFrom, psTo, "y2026");
+            const v25 = computePeriodYield(c, psFrom, psTo, "y2025");
+            const v24 = computePeriodYield(c, psFrom, psTo, "y2024");
+            return { crop: c, v26, v25, v24, growthVsLy: (((v26 - v25) / v25) * 100).toFixed(1) };
+          });
+          const psChartData = psCards.map((r) => ({
+            name: r.crop === "Vegetables" ? "Veg." : r.crop,
+            "2024": r.v24,
+            "2025": r.v25,
+            "2026": r.v26,
+          }));
+
           const PERIOD_TABS = [
-            { key: "annual",  label: "Annual" },
-            { key: "h1",      label: "H1 Jan–Jun" },
-            { key: "h2",      label: "H2 Jul–Dec" },
-            { key: "monthly", label: "Monthly Y2Y" },
+            { key: "annual",             label: "Annual" },
+            { key: "period-select",      label: "Period Select" },
+            { key: "actual-vs-forecast", label: "Actual vs Forecast" },
+            { key: "monthly",            label: "Monthly Y2Y" },
           ] as const;
           return (
             <>
               <div className="flex flex-wrap gap-2 mb-5">
-                <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
-                  <Layers className="h-3.5 w-3.5" />
-                  {crops.length} crops tracked
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+<span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
                   <TrendingUp className="h-3.5 w-3.5" />
                   Avg ↑{avgGrowth}% 2025→2026
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-                  <CircleDot className="h-3.5 w-3.5" />
-                  {avgConfidence}% avg confidence
-                </span>
+
               </div>
 
               <div className="flex flex-wrap gap-1 p-1 bg-gray-100 rounded-xl w-fit mb-6">
@@ -1083,7 +1110,229 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
                 ))}
               </div>
 
-              {yieldPeriod !== "monthly" ? (
+              {yieldPeriod === "actual-vs-forecast" ? (
+                <>
+                  {/* Context banner */}
+                  <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+                    <span className="text-xs font-semibold text-blue-700">Currently in 2026 H2 (Jul–Dec)</span>
+                    <span className="hidden sm:block h-3 w-px bg-blue-200" />
+                    <span className="inline-flex items-center gap-1.5 text-xs text-blue-600">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-[#3b82f6]" />
+                      H1 Jan–Jun — <strong>Actual confirmed</strong>
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-[#cbd5e1]" />
+                      H2 Jul–Dec — <strong>Forecast</strong> (based on 2026 H1 actuals + 2025 H2 baseline)
+                    </span>
+                  </div>
+
+                  {/* Crop cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                    {crops.map((crop) => {
+                      const d = YIELD_3Y[crop];
+                      const Icon = CROP_ICONS[crop] ?? CircleDot;
+                      const h1Act = d.y2026.h1;
+                      const h2Fcast = d.y2026.h2;
+                      const h2GrowthVsLy = (((h2Fcast - d.y2025.h2) / d.y2025.h2) * 100).toFixed(1);
+                      const h1Pct = Math.round((h1Act / (h1Act + h2Fcast)) * 100);
+                      return (
+                        <div key={crop} className="rounded-xl border border-gray-200 bg-white p-4 flex flex-col gap-2.5">
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-4 w-4 shrink-0" style={{ color: d.color }} />
+                            <span className="text-xs font-semibold text-gray-600 truncate">{crop}</span>
+                          </div>
+                          <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2">
+                            <p className="text-[9px] font-semibold uppercase tracking-wide text-blue-400 mb-0.5">H1 2026 Actual</p>
+                            <div className="flex items-baseline gap-1">
+                              <p className="text-lg font-bold tabular-nums text-blue-700">{h1Act}</p>
+                              <span className="text-[9px] text-blue-400">MT/ha</span>
+                            </div>
+                          </div>
+                          <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                            <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400 mb-0.5">H2 2026 Forecast</p>
+                            <div className="flex items-baseline gap-1">
+                              <p className="text-lg font-bold tabular-nums text-gray-600">{h2Fcast}</p>
+                              <span className="text-[9px] text-gray-400">MT/ha</span>
+                            </div>
+                            <p className="text-[9px] text-gray-400 mt-0.5">↑ {h2GrowthVsLy}% vs 2025 H2</p>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[9px] mb-1">
+                              <span className="font-medium text-blue-400">H1 {h1Pct}% actual</span>
+                              <span className="text-gray-400">H2 {100 - h1Pct}% forecast</span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full overflow-hidden flex">
+                              <div className="h-full rounded-l-full bg-blue-500" style={{ width: `${h1Pct}%` }} />
+                              <div className="h-full rounded-r-full flex-1 bg-gray-300" />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] text-gray-400">Forecast confidence</span>
+                              <span className="text-[10px] font-bold text-gray-500">{d.confidence}%</span>
+                            </div>
+                            <div className="h-1 w-full rounded-full bg-gray-200/80">
+                              <div className="h-full rounded-full bg-gray-400" style={{ width: `${d.confidence}%` }} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Chart */}
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                      2026 H1 Actual vs H2 Forecast — by crop (MT/ha)
+                    </p>
+                    <div style={{ height: 220 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={avfChartData} margin={{ top: 4, right: 16, left: -12, bottom: 4 }} barCategoryGap="30%" barGap={2}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
+                            formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
+                          />
+                          <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
+                          <Bar dataKey="H1 Actual"   fill="#3b82f6" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                          <Bar dataKey="H2 Forecast" fill="#cbd5e1" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4 mt-2 text-[10px] text-gray-400">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="inline-block h-2.5 w-2.5 rounded-sm bg-[#3b82f6]" />Actual (H1 confirmed)
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="inline-block h-2.5 w-2.5 rounded-sm bg-[#cbd5e1]" />Forecast (H1-informed H2 projection)
+                      </span>
+                    </div>
+                  </div>
+                </>
+              ) : yieldPeriod === "period-select" ? (
+                <>
+                  {/* Month range picker */}
+                  <div className="mb-6">
+                    <div className="flex rounded-xl overflow-hidden border border-gray-200">
+                      {MONTHS_SHORT.map((m, i) => {
+                        const inRange = i >= psFrom && i <= psTo;
+                        const isActual = i <= LAST_ACTUAL_MONTH;
+                        const isFrom = i === psFrom;
+                        const isTo   = i === psTo && psTo !== psFrom;
+                        return (
+                          <button key={m} type="button"
+                            title={`${m} 2026 — ${isActual ? "Actual" : "Forecast"}`}
+                            onClick={() => {
+                              if (i <= yieldRangeFrom) {
+                                setYieldRangeFrom(i);
+                                setYieldRangeTo(i);
+                              } else {
+                                setYieldRangeTo(i);
+                              }
+                            }}
+                            className={`flex-1 py-2.5 border-r last:border-r-0 border-gray-200 transition-colors ${
+                              inRange
+                                ? isActual ? "bg-blue-500 text-white" : "bg-slate-500 text-white"
+                                : isActual ? "bg-blue-50 text-blue-400 hover:bg-blue-100" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                            }`}>
+                            <span className="block text-[11px] font-semibold">{m}</span>
+                            <span className="block text-[8px] mt-0.5 opacity-70">
+                              {isFrom ? "from" : isTo ? "to" : " "}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 mt-3">
+                      <span className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${
+                        rangeIsAllActual
+                          ? "border-blue-200 bg-blue-50 text-blue-700"
+                          : rangeIsAllForecast
+                            ? "border-gray-200 bg-gray-100 text-gray-600"
+                            : "border-violet-200 bg-violet-50 text-violet-700"
+                      }`}>
+                        {rangeIsAllActual ? "Confirmed actual data" : rangeIsAllForecast ? "Forecast data" : "Mixed: actual + forecast"}
+                      </span>
+                      <span className="text-xs font-medium text-gray-700">
+                        {MONTHS_SHORT[psFrom]}–{MONTHS_SHORT[psTo]} 2026
+                        <span className="ml-1 text-gray-400">({psTo - psFrom + 1} month{psTo - psFrom !== 0 ? "s" : ""})</span>
+                      </span>
+                      <span className="ml-auto hidden sm:flex items-center gap-2 text-[10px] text-gray-400">
+                        <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-blue-400" />Jan–Jun = actual</span>
+                        <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-slate-400" />Jul–Dec = forecast</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Crop cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                    {psCards.map(({ crop, v26, v25, v24, growthVsLy }) => {
+                      const d = YIELD_3Y[crop];
+                      const Icon = CROP_ICONS[crop] ?? CircleDot;
+                      return (
+                        <div key={crop} className="rounded-xl border p-4 flex flex-col gap-2"
+                          style={{ backgroundColor: d.bg, borderColor: d.border }}>
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-4 w-4 shrink-0" style={{ color: d.color }} />
+                            <span className="text-xs font-semibold text-gray-600 truncate">{crop}</span>
+                          </div>
+                          <div>
+                            <div className="flex items-baseline gap-1">
+                              <p className="text-2xl font-bold tabular-nums text-gray-900 leading-none">{v26}</p>
+                              <span className="text-[10px] text-gray-400">MT/ha</span>
+                            </div>
+                            <p className="text-[10px] font-semibold text-violet-600 mt-0.5">
+                              {rangeIsAllActual ? "Actual" : rangeIsAllForecast ? "2026 Forecast" : "2026 Est."}
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1 text-[10px]">
+                            <div className="bg-white/60 rounded p-1.5"><p className="text-gray-400">2024</p><p className="font-semibold text-gray-700">{v24}</p></div>
+                            <div className="bg-white/60 rounded p-1.5"><p className="text-gray-400">2025</p><p className="font-semibold text-gray-700">{v25}</p></div>
+                          </div>
+                          <p className="text-xs font-semibold" style={{ color: d.color }}>
+                            {+growthVsLy >= 0 ? "↑" : "↓"} {Math.abs(+growthVsLy)}% vs 2025
+                          </p>
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] text-gray-400">Confidence</span>
+                              <span className="text-[10px] font-bold text-gray-500">{d.confidence}%</span>
+                            </div>
+                            <div className="h-1 w-full rounded-full bg-gray-200/80">
+                              <div className="h-full rounded-full" style={{ width: `${d.confidence}%`, backgroundColor: d.color }} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Comparison chart */}
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                      {MONTHS_SHORT[psFrom]}–{MONTHS_SHORT[psTo]} period comparison (MT/ha)
+                    </p>
+                    <div style={{ height: 220 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={psChartData} margin={{ top: 4, right: 16, left: -12, bottom: 4 }} barCategoryGap="30%" barGap={2}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
+                            formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
+                          />
+                          <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
+                          <Bar dataKey="2024" fill="#cbd5e1" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                          <Bar dataKey="2025" fill="#6b9bda" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                          <Bar dataKey="2026" fill={rangeIsAllForecast ? "#94a3b8" : "#032EA1"} radius={[3, 3, 0, 0]} maxBarSize={18} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </>
+              ) : yieldPeriod !== "monthly" ? (
                 <>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
                     {crops.map((crop) => {
@@ -1149,8 +1398,7 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
 
                   <div>
                     <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
-                      3-year comparison —{" "}
-                      {pKey === "annual" ? "Annual" : pKey === "h1" ? "H1 (Jan–Jun)" : "H2 (Jul–Dec)"} yield (MT/ha)
+                      3-year comparison — Annual yield (MT/ha)
                     </p>
                     <div style={{ height: 220 }}>
                       <ResponsiveContainer width="100%" height="100%">
