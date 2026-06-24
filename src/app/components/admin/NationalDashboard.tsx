@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType }
 import {
   Building2,
   UserRound,
-  FileText,
   Package,
   BookOpen,
   TrendingUp,
@@ -15,7 +14,6 @@ import {
   Salad,
   CircleDot,
   X,
-  ChevronRight,
   Layers,
   ChevronDown,
   Check,
@@ -182,232 +180,6 @@ const provinceCrops: Record<string, { dominant: string; secondary: string; pct: 
   "Tboung Khmum":     { dominant: "Cassava",     secondary: "Maize",      pct: 60 },
 };
 
-const BENTO_CARD =
-  "rounded-2xl bg-white shadow-[0_10px_15px_-3px_rgb(0_0_0/0.1),0_4px_6px_-4px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.03]";
-
-/** 12px radius, soft shadow — Business plan bento cards */
-const BP_CARD =
-  "rounded-xl bg-white shadow-[0_10px_15px_-3px_rgb(0_0_0/0.1),0_4px_6px_-4px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.03]";
-
-const BP_REJECTION_RED = "#D00000";
-const BP_PROVINCE_BLUE = "#1A365D";
-
-type BpPipeline = {
-  submitted: number;
-  approved: number;
-  inProgress: number;
-  rejected: number;
-};
-
-function WorkflowStatusFunnel({
-  bp,
-  rejectedDrillOpen,
-  onSegmentClick,
-}: {
-  bp: BpPipeline;
-  rejectedDrillOpen: boolean;
-  onSegmentClick: (segmentKey: string) => void;
-}) {
-  const { submitted, approved, inProgress, rejected } = bp;
-  const accounted = approved + inProgress + rejected;
-  const remainder = Math.max(0, submitted - accounted);
-
-  const segments = [
-    {
-      key: "approved",
-      label: "Approved",
-      count: approved,
-      barClass:
-        "bg-gradient-to-b from-emerald-500 to-emerald-700 shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]",
-      dotClass: "bg-emerald-600",
-    },
-    {
-      key: "inProgress",
-      label: "In progress",
-      count: inProgress,
-      barClass:
-        "bg-gradient-to-b from-amber-400 to-amber-600 shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]",
-      dotClass: "bg-amber-500",
-    },
-    {
-      key: "rejected",
-      label: "Rejected",
-      count: rejected,
-      barClass: "bg-gradient-to-b from-red-500 to-red-700 shadow-[inset_0_1px_0_rgb(255_255_255/0.15)]",
-      dotClass: "bg-red-600",
-    },
-    ...(remainder > 0
-      ? [
-          {
-            key: "remainder",
-            label: "Other / pending",
-            count: remainder,
-            barClass:
-              "bg-gradient-to-b from-slate-400 to-slate-600 shadow-[inset_0_1px_0_rgb(255_255_255/0.15)]",
-            dotClass: "bg-slate-500",
-          },
-        ]
-      : []),
-  ];
-
-  const base = submitted > 0 ? submitted : 1;
-
-  if (submitted <= 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center text-sm text-gray-500">
-        No submitted plans in this view.
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap justify-end">
-        <div className="text-right">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Total submitted</p>
-          <p className="font-mono text-2xl font-bold tabular-nums text-gray-900">{submitted.toLocaleString()}</p>
-        </div>
-      </div>
-
-      <div className="flex min-h-[56px] w-full overflow-hidden rounded-xl bg-white shadow-[inset_0_2px_6px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.07]">
-        {segments.map((s) => {
-          if (s.count <= 0) return null;
-          const pct = (s.count / base) * 100;
-          const isRejected = s.key === "rejected";
-          const interactive = s.count > 0;
-          const showFullLabel = pct >= 14 || isRejected;
-          const showCountOnly = !isRejected && pct >= 7 && pct < 14;
-          const narrowRejected = Boolean(isRejected && pct < 12);
-          const activeRejected = isRejected && rejectedDrillOpen;
-          return (
-            <div
-              key={s.key}
-              role={interactive ? "button" : undefined}
-              tabIndex={interactive ? 0 : undefined}
-              onClick={() => {
-                if (!interactive) return;
-                onSegmentClick(s.key);
-              }}
-              onKeyDown={(e) => {
-                if (!interactive) return;
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onSegmentClick(s.key);
-                }
-              }}
-              className={cn(
-                "relative flex min-h-[56px] min-w-0 items-center justify-center border-l border-white/30 first:border-l-0",
-                s.barClass,
-                interactive &&
-                  "motion-safe:cursor-pointer motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:brightness-110 motion-safe:hover:shadow-md",
-                !interactive && "cursor-default",
-                activeRejected &&
-                  "z-10 ring-2 ring-white/95 shadow-[0_0_0_2px_rgba(220,38,38,0.5),0_10px_22px_rgba(0,0,0,0.14)] motion-safe:hover:translate-y-0"
-              )}
-              style={{ width: `${pct}%` }}
-              title={`${s.label}: ${s.count} (${pct.toFixed(1)}% of submitted)${isRejected ? " — click for rejection reasons" : ""}`}
-            >
-              {showFullLabel ? (
-                <div className="px-1 text-center text-white drop-shadow-sm">
-                  <p
-                    className={`font-mono font-bold tabular-nums ${narrowRejected ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}
-                  >
-                    {s.count}
-                  </p>
-                  <p
-                    className={`font-semibold uppercase tracking-wide text-white/90 ${narrowRejected ? "text-[9px] leading-tight sm:text-[10px]" : "text-[10px] sm:text-[11px]"}`}
-                  >
-                    {s.label}
-                  </p>
-                </div>
-              ) : showCountOnly ? (
-                <span className="font-mono text-xs font-bold tabular-nums text-white">{s.count}</span>
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
-
-      <ul className="flex flex-wrap gap-x-6 gap-y-2 border-t border-slate-100 pt-3">
-        {segments
-          .filter((s) => s.count > 0)
-          .map((s) => {
-            const pct = (s.count / base) * 100;
-            return (
-              <li key={s.key} className="flex items-center gap-2 text-xs text-gray-700">
-                <span className={`h-2.5 w-2.5 shrink-0 rounded-sm shadow-sm ${s.dotClass}`} />
-                <span className="font-medium">{s.label}</span>
-                <span className="font-mono tabular-nums text-gray-900">{s.count.toLocaleString()}</span>
-                <span className="text-gray-400">({pct.toFixed(1)}%)</span>
-              </li>
-            );
-          })}
-      </ul>
-    </div>
-  );
-}
-
-const bpByProvince = [
-  { province: "Battambang", submitted: 98, approved: 82, rate: 84 },
-  { province: "Siem Reap", submitted: 76, approved: 61, rate: 80 },
-  { province: "Kandal", submitted: 112, approved: 88, rate: 79 },
-  { province: "Kampong Cham", submitted: 71, approved: 52, rate: 73 },
-  { province: "Takeo", submitted: 54, approved: 38, rate: 70 },
-];
-
-const topRejections = [
-  { reason: "Incomplete financial annex", count: 38 },
-  { reason: "Milestones not measurable", count: 27 },
-  { reason: "Missing risk mitigation", count: 19 },
-  { reason: "Governance section insufficient", count: 14 },
-];
-
-const topRejectionsTotal = topRejections.reduce((s, r) => s + r.count, 0);
-const topRejectionsWithPct = topRejections.map((r) => ({
-  ...r,
-  pct: Math.round((r.count / topRejectionsTotal) * 100),
-}));
-
-function BpRejectionReasonsList({ className, dense }: { className?: string; dense?: boolean }) {
-  return (
-    <ul className={cn(dense ? "space-y-3" : "mt-5 space-y-4", className)}>
-      {topRejectionsWithPct.map((row) => (
-        <li key={row.reason}>
-          <div className="flex items-start justify-between gap-3 text-sm">
-            <span className="min-w-0 leading-snug text-gray-800">{row.reason}</span>
-            <span className="shrink-0 font-mono text-sm font-semibold tabular-nums text-[#D00000]">
-              {row.pct}%
-            </span>
-          </div>
-          <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
-            <div
-              className="h-full rounded-full bg-[#D00000] shadow-sm transition-[width] duration-500"
-              style={{ width: `${row.pct}%` }}
-            />
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function BpRejectionDrillPanel({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="relative flex min-h-[220px] flex-col rounded-xl border-l-4 border-[#D00000] bg-[#FFF5F5] p-5 shadow-lg ring-1 ring-red-100/90">
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute right-3 top-3 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-100/90 hover:text-gray-900"
-        aria-label="Close rejection details"
-      >
-        <X className="h-4 w-4" />
-      </button>
-      <p className="pr-10 text-sm font-semibold text-gray-900">Top rejection reasons</p>
-      <p className="mt-0.5 text-xs text-gray-500">Share of recorded rejections (illustrative)</p>
-      <BpRejectionReasonsList dense className="mt-4 flex-1" />
-    </div>
-  );
-}
 
 const ASSET_TYPE_META: Record<string, { color: string; bg: string; textColor: string; pct: number }> = {
   Equipment:      { color: "#032EA1", bg: "#eff6ff", textColor: "#1e40af", pct: 55 },
@@ -649,14 +421,13 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
     selectedProvinces.length === 1 ? selectedProvinces[0] :
     selectedProvinces.length <= 3 ? selectedProvinces.join(", ") :
     `${selectedProvinces.length} provinces`;
-  const [bpRejectedDrillOpen, setBpRejectedDrillOpen] = useState(false);
   const [perfChartHoverProvince, setPerfChartHoverProvince] = useState<string | null>(null);
   const [showAllGeo, setShowAllGeo] = useState(false);
   const [showAllKm, setShowAllKm] = useState(false);
   const [cropFilters, setCropFilters] = useState<string[]>([]);
   const [cropDropdownOpen, setCropDropdownOpen] = useState(false);
   const [showAllCrops, setShowAllCrops] = useState(false);
-  const [bpPage, setBpPage] = useState(0);
+  const [cropSectionTab, setCropSectionTab] = useState<"distribution" | "yield">("distribution");
   const [showAcPins, setShowAcPins] = useState(true);
   const [showMacPins, setShowMacPins] = useState(true);
   const [yieldPeriod, setYieldPeriod] = useState<"annual" | "h1" | "h2" | "monthly">("annual");
@@ -675,40 +446,8 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
 
   const acStats = acStatsNational;
 
-  const bp = useMemo(
-    () => ({
-      submitted: scale(428, f),
-      approved: scale(312, f),
-      rejected: scale(41, f),
-      inProgress: scale(75, f),
-      approvalRate: 73,
-    }),
-    [f]
-  );
-
-  const handleBpSegmentClick = useCallback(
-    (segmentKey: string) => {
-      if (segmentKey === "rejected") {
-        if (bp.rejected <= 0) return;
-        setBpRejectedDrillOpen((v) => !v);
-      } else {
-        setBpRejectedDrillOpen(false);
-      }
-    },
-    [bp.rejected]
-  );
-
-  useEffect(() => {
-    setBpRejectedDrillOpen(false);
-  }, [selectedProvinces]);
-
-  useEffect(() => {
-    if (bp.rejected <= 0) setBpRejectedDrillOpen(false);
-  }, [bp.rejected]);
-
   useEffect(() => {
     setPerfChartHoverProvince(null);
-    setBpPage(0);
   }, [selectedProvinces]);
 
   const assets = useMemo(
@@ -751,34 +490,6 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   }, [f]);
 
 
-const bpChartData = useMemo(() => {
-    const generate = (name: string) => {
-      const geo = provinceGeo.find((p) => p.province === name);
-      if (!geo) return null;
-      const rate = Math.min(88, 68 + (geo.acs % 12));
-      const submitted = Math.max(12, Math.round(geo.acs * 0.75));
-      const approved = Math.max(10, Math.round(geo.acs * 0.6));
-      return { province: geo.province, submitted, approved, rate };
-    };
-
-    if (isNational) {
-      return provinceGeo.map((p) => {
-        const existing = bpByProvince.find((b) => b.province === p.province);
-        return existing ?? generate(p.province)!;
-      });
-    }
-
-    const hits = bpByProvince.filter((b) => selectedProvinces.includes(b.province));
-    const missing = selectedProvinces.filter((name) => !bpByProvince.some((b) => b.province === name));
-    return [...hits, ...missing.flatMap((name) => { const e = generate(name); return e ? [e] : []; })];
-  }, [isNational, selectedProvinces]);
-
-  /** Ascending so highest rate renders at top of horizontal bar chart (Recharts category order). */
-  const bpChartSorted = useMemo(
-    () => [...bpChartData].sort((a, b) => a.rate - b.rate),
-    [bpChartData]
-  );
-
   const perfHeatFiltered = useMemo(() => {
     if (isNational) return perfHeat;
     const hits = perfHeat.filter((h) => selectedProvinces.includes(h.province));
@@ -799,22 +510,6 @@ const bpChartData = useMemo(() => {
   );
 
 const title = isNational ? "National Dashboard" : `National Dashboard — ${provinceDisplayLabel}`;
-
-  const leaderboardRows = useMemo(
-    () =>
-      [...provinceGeo]
-        .sort((a, b) => b.acs - a.acs)
-        .map((p) => {
-          const bpRow = bpByProvince.find((b) => b.province === p.province);
-          return {
-            province: p.province,
-            acs: p.acs,
-            members: p.members,
-            approvalRate: bpRow?.rate ?? null,
-          };
-        }),
-    []
-  );
 
   return (
     <div className="space-y-10">
@@ -1072,290 +767,475 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
               <p className="text-sm font-semibold text-[#032EA1]">Model Agricultural Cooperatives</p>
             </button>
           </div>
-          {/* <div className="rounded-xl border border-gray-200 bg-white shadow-sm flex flex-col min-h-[280px] lg:min-h-0 lg:max-h-[min(420px,55vh)]">
-            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/80">
-              <h2 className="text-sm font-semibold text-gray-900">Provincial leaderboard</h2>
-              <p className="text-xs text-gray-500 mt-0.5">By AC count — click a row to focus</p>
-            </div>
-            <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
-              {leaderboardRows.map((row) => {
-                const active = selectedProvinces.includes(row.province);
-                return (
-                  <button
-                    key={row.province}
-                    type="button"
-                    onClick={() => setProvinceFilter(row.province)}
-                    className={`w-full text-left px-4 py-3 transition-colors hover:bg-blue-50/50 ${
-                      active ? "bg-blue-50 border-l-4 border-l-[#032EA1]" : "border-l-4 border-l-transparent"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-gray-900">{row.province}</span>
-                      {row.approvalRate != null && (
-                        <span className="text-xs tabular-nums text-emerald-700 font-medium">{row.approvalRate}% BP</span>
-                      )}
-                    </div>
-                    <div className="mt-1 flex gap-3 text-xs text-gray-500">
-                      <span>
-                        <span className="font-semibold text-gray-700">{row.acs}</span> ACs
-                      </span>
-                      <span>
-                        <span className="font-semibold text-gray-700">{row.members.toLocaleString()}</span> members
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="px-4 py-2 border-t border-gray-100 bg-gray-50/50">
-              <button
-                type="button"
-                onClick={() => setProvinceFilter("All")}
-                className="text-xs font-medium text-[#032EA1] hover:text-[#0447D4]"
-              >
-                Clear focus — show all provinces
-              </button>
-            </div>
-          </div> */}
         </section>
         {/* <p className="text-xs text-gray-400">
           Circle size reflects relative AC density (illustrative). Click a province on the map or list to filter charts below.
         </p> */}
       </section>
 
-      {/* 1b. Regional Crop Distribution Map */}
+      {/* Combined: Regional Crop Distribution + Annual Yield Prediction */}
       <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
-        {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+        {/* Shared header with tab switcher */}
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-5 border-b border-gray-200/80 pb-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Wheat className="h-5 w-5 text-[#0F2F8F]" />
-              Regional Crop Distribution
+              {cropSectionTab === "distribution" ? "Regional Crop Distribution" : "Annual Yield Prediction — 2026 Forecast"}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              Dominant crop per province — select one or more crops to filter
+              {cropSectionTab === "distribution"
+                ? "Dominant crop per province — select one or more crops to filter"
+                : `H1 (Jan–Jun) & H2 (Jul–Dec) harvest period breakdown${isNational ? "" : ` · ${provinceDisplayLabel}`}`}
             </p>
           </div>
-
-          {/* Multi-select crop dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setCropDropdownOpen((v) => !v)}
-              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors"
-            >
-              <Wheat className="h-4 w-4 text-gray-400" />
-              {cropFilters.length === 0
-                ? "All crops"
-                : cropFilters.length === 1
-                ? cropFilters[0]
-                : `${cropFilters.length} crops selected`}
-              <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${cropDropdownOpen ? "rotate-180" : ""}`} />
-            </button>
-
-            {cropDropdownOpen && (
-              <>
-                {/* backdrop */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Crop filter dropdown — only visible on distribution tab */}
+            {cropSectionTab === "distribution" && (
+              <div className="relative">
                 <button
                   type="button"
-                  aria-hidden
-                  className="fixed inset-0 z-10 cursor-default bg-transparent"
-                  onClick={() => setCropDropdownOpen(false)}
-                />
-                <div className="absolute right-0 top-full mt-1.5 z-20 w-56 rounded-xl border border-gray-200 bg-white shadow-xl py-2">
-                  {/* Clear all */}
-                  <button
-                    type="button"
-                    onClick={() => { setCropFilters([]); }}
-                    className="w-full px-3 py-1.5 text-left text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    Clear all
-                  </button>
-                  <div className="h-px bg-gray-100 mx-2 my-1" />
-                  {Object.entries(CROP_COLORS).map(([crop, color]) => {
-                    const Icon = CROP_ICONS[crop] ?? CircleDot;
-                    const checked = cropFilters.includes(crop);
-                    return (
+                  onClick={() => setCropDropdownOpen((v) => !v)}
+                  className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:border-gray-300 transition-colors"
+                >
+                  <Wheat className="h-4 w-4 text-gray-400" />
+                  {cropFilters.length === 0
+                    ? "All crops"
+                    : cropFilters.length === 1
+                    ? cropFilters[0]
+                    : `${cropFilters.length} crops selected`}
+                  <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${cropDropdownOpen ? "rotate-180" : ""}`} />
+                </button>
+                {cropDropdownOpen && (
+                  <>
+                    <button
+                      type="button"
+                      aria-hidden
+                      className="fixed inset-0 z-10 cursor-default bg-transparent"
+                      onClick={() => setCropDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-1.5 z-20 w-56 rounded-xl border border-gray-200 bg-white shadow-xl py-2">
                       <button
-                        key={crop}
                         type="button"
-                        onClick={() =>
-                          setCropFilters((prev) =>
-                            checked ? prev.filter((c) => c !== crop) : [...prev, crop]
-                          )
-                        }
-                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors text-sm text-left"
+                        onClick={() => { setCropFilters([]); }}
+                        className="w-full px-3 py-1.5 text-left text-xs font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        {/* checkbox */}
-                        <span
-                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                            checked ? "border-transparent" : "border-gray-300 bg-white"
-                          }`}
-                          style={checked ? { backgroundColor: color } : {}}
-                        >
-                          {checked && <Check className="h-3 w-3 text-white" />}
-                        </span>
-                        <Icon className="h-4 w-4 shrink-0" style={{ color }} />
-                        <span className="text-gray-700">{crop}</span>
+                        Clear all
                       </button>
-                    );
-                  })}
-                </div>
-              </>
+                      <div className="h-px bg-gray-100 mx-2 my-1" />
+                      {Object.entries(CROP_COLORS).map(([crop, color]) => {
+                        const Icon = CROP_ICONS[crop] ?? CircleDot;
+                        const checked = cropFilters.includes(crop);
+                        return (
+                          <button
+                            key={crop}
+                            type="button"
+                            onClick={() =>
+                              setCropFilters((prev) =>
+                                checked ? prev.filter((c) => c !== crop) : [...prev, crop]
+                              )
+                            }
+                            className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors text-sm text-left"
+                          >
+                            <span
+                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                                checked ? "border-transparent" : "border-gray-300 bg-white"
+                              }`}
+                              style={checked ? { backgroundColor: color } : {}}
+                            >
+                              {checked && <Check className="h-3 w-3 text-white" />}
+                            </span>
+                            <Icon className="h-4 w-4 shrink-0" style={{ color }} />
+                            <span className="text-gray-700">{crop}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
             )}
+            {/* Tab switcher */}
+            <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setCropSectionTab("distribution")}
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  cropSectionTab === "distribution" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Crop Distribution
+              </button>
+              <button
+                type="button"
+                onClick={() => setCropSectionTab("yield")}
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  cropSectionTab === "yield" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Yield Prediction
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Map + sidebar grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Leaflet map — 2/3 width */}
-          <div className="lg:col-span-2">
-            <div className="h-[min(400px,52vh)] min-h-[260px] rounded-xl overflow-hidden border border-gray-100 ring-1 ring-black/[0.04]">
-              <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom={false}>
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                {provinceGeo.map((p) => {
-                  const info = provinceCrops[p.province];
-                  const dominant = info?.dominant ?? "Other";
-                  const color = CROP_COLORS[dominant] ?? "#94a3b8";
-                  const dimmed = cropFilters.length > 0 && !cropFilters.includes(dominant);
-                  const r = 7 + Math.min(14, p.acs / 9);
-                  return (
-                    <CircleMarker
-                      key={p.province}
-                      center={[p.lat, p.lon]}
-                      radius={dimmed ? r * 0.55 : r}
-                      pathOptions={{
-                        color: "#fff",
-                        fillColor: dimmed ? "#d1d5db" : color,
-                        fillOpacity: dimmed ? 0.35 : 0.88,
-                        weight: dimmed ? 1 : 2,
-                      }}
-                    >
-                      <LeafletTooltip direction="top" offset={[0, -4]} opacity={0.97}>
-                        <div className="text-xs font-medium space-y-0.5">
-                          <div className="font-bold text-gray-900">{p.province}</div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                            <span>Dominant: <strong>{dominant}</strong> ({info?.pct ?? "—"}%)</span>
+        {/* Tab 1: Regional Crop Distribution */}
+        {cropSectionTab === "distribution" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div className="lg:col-span-2">
+              <div className="h-[min(400px,52vh)] min-h-[260px] rounded-xl overflow-hidden border border-gray-100 ring-1 ring-black/[0.04]">
+                <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom={false}>
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {provinceGeo.map((p) => {
+                    const info = provinceCrops[p.province];
+                    const dominant = info?.dominant ?? "Other";
+                    const color = CROP_COLORS[dominant] ?? "#94a3b8";
+                    const dimmed = cropFilters.length > 0 && !cropFilters.includes(dominant);
+                    const r = 7 + Math.min(14, p.acs / 9);
+                    return (
+                      <CircleMarker
+                        key={p.province}
+                        center={[p.lat, p.lon]}
+                        radius={dimmed ? r * 0.55 : r}
+                        pathOptions={{
+                          color: "#fff",
+                          fillColor: dimmed ? "#d1d5db" : color,
+                          fillOpacity: dimmed ? 0.35 : 0.88,
+                          weight: dimmed ? 1 : 2,
+                        }}
+                      >
+                        <LeafletTooltip direction="top" offset={[0, -4]} opacity={0.97}>
+                          <div className="text-xs font-medium space-y-0.5">
+                            <div className="font-bold text-gray-900">{p.province}</div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                              <span>Dominant: <strong>{dominant}</strong> ({info?.pct ?? "—"}%)</span>
+                            </div>
+                            <div className="text-gray-500">Secondary: {info?.secondary ?? "—"}</div>
+                            <div className="text-gray-500">ACs: {p.acs} · Members: {p.members.toLocaleString()}</div>
                           </div>
-                          <div className="text-gray-500">Secondary: {info?.secondary ?? "—"}</div>
-                          <div className="text-gray-500">ACs: {p.acs} · Members: {p.members.toLocaleString()}</div>
-                        </div>
-                      </LeafletTooltip>
-                    </CircleMarker>
+                        </LeafletTooltip>
+                      </CircleMarker>
+                    );
+                  })}
+                </MapContainer>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-4">
+                {Object.entries(CROP_COLORS).map(([crop, color]) => {
+                  const count = Object.values(provinceCrops).filter((v) => v.dominant === crop).length;
+                  return (
+                    <div key={crop} className="flex items-center gap-1.5 text-xs text-gray-600">
+                      <span className="inline-block w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: color }} />
+                      <span className="font-medium">{crop}</span>
+                      <span className="text-gray-400">({count} prov.)</span>
+                    </div>
                   );
                 })}
-              </MapContainer>
+              </div>
             </div>
-            {/* Legend row */}
-            <div className="mt-3 flex flex-wrap gap-4">
-              {Object.entries(CROP_COLORS).map(([crop, color]) => {
-                const count = Object.values(provinceCrops).filter((v) => v.dominant === crop).length;
+
+            <div className="lg:col-span-1 flex flex-col gap-3">
+              {(() => {
+                const CROP_INITIAL = 4;
+                const allCropEntries = Object.entries(CROP_COLORS);
+                const visibleEntries = showAllCrops ? allCropEntries : allCropEntries.slice(0, CROP_INITIAL);
                 return (
-                  <div key={crop} className="flex items-center gap-1.5 text-xs text-gray-600">
-                    <span className="inline-block w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: color }} />
-                    <span className="font-medium">{crop}</span>
-                    <span className="text-gray-400">({count} prov.)</span>
-                  </div>
+                  <>
+                    <div className="grid grid-cols-1 gap-2">
+                      {visibleEntries.map(([crop, color]) => {
+                        const Icon = CROP_ICONS[crop] ?? CircleDot;
+                        const provinces = Object.entries(provinceCrops)
+                          .filter(([, v]) => v.dominant === crop)
+                          .map(([name]) => name);
+                        const totalAcs = provinces.reduce((s, name) => {
+                          const geo = provinceGeo.find((p) => p.province === name);
+                          return s + (geo?.acs ?? 0);
+                        }, 0);
+                        const isActive = cropFilters.includes(crop);
+                        return (
+                          <button
+                            key={crop}
+                            type="button"
+                            onClick={() =>
+                              setCropFilters((prev) =>
+                                isActive ? prev.filter((c) => c !== crop) : [...prev, crop]
+                              )
+                            }
+                            className={`w-full rounded-xl border p-3 text-left transition-all ${
+                              isActive ? "ring-2" : "hover:border-gray-300"
+                            }`}
+                            style={
+                              isActive
+                                ? { backgroundColor: `${color}12`, borderColor: color }
+                                : { borderColor: "#e5e7eb", backgroundColor: "#fafafa" }
+                            }
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                                  style={{ backgroundColor: `${color}22` }}
+                                >
+                                  <Icon className="h-4 w-4" style={{ color }} />
+                                </div>
+                                <span className="text-sm font-semibold text-gray-800">{crop}</span>
+                              </div>
+                              <span className="text-xs font-bold tabular-nums" style={{ color }}>
+                                {provinces.length} prov.
+                              </span>
+                            </div>
+                            <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
+                              <span>{totalAcs} ACs</span>
+                              <span className="text-gray-300">·</span>
+                              <span className="truncate text-[11px]">
+                                {provinces.slice(0, 2).join(", ")}
+                                {provinces.length > 2 ? ` +${provinces.length - 2}` : ""}
+                              </span>
+                            </div>
+                            <div className="mt-2 h-1 w-full rounded-full bg-gray-200">
+                              <div
+                                className="h-full rounded-full"
+                                style={{
+                                  width: `${Math.round((provinces.length / 25) * 100)}%`,
+                                  backgroundColor: color,
+                                }}
+                              />
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {allCropEntries.length > CROP_INITIAL && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllCrops((v) => !v)}
+                        className="text-sm font-medium text-[#032EA1] hover:text-[#0447D4] transition-colors text-left"
+                      >
+                        {showAllCrops ? "Show less" : `Show more (${allCropEntries.length - CROP_INITIAL} more)`}
+                      </button>
+                    )}
+                  </>
                 );
-              })}
+              })()}
             </div>
           </div>
+        )}
 
-          {/* Right sidebar — province list by dominant crop */}
-          <div className="lg:col-span-1 flex flex-col gap-3">
-            {/* Crop summary cards with show more/less */}
-            {(() => {
-              const CROP_INITIAL = 4;
-              const allCropEntries = Object.entries(CROP_COLORS);
-              const visibleEntries = showAllCrops ? allCropEntries : allCropEntries.slice(0, CROP_INITIAL);
-              return (
+        {/* Tab 2: Annual Yield Prediction */}
+        {cropSectionTab === "yield" && (() => {
+          const crops = Object.keys(YIELD_3Y);
+          const pKey = (yieldPeriod === "monthly" ? "annual" : yieldPeriod) as "annual" | "h1" | "h2";
+          const avgConfidence = Math.round(crops.reduce((s, c) => s + YIELD_3Y[c].confidence, 0) / crops.length);
+          const avgGrowth = (crops.reduce((s, c) => {
+            const d = YIELD_3Y[c];
+            return s + ((d.y2026[pKey] - d.y2025[pKey]) / d.y2025[pKey]) * 100;
+          }, 0) / crops.length).toFixed(1);
+          const chartData = crops.map((c) => ({
+            name: c === "Vegetables" ? "Veg." : c,
+            "2024 Actual":   YIELD_3Y[c].y2024[pKey],
+            "2025 Actual":   YIELD_3Y[c].y2025[pKey],
+            "2026 Forecast": YIELD_3Y[c].y2026[pKey],
+          }));
+          const monthlyData = MONTHS_SHORT.map((m, i) => {
+            const idx = YIELD_MONTHLY_IDX[yieldMonthlyCrop]?.[i] ?? 0;
+            const d = YIELD_3Y[yieldMonthlyCrop];
+            return {
+              month: m,
+              "2024": +(d.y2024.annual * idx).toFixed(2),
+              "2025": +(d.y2025.annual * idx).toFixed(2),
+              "2026F": +(d.y2026.annual * idx).toFixed(2),
+            };
+          });
+          const PERIOD_TABS = [
+            { key: "annual",  label: "Annual" },
+            { key: "h1",      label: "H1 Jan–Jun" },
+            { key: "h2",      label: "H2 Jul–Dec" },
+            { key: "monthly", label: "Monthly Y2Y" },
+          ] as const;
+          return (
+            <>
+              <div className="flex flex-wrap gap-2 mb-5">
+                <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
+                  <Layers className="h-3.5 w-3.5" />
+                  {crops.length} crops tracked
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  Avg ↑{avgGrowth}% 2025→2026
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                  <CircleDot className="h-3.5 w-3.5" />
+                  {avgConfidence}% avg confidence
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-1 p-1 bg-gray-100 rounded-xl w-fit mb-6">
+                {PERIOD_TABS.map((t) => (
+                  <button key={t.key} type="button"
+                    onClick={() => setYieldPeriod(t.key)}
+                    className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                      yieldPeriod === t.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                    }`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              {yieldPeriod !== "monthly" ? (
                 <>
-                  <div className="grid grid-cols-1 gap-2">
-                    {visibleEntries.map(([crop, color]) => {
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                    {crops.map((crop) => {
+                      const d = YIELD_3Y[crop];
                       const Icon = CROP_ICONS[crop] ?? CircleDot;
-                      const provinces = Object.entries(provinceCrops)
-                        .filter(([, v]) => v.dominant === crop)
-                        .map(([name]) => name);
-                      const totalAcs = provinces.reduce((s, name) => {
-                        const geo = provinceGeo.find((p) => p.province === name);
-                        return s + (geo?.acs ?? 0);
-                      }, 0);
-                      const isActive = cropFilters.includes(crop);
+                      const v2024 = d.y2024[pKey];
+                      const v2025 = d.y2025[pKey];
+                      const v2026 = d.y2026[pKey];
+                      const growthPct = (((v2026 - v2025) / v2025) * 100).toFixed(1);
+                      const h1Pct = Math.round((d.y2026.h1 / d.y2026.annual) * 100);
                       return (
-                        <button
-                          key={crop}
-                          type="button"
-                          onClick={() =>
-                            setCropFilters((prev) =>
-                              isActive ? prev.filter((c) => c !== crop) : [...prev, crop]
-                            )
-                          }
-                          className={`w-full rounded-xl border p-3 text-left transition-all ${
-                            isActive ? "ring-2" : "hover:border-gray-300"
-                          }`}
-                          style={
-                            isActive
-                              ? { backgroundColor: `${color}12`, borderColor: color }
-                              : { borderColor: "#e5e7eb", backgroundColor: "#fafafa" }
-                          }
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-                                style={{ backgroundColor: `${color}22` }}
-                              >
-                                <Icon className="h-4 w-4" style={{ color }} />
-                              </div>
-                              <span className="text-sm font-semibold text-gray-800">{crop}</span>
+                        <div key={crop} className="rounded-xl border p-4 flex flex-col gap-2"
+                          style={{ backgroundColor: d.bg, borderColor: d.border }}>
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-4 w-4 shrink-0" style={{ color: d.color }} />
+                            <span className="text-xs font-semibold text-gray-600 truncate">{crop}</span>
+                          </div>
+                          <div>
+                            <div className="flex items-baseline gap-1">
+                              <p className="text-2xl font-bold tabular-nums text-gray-900 leading-none">{v2026}</p>
+                              <span className="text-[10px] text-gray-400">MT/ha</span>
                             </div>
-                            <span className="text-xs font-bold tabular-nums" style={{ color }}>
-                              {provinces.length} prov.
-                            </span>
+                            <p className="text-[10px] font-semibold text-violet-600 mt-0.5">2026 Forecast</p>
                           </div>
-                          <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
-                            <span>{totalAcs} ACs</span>
-                            <span className="text-gray-300">·</span>
-                            <span className="truncate text-[11px]">
-                              {provinces.slice(0, 2).join(", ")}
-                              {provinces.length > 2 ? ` +${provinces.length - 2}` : ""}
-                            </span>
+                          <div className="grid grid-cols-2 gap-1 text-[10px]">
+                            <div className="bg-white/60 rounded p-1.5">
+                              <p className="text-gray-400">2024</p>
+                              <p className="font-semibold text-gray-700">{v2024}</p>
+                            </div>
+                            <div className="bg-white/60 rounded p-1.5">
+                              <p className="text-gray-400">2025</p>
+                              <p className="font-semibold text-gray-700">{v2025}</p>
+                            </div>
                           </div>
-                          <div className="mt-2 h-1 w-full rounded-full bg-gray-200">
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${Math.round((provinces.length / 25) * 100)}%`,
-                                backgroundColor: color,
-                              }}
-                            />
+                          <p className="text-xs font-semibold" style={{ color: d.color }}>↑ {growthPct}% vs 2025</p>
+                          {pKey === "annual" && (
+                            <div className="mt-0.5">
+                              <div className="flex justify-between text-[9px] text-gray-400 mb-1">
+                                <span>H1 {h1Pct}%</span><span>H2 {100 - h1Pct}%</span>
+                              </div>
+                              <div className="h-1.5 w-full rounded-full overflow-hidden flex">
+                                <div className="h-full rounded-l-full"
+                                  style={{ width: `${h1Pct}%`, backgroundColor: d.color, opacity: 0.6 }} />
+                                <div className="h-full rounded-r-full flex-1"
+                                  style={{ backgroundColor: d.color }} />
+                              </div>
+                            </div>
+                          )}
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] text-gray-400">Confidence</span>
+                              <span className="text-[10px] font-bold text-gray-500">{d.confidence}%</span>
+                            </div>
+                            <div className="h-1 w-full rounded-full bg-gray-200/80">
+                              <div className="h-full rounded-full"
+                                style={{ width: `${d.confidence}%`, backgroundColor: d.color }} />
+                            </div>
                           </div>
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
 
-                  {/* Show more / less */}
-                  {allCropEntries.length > CROP_INITIAL && (
-                    <button
-                      type="button"
-                      onClick={() => setShowAllCrops((v) => !v)}
-                      className="text-sm font-medium text-[#032EA1] hover:text-[#0447D4] transition-colors text-left"
-                    >
-                      {showAllCrops
-                        ? "Show less"
-                        : `Show more (${allCropEntries.length - CROP_INITIAL} more)`}
-                    </button>
-                  )}
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                      3-year comparison —{" "}
+                      {pKey === "annual" ? "Annual" : pKey === "h1" ? "H1 (Jan–Jun)" : "H2 (Jul–Dec)"} yield (MT/ha)
+                    </p>
+                    <div style={{ height: 220 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData} margin={{ top: 4, right: 16, left: -12, bottom: 4 }} barCategoryGap="30%" barGap={2}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
+                            formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
+                          />
+                          <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
+                          <Bar dataKey="2024 Actual"   fill="#cbd5e1" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                          <Bar dataKey="2025 Actual"   fill="#6b9bda" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                          <Bar dataKey="2026 Forecast" fill="#032EA1" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 </>
-              );
-            })()}
-          </div>
-        </div>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {crops.map((c) => {
+                      const Icon = CROP_ICONS[c] ?? CircleDot;
+                      const active = yieldMonthlyCrop === c;
+                      return (
+                        <button key={c} type="button"
+                          onClick={() => setYieldMonthlyCrop(c)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                            active ? "text-white border-transparent shadow-sm" : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                          }`}
+                          style={active ? { backgroundColor: YIELD_3Y[c].color, borderColor: YIELD_3Y[c].color } : {}}>
+                          <Icon className="h-3.5 w-3.5" />
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+                      Monthly yield Y2Y — {yieldMonthlyCrop} (MT/ha · seasonal estimate)
+                    </p>
+                    <div style={{ height: 240 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={monthlyData} margin={{ top: 4, right: 20, left: -12, bottom: 4 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                          <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
+                            formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
+                          />
+                          <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
+                          <ReferenceLine x="Jun" stroke="#e2e8f0" strokeDasharray="4 3"
+                            label={{ value: "H1|H2", fontSize: 9, fill: "#94a3b8", position: "insideTopRight" }} />
+                          <Line dataKey="2024"  stroke="#cbd5e1" strokeWidth={2} dot={false} />
+                          <Line dataKey="2025"  stroke="#6b9bda" strokeWidth={2} dot={false} />
+                          <Line dataKey="2026F" stroke="#032EA1" strokeWidth={2.5} dot={false} strokeDasharray="6 3" />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4 mt-3 text-[10px] text-gray-400">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="inline-block w-5 h-0.5 bg-[#cbd5e1] rounded" />2024 Actual
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="inline-block w-5 h-0.5 bg-[#6b9bda] rounded" />2025 Actual
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="inline-block w-5 h-px border-t-2 border-dashed border-[#032EA1]" />2026 Forecast
+                      </span>
+                      <span className="ml-auto">H1 = Jan–Jun harvest · H2 = Jul–Dec harvest</span>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <p className="mt-4 text-[10px] text-gray-400">
+                Forecast based on cooperative field reports, seasonal rainfall index, and MAFF provincial extension data.
+                2-year trend (2024–2025) applied for 2026 projection. Confidence band ±5%.
+              </p>
+            </>
+          );
+        })()}
       </section>
 
       {/* 2. Geographic Distribution */}
@@ -1415,251 +1295,6 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
         })()}
       </section>
 
-      {/* 3. Annual Yield Prediction */}
-      {(() => {
-        const crops = Object.keys(YIELD_3Y);
-        const pKey = (yieldPeriod === "monthly" ? "annual" : yieldPeriod) as "annual" | "h1" | "h2";
-        const avgConfidence = Math.round(crops.reduce((s, c) => s + YIELD_3Y[c].confidence, 0) / crops.length);
-        const avgGrowth = (crops.reduce((s, c) => {
-          const d = YIELD_3Y[c];
-          return s + ((d.y2026[pKey] - d.y2025[pKey]) / d.y2025[pKey]) * 100;
-        }, 0) / crops.length).toFixed(1);
-
-        const chartData = crops.map((c) => ({
-          name: c === "Vegetables" ? "Veg." : c,
-          "2024 Actual":   YIELD_3Y[c].y2024[pKey],
-          "2025 Actual":   YIELD_3Y[c].y2025[pKey],
-          "2026 Forecast": YIELD_3Y[c].y2026[pKey],
-        }));
-
-        const monthlyData = MONTHS_SHORT.map((m, i) => {
-          const idx = YIELD_MONTHLY_IDX[yieldMonthlyCrop]?.[i] ?? 0;
-          const d = YIELD_3Y[yieldMonthlyCrop];
-          return {
-            month: m,
-            "2024": +(d.y2024.annual * idx).toFixed(2),
-            "2025": +(d.y2025.annual * idx).toFixed(2),
-            "2026F": +(d.y2026.annual * idx).toFixed(2),
-          };
-        });
-
-        const PERIOD_TABS = [
-          { key: "annual",  label: "Annual" },
-          { key: "h1",      label: "H1 Jan–Jun" },
-          { key: "h2",      label: "H2 Jul–Dec" },
-          { key: "monthly", label: "Monthly Y2Y" },
-        ] as const;
-
-        return (
-          <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
-            {/* Header */}
-            <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Wheat className="h-5 w-5 text-[#0F2F8F]" />
-                  Annual Yield Prediction — 2026 Forecast
-                </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  H1 (Jan–Jun) &amp; H2 (Jul–Dec) harvest period breakdown for government budget allocation
-                  {isNational ? "" : ` · ${provinceDisplayLabel}`}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700">
-                  <Layers className="h-3.5 w-3.5" />
-                  {crops.length} crops tracked
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  Avg ↑{avgGrowth}% 2025→2026
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-                  <CircleDot className="h-3.5 w-3.5" />
-                  {avgConfidence}% avg confidence
-                </span>
-              </div>
-            </div>
-
-            {/* Period Tabs */}
-            <div className="flex flex-wrap gap-1 p-1 bg-gray-100 rounded-xl w-fit mb-6">
-              {PERIOD_TABS.map((t) => (
-                <button key={t.key} type="button"
-                  onClick={() => setYieldPeriod(t.key)}
-                  className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                    yieldPeriod === t.key
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            {yieldPeriod !== "monthly" ? (
-              <>
-                {/* Crop Cards — 3-year view */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-                  {crops.map((crop) => {
-                    const d = YIELD_3Y[crop];
-                    const Icon = CROP_ICONS[crop] ?? CircleDot;
-                    const v2024 = d.y2024[pKey];
-                    const v2025 = d.y2025[pKey];
-                    const v2026 = d.y2026[pKey];
-                    const growthPct = (((v2026 - v2025) / v2025) * 100).toFixed(1);
-                    const h1Pct = Math.round((d.y2026.h1 / d.y2026.annual) * 100);
-                    return (
-                      <div key={crop} className="rounded-xl border p-4 flex flex-col gap-2"
-                        style={{ backgroundColor: d.bg, borderColor: d.border }}>
-                        <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4 shrink-0" style={{ color: d.color }} />
-                          <span className="text-xs font-semibold text-gray-600 truncate">{crop}</span>
-                        </div>
-                        {/* 2026 hero */}
-                        <div>
-                          <div className="flex items-baseline gap-1">
-                            <p className="text-2xl font-bold tabular-nums text-gray-900 leading-none">{v2026}</p>
-                            <span className="text-[10px] text-gray-400">MT/ha</span>
-                          </div>
-                          <p className="text-[10px] font-semibold text-violet-600 mt-0.5">2026 Forecast</p>
-                        </div>
-                        {/* Historical row */}
-                        <div className="grid grid-cols-2 gap-1 text-[10px]">
-                          <div className="bg-white/60 rounded p-1.5">
-                            <p className="text-gray-400">2024</p>
-                            <p className="font-semibold text-gray-700">{v2024}</p>
-                          </div>
-                          <div className="bg-white/60 rounded p-1.5">
-                            <p className="text-gray-400">2025</p>
-                            <p className="font-semibold text-gray-700">{v2025}</p>
-                          </div>
-                        </div>
-                        <p className="text-xs font-semibold" style={{ color: d.color }}>↑ {growthPct}% vs 2025</p>
-                        {/* H1/H2 split — only in Annual view */}
-                        {pKey === "annual" && (
-                          <div className="mt-0.5">
-                            <div className="flex justify-between text-[9px] text-gray-400 mb-1">
-                              <span>H1 {h1Pct}%</span><span>H2 {100 - h1Pct}%</span>
-                            </div>
-                            <div className="h-1.5 w-full rounded-full overflow-hidden flex">
-                              <div className="h-full rounded-l-full"
-                                style={{ width: `${h1Pct}%`, backgroundColor: d.color, opacity: 0.6 }} />
-                              <div className="h-full rounded-r-full flex-1"
-                                style={{ backgroundColor: d.color }} />
-                            </div>
-                          </div>
-                        )}
-                        {/* Confidence */}
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-[10px] text-gray-400">Confidence</span>
-                            <span className="text-[10px] font-bold text-gray-500">{d.confidence}%</span>
-                          </div>
-                          <div className="h-1 w-full rounded-full bg-gray-200/80">
-                            <div className="h-full rounded-full"
-                              style={{ width: `${d.confidence}%`, backgroundColor: d.color }} />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* 3-year Grouped Bar Chart */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
-                    3-year comparison —{" "}
-                    {pKey === "annual" ? "Annual" : pKey === "h1" ? "H1 (Jan–Jun)" : "H2 (Jul–Dec)"} yield (MT/ha)
-                  </p>
-                  <div style={{ height: 220 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} margin={{ top: 4, right: 16, left: -12, bottom: 4 }} barCategoryGap="30%" barGap={2}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                        <Tooltip
-                          contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
-                          formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
-                        />
-                        <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
-                        <Bar dataKey="2024 Actual"   fill="#cbd5e1" radius={[3, 3, 0, 0]} maxBarSize={18} />
-                        <Bar dataKey="2025 Actual"   fill="#6b9bda" radius={[3, 3, 0, 0]} maxBarSize={18} />
-                        <Bar dataKey="2026 Forecast" fill="#032EA1" radius={[3, 3, 0, 0]} maxBarSize={18} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </>
-            ) : (
-              /* Monthly Y2Y View */
-              <>
-                {/* Crop selector */}
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {crops.map((c) => {
-                    const Icon = CROP_ICONS[c] ?? CircleDot;
-                    const active = yieldMonthlyCrop === c;
-                    return (
-                      <button key={c} type="button"
-                        onClick={() => setYieldMonthlyCrop(c)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                          active
-                            ? "text-white border-transparent shadow-sm"
-                            : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
-                        }`}
-                        style={active ? { backgroundColor: YIELD_3Y[c].color, borderColor: YIELD_3Y[c].color } : {}}>
-                        <Icon className="h-3.5 w-3.5" />
-                        {c}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Line chart */}
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
-                    Monthly yield Y2Y — {yieldMonthlyCrop} (MT/ha · seasonal estimate)
-                  </p>
-                  <div style={{ height: 240 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={monthlyData} margin={{ top: 4, right: 20, left: -12, bottom: 4 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                        <Tooltip
-                          contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
-                          formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
-                        />
-                        <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
-                        <ReferenceLine x="Jun" stroke="#e2e8f0" strokeDasharray="4 3"
-                          label={{ value: "H1|H2", fontSize: 9, fill: "#94a3b8", position: "insideTopRight" }} />
-                        <Line dataKey="2024"  stroke="#cbd5e1" strokeWidth={2} dot={false} />
-                        <Line dataKey="2025"  stroke="#6b9bda" strokeWidth={2} dot={false} />
-                        <Line dataKey="2026F" stroke="#032EA1" strokeWidth={2.5} dot={false} strokeDasharray="6 3" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-4 mt-3 text-[10px] text-gray-400">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="inline-block w-5 h-0.5 bg-[#cbd5e1] rounded" />2024 Actual
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="inline-block w-5 h-0.5 bg-[#6b9bda] rounded" />2025 Actual
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="inline-block w-5 h-px border-t-2 border-dashed border-[#032EA1]" />2026 Forecast
-                    </span>
-                    <span className="ml-auto">H1 = Jan–Jun harvest · H2 = Jul–Dec harvest</span>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <p className="mt-4 text-[10px] text-gray-400">
-              Forecast based on cooperative field reports, seasonal rainfall index, and MAFF provincial extension data.
-              2-year trend (2024–2025) applied for 2026 projection. Confidence band ±5%.
-            </p>
-          </section>
-        );
-      })()}
 
       {/* 4. Farmer Membership Trend */}
       {(() => {
@@ -1745,112 +1380,6 @@ const title = isNational ? "National Dashboard" : `National Dashboard — ${prov
         );
       })()}
 
-      {/* 4. Business Plan Analytics */}
-      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
-        {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-[#0F2F8F]" />
-              Business Plan Analytics
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">Provincial comparison of business plan performance</p>
-          </div>
-          <div className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
-            <TrendingUp className="h-4 w-4" />
-            {bp.approvalRate}% Approval Rate
-          </div>
-        </div>
-
-        {/* Paginated grouped bar chart */}
-        {(() => {
-          const BP_PAGE_SIZE = 8;
-          const chartRows = bpChartData.map((d) => {
-            const leftover = d.submitted - d.approved;
-            return {
-              province: d.province.split(" ").pop(),
-              Approved: d.approved,
-              "In Progress": Math.round(leftover * 0.45),
-              Rejected: Math.round(leftover * 0.55),
-            };
-          });
-          const totalPages = Math.ceil(chartRows.length / BP_PAGE_SIZE);
-          const pageRows = chartRows.slice(bpPage * BP_PAGE_SIZE, (bpPage + 1) * BP_PAGE_SIZE);
-          return (
-            <>
-              <div style={{ height: 280 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={pageRows}
-                    margin={{ top: 4, right: 8, left: -16, bottom: 4 }}
-                    barCategoryGap="30%"
-                    barGap={2}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                    <XAxis dataKey="province" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8 }} />
-                    <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12 }} />
-                    <Bar dataKey="Approved" fill="#38bdf8" radius={[3, 3, 0, 0]} maxBarSize={20} />
-                    <Bar dataKey="In Progress" fill="#1e293b" radius={[3, 3, 0, 0]} maxBarSize={20} />
-                    <Bar dataKey="Rejected" fill="#64748b" radius={[3, 3, 0, 0]} maxBarSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              {totalPages > 1 && (
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-xs text-gray-400">
-                    Showing {bpPage * BP_PAGE_SIZE + 1}–{Math.min((bpPage + 1) * BP_PAGE_SIZE, chartRows.length)} of {chartRows.length} provinces
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setBpPage((p) => Math.max(0, p - 1))}
-                      disabled={bpPage === 0}
-                      className="px-3 py-1 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      ← Prev
-                    </button>
-                    <span className="text-xs font-semibold text-gray-600">
-                      {bpPage + 1} / {totalPages}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setBpPage((p) => Math.min(totalPages - 1, p + 1))}
-                      disabled={bpPage === totalPages - 1}
-                      className="px-3 py-1 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          );
-        })()}
-
-        {/* Stat cards */}
-        <div className="mt-5 grid grid-cols-3 gap-4">
-          {[
-            { label: "Submitted", value: bp.submitted, pct: 100, barColor: "#1e293b", border: "border-gray-200", bg: "bg-white", textColor: "text-gray-900" },
-            { label: "Approved", value: bp.approved, pct: Math.round((bp.approved / Math.max(1, bp.submitted)) * 100), barColor: "#3b82f6", border: "border-blue-200 ring-1 ring-blue-200", bg: "bg-blue-50", textColor: "text-blue-600" },
-            { label: "Rejected", value: bp.rejected, pct: Math.round((bp.rejected / Math.max(1, bp.submitted)) * 100), barColor: "#94a3b8", border: "border-gray-200", bg: "bg-white", textColor: "text-gray-900" },
-          ].map((s) => (
-            <div key={s.label} className={`rounded-xl p-5 border ${s.border} ${s.bg}`}>
-              <p className={`text-3xl font-bold tabular-nums tracking-tight ${s.textColor}`}>
-                {s.value.toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">{s.label}</p>
-              <div className="mt-4 h-1.5 w-full rounded-full bg-gray-100">
-                <div
-                  className="h-full rounded-full transition-[width] duration-700"
-                  style={{ width: `${s.pct}%`, backgroundColor: s.barColor }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* Asset Management Overview */}
       <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
