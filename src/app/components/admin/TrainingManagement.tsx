@@ -43,7 +43,8 @@ type Training = {
   trainerOrg: string;
   startDate: string;
   endDate: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   location: string;
   province: string;
   capacity: number;
@@ -106,7 +107,8 @@ const SEED_TRAININGS: Training[] = [
     trainerOrg: "GDA",
     startDate: "2026-10-09",
     endDate: "2026-10-09",
-    time: "08:30 – 12:00",
+    startTime: "08:30",
+    endTime: "12:00",
     location: "AC Meeting Hall",
     province: "Kampong Thom",
     capacity: 40,
@@ -123,7 +125,8 @@ const SEED_TRAININGS: Training[] = [
     trainerOrg: "FAO",
     startDate: "2026-09-20",
     endDate: "2026-09-20",
-    time: "09:00 – 13:00",
+    startTime: "09:00",
+    endTime: "13:00",
     location: "Maize Demonstration Plot",
     province: "Battambang",
     capacity: 35,
@@ -140,7 +143,8 @@ const SEED_TRAININGS: Training[] = [
     trainerOrg: "MAFF",
     startDate: "2026-08-14",
     endDate: "2026-08-14",
-    time: "14:00 – 16:30",
+    startTime: "14:00",
+    endTime: "16:30",
     location: "Commune Office (Annex)",
     province: "Kampot",
     capacity: 50,
@@ -157,7 +161,8 @@ const SEED_TRAININGS: Training[] = [
     trainerOrg: "DACP",
     startDate: "2026-07-28",
     endDate: "2026-07-28",
-    time: "07:00 – 11:00",
+    startTime: "07:00",
+    endTime: "11:00",
     location: "Central Warehouse Apron",
     province: "Battambang",
     capacity: 45,
@@ -174,7 +179,8 @@ const SEED_TRAININGS: Training[] = [
     trainerOrg: "GDA",
     startDate: "2026-11-05",
     endDate: "2026-11-05",
-    time: "13:00 – 17:00",
+    startTime: "13:00",
+    endTime: "17:00",
     location: "AC Meeting Hall",
     province: "Siem Reap",
     capacity: 30,
@@ -191,7 +197,8 @@ const SEED_TRAININGS: Training[] = [
     trainerOrg: "DACP",
     startDate: "2026-09-15",
     endDate: "2026-09-15",
-    time: "06:30 – 10:00",
+    startTime: "06:30",
+    endTime: "10:00",
     location: "Vegetable Cluster (East)",
     province: "Takeo",
     capacity: 40,
@@ -208,7 +215,8 @@ const SEED_TRAININGS: Training[] = [
     trainerOrg: "GDA",
     startDate: "2026-11-20",
     endDate: "2026-11-20",
-    time: "10:00 – 15:00",
+    startTime: "10:00",
+    endTime: "15:00",
     location: "AC Office",
     province: "Kampong Cham",
     capacity: 25,
@@ -225,7 +233,8 @@ const SEED_TRAININGS: Training[] = [
     trainerOrg: "MAFF",
     startDate: "2026-06-02",
     endDate: "2026-06-02",
-    time: "09:00 – 12:00",
+    startTime: "09:00",
+    endTime: "12:00",
     location: "Online + Hall Hybrid",
     province: "Prey Veng",
     capacity: 40,
@@ -243,7 +252,8 @@ type TrainingFormState = {
   trainerOrg: string;
   startDate: string;
   endDate: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   location: string;
   province: string;
   capacity: string;
@@ -259,7 +269,8 @@ const EMPTY_FORM: TrainingFormState = {
   trainerOrg: "",
   startDate: "",
   endDate: "",
-  time: "",
+  startTime: "",
+  endTime: "",
   location: "",
   province: PROVINCE_OPTIONS[0],
   capacity: "",
@@ -305,18 +316,25 @@ export function TrainingManagement() {
 
   const filteredTrainings = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-    return trainings.filter((t) => {
-      const matchesSearch =
-        !q ||
-        t.title.toLowerCase().includes(q) ||
-        t.trainerName.toLowerCase().includes(q) ||
-        t.location.toLowerCase().includes(q) ||
-        t.province.toLowerCase().includes(q);
-      const matchesStatus = statusFilter === "all" || t.status === statusFilter;
-      const matchesTags =
-        tagFilter.length === 0 || t.tags.some((c) => tagFilter.includes(c));
-      return matchesSearch && matchesStatus && matchesTags;
-    });
+    const statusPriority: Record<TrainingStatus, number> = {
+      Upcoming: 0,
+      Ongoing: 1,
+      Completed: 2,
+    };
+    return trainings
+      .filter((t) => {
+        const matchesSearch =
+          !q ||
+          t.title.toLowerCase().includes(q) ||
+          t.trainerName.toLowerCase().includes(q) ||
+          t.location.toLowerCase().includes(q) ||
+          t.province.toLowerCase().includes(q);
+        const matchesStatus = statusFilter === "all" || t.status === statusFilter;
+        const matchesTags =
+          tagFilter.length === 0 || t.tags.some((c) => tagFilter.includes(c));
+        return matchesSearch && matchesStatus && matchesTags;
+      })
+      .sort((a, b) => statusPriority[a.status] - statusPriority[b.status]);
   }, [trainings, searchTerm, statusFilter, tagFilter]);
 
   const closeForm = () => {
@@ -341,7 +359,8 @@ export function TrainingManagement() {
       trainerOrg: t.trainerOrg,
       startDate: t.startDate,
       endDate: t.endDate,
-      time: t.time,
+      startTime: t.startTime,
+      endTime: t.endTime,
       location: t.location,
       province: t.province,
       capacity: String(t.capacity),
@@ -588,7 +607,7 @@ export function TrainingManagement() {
                         </span>
                         <span className="flex items-center gap-1.5 text-[11px] text-gray-500 mt-1">
                           <Clock className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                          {t.time}
+                          {t.startTime} – {t.endTime}
                         </span>
                       </td>
                       <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
@@ -788,12 +807,20 @@ export function TrainingManagement() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Time</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Start Time</label>
                     <input
-                      type="text"
-                      value={formState.time}
-                      onChange={(e) => setFormState((f) => ({ ...f, time: e.target.value }))}
-                      placeholder="e.g., 08:30 – 12:00"
+                      type="time"
+                      value={formState.startTime}
+                      onChange={(e) => setFormState((f) => ({ ...f, startTime: e.target.value }))}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">End Time</label>
+                    <input
+                      type="time"
+                      value={formState.endTime}
+                      onChange={(e) => setFormState((f) => ({ ...f, endTime: e.target.value }))}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
                     />
                   </div>

@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { toast } from "sonner";
 import {
   Mail,
   Phone,
@@ -11,6 +13,9 @@ import {
   Upload,
   Trash2,
   X,
+  ChevronDown,
+  Globe,
+  ArrowLeft,
 } from "lucide-react";
 import { CooperativeLocationMap } from "./CooperativeLocationMap";
 
@@ -30,28 +35,75 @@ function formatDossierFileSize(bytes: number): string {
 }
 
 export function ACProfile() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  /** Only the "Register New AC" route starts blank/always-editable; viewing any existing
+   *  cooperative (own profile or admin viewing a specific AC) shows real, disabled-by-default data. */
+  const isNewRegistration = location.pathname.endsWith("/ac-profiles/new");
   const [activeTab, setActiveTab] = useState("cooperative-info");
   const [isEditing, setIsEditing] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
-  const [dossierDocs, setDossierDocs] = useState<DossierDocRow[]>([
-    {
-      id: "d1",
-      name: "Constitution",
-      uploadDate: "Mar 15, 2024",
-      fileSize: "2.3 MB",
-    },
-    {
-      id: "d2",
-      name: "Meeting Minutes - 2026",
-      uploadDate: "Feb 2, 2026",
-      fileSize: "1.1 MB",
-    },
-  ]);
+  const [dossierDocs, setDossierDocs] = useState<DossierDocRow[]>(
+    isNewRegistration
+      ? []
+      : [
+          {
+            id: "d1",
+            name: "Constitution",
+            uploadDate: "Mar 15, 2024",
+            fileSize: "2.3 MB",
+          },
+          {
+            id: "d2",
+            name: "Meeting Minutes - 2026",
+            uploadDate: "Feb 2, 2026",
+            fileSize: "1.1 MB",
+          },
+        ]
+  );
   const [dossierDrawerOpen, setDossierDrawerOpen] = useState(false);
   const [dossierDrawerVisible, setDossierDrawerVisible] = useState(false);
   const [dossierDocName, setDossierDocName] = useState("");
   const [dossierSelectedFile, setDossierSelectedFile] = useState<File | null>(null);
   const dossierFileInputRef = useRef<HTMLInputElement>(null);
+
+  const [address, setAddress] = useState(isNewRegistration ? "" : "Kampong Thom");
+  const [country, setCountry] = useState(isNewRegistration ? "" : "Cambodia");
+  const [province, setProvince] = useState(isNewRegistration ? "" : "Kampong Thom");
+  const [district, setDistrict] = useState(isNewRegistration ? "" : "Baray");
+  const [city, setCity] = useState(isNewRegistration ? "" : "Baray Commune");
+  const [zip, setZip] = useState(isNewRegistration ? "" : "06401");
+  const [latitude, setLatitude] = useState(isNewRegistration ? "" : "12.5867");
+  const [longitude, setLongitude] = useState(isNewRegistration ? "" : "104.8667");
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
+  const geocodeAddress = useCallback(async () => {
+    const parts = [address, city, district, province, country].filter(Boolean);
+    if (parts.length < 2) return;
+    setIsGeocoding(true);
+    try {
+      const query = encodeURIComponent(parts.join(", "));
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`,
+        { headers: { "Accept-Language": "en" } }
+      );
+      const data = await res.json();
+      if (data?.length > 0) {
+        setLatitude(parseFloat(data[0].lat).toFixed(4));
+        setLongitude(parseFloat(data[0].lon).toFixed(4));
+      }
+    } catch {
+      // silently ignore geocoding errors
+    } finally {
+      setIsGeocoding(false);
+    }
+  }, [address, city, district, province, country]);
+
+  useEffect(() => {
+    if (!isNewRegistration) return;
+    const timer = setTimeout(geocodeAddress, 800);
+    return () => clearTimeout(timer);
+  }, [address, city, district, province, country, isNewRegistration, geocodeAddress]);
 
   const DRAWER_ANIM_MS = 200;
 
@@ -93,8 +145,60 @@ export function ACProfile() {
     closeDossierDrawer();
   };
 
+  /** Unified translucent field style for the dark banner — one visual language for every
+   *  editable control there (text, textarea, select) instead of mixed pill/plain treatments. */
+  const bannerFieldClass =
+    "w-full bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/40 outline-none focus:bg-white/15 focus:border-white/40 transition-colors";
+  const bannerLabelClass =
+    "block text-[11px] font-semibold uppercase tracking-wide text-white/50 mb-1.5";
+
   return (
     <div className="space-y-6">
+      {isNewRegistration ? (
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold text-gray-900">Register New AC</h1>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/admin/ac-profiles")}
+              className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                toast.success("Cooperative registered. Sent for Commune Officer verification.");
+                navigate("/dashboard/admin/ac-profiles");
+              }}
+              className="px-5 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors shadow-sm"
+            >
+              Save AC Profile
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsEditing(!isEditing)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors shadow-sm"
+          >
+            <Edit2 className="w-4 h-4" />
+            {isEditing ? "Cancel" : "Edit Information"}
+          </button>
+        </div>
+      )}
+
       {/* Profile Banner */}
       <div className="bg-gradient-to-br from-[#032EA1] to-[#021c5e] rounded-2xl p-8 shadow-xl">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -118,52 +222,139 @@ export function ACProfile() {
 
           {/* Info */}
           <div className="flex-1 text-white min-w-0">
-            <div className="flex flex-col gap-3 mb-3">
-              <h1 className="text-3xl font-bold">Prasat Sambor Rung Roeang Modern Agricultural Cooperative</h1>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500 rounded-full shadow-sm">
-                  <CheckCircle className="w-4 h-4 text-white shrink-0" />
-                  <span className="text-xs font-semibold text-white">Verified</span>
+            {isNewRegistration ? (
+              <div className="space-y-4">
+                {/* Row 1: Cooperative Name + AC Type */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={bannerLabelClass}>
+                      Cooperative Name <span className="text-red-300">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter cooperative name"
+                      className={`${bannerFieldClass} px-3.5 py-2.5`}
+                    />
+                  </div>
+                  <div>
+                    <label className={bannerLabelClass}>
+                      AC Type <span className="text-red-300">*</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        defaultValue=""
+                        className={`${bannerFieldClass} appearance-none px-3.5 py-2.5 pr-9 text-sm font-medium cursor-pointer`}
+                      >
+                        <option value="" disabled className="text-gray-900">Select AC Type</option>
+                        <option value="AC" className="text-gray-900">Agricultural Cooperative (AC)</option>
+                        <option value="MAC" className="text-gray-900">Modern Agriculture Community (MAC)</option>
+                        <option value="PG" className="text-gray-900">Producer Group (PG)</option>
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                    </div>
+                  </div>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500 rounded-full shadow-sm">
-                  <span className="relative flex h-3 w-3 shrink-0">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-200 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white" />
-                  </span>
-                  <span className="text-xs font-semibold text-white">Active</span>
-                </div>
-                <div className="inline-flex items-center px-3 py-1 bg-emerald-500 rounded-full shadow-sm">
-                  <span className="text-xs font-semibold text-white">MAC</span>
-                </div>
-              </div>
-            </div>
-            
-            <p className="text-sm opacity-90 mb-4 max-w-2xl">
-              A community-driven agricultural cooperative focused on organic farming practices,
-              sustainable agriculture, and improving the livelihoods of smallholder farmers in
-              Kampong Thom province.
-            </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-2 min-w-0">
-                <Mail className="w-4 h-4 opacity-80 shrink-0" />
-                <a
-                  href="mailto:baray.coop@example.com"
-                  className="text-sm font-medium underline decoration-white/70 underline-offset-2 hover:decoration-white hover:text-white/95 transition-colors truncate"
-                >
-                  baray.coop@example.com
-                </a>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 opacity-80" />
-                <span className="text-sm">+855 12 345 678</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 opacity-80" />
-                <span className="text-sm">AC-KT-2024-157</span>
-              </div>
-            </div>
+                <div className="h-px bg-white/10" />
 
+                {/* Row 2: Email + Phone */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={bannerLabelClass}>Email</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+                      <input
+                        type="email"
+                        placeholder="contact@example.com"
+                        className={`${bannerFieldClass} pl-9 pr-3 py-2.5 text-sm`}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={bannerLabelClass}>Phone</label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+                      <input
+                        type="tel"
+                        placeholder="+855 XX XXX XXX"
+                        className={`${bannerFieldClass} pl-9 pr-3 py-2.5 text-sm`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 3: Registration Number + Description */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={bannerLabelClass}>Registration Number</label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="e.g., AC-KT-2026-001"
+                        className={`${bannerFieldClass} pl-9 pr-3 py-2.5 text-sm`}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={bannerLabelClass}>Description</label>
+                    <textarea
+                      rows={1}
+                      placeholder="Briefly describe the cooperative's focus and activities"
+                      className={`${bannerFieldClass} px-3.5 py-2.5 text-sm resize-none`}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-3 mb-3">
+                  <h1 className="text-3xl font-bold">Prasat Sambor Rung Roeang Modern Agricultural Cooperative</h1>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-500 rounded-full shadow-sm">
+                      <CheckCircle className="w-4 h-4 text-white shrink-0" />
+                      <span className="text-xs font-semibold text-white">Verified</span>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500 rounded-full shadow-sm">
+                      <span className="relative flex h-3 w-3 shrink-0">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-200 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-white" />
+                      </span>
+                      <span className="text-xs font-semibold text-white">Active</span>
+                    </div>
+                    <div className="inline-flex items-center px-3 py-1 bg-emerald-500 rounded-full shadow-sm">
+                      <span className="text-xs font-semibold text-white">MAC</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm opacity-90 mb-4 max-w-2xl">
+                  A community-driven agricultural cooperative focused on organic farming practices,
+                  sustainable agriculture, and improving the livelihoods of smallholder farmers in
+                  Kampong Thom province.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Mail className="w-4 h-4 opacity-80 shrink-0" />
+                    <a
+                      href="mailto:baray.coop@example.com"
+                      className="text-sm font-medium underline decoration-white/70 underline-offset-2 hover:decoration-white hover:text-white/95 transition-colors truncate"
+                    >
+                      baray.coop@example.com
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 opacity-80" />
+                    <span className="text-sm">+855 12 345 678</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 opacity-80" />
+                    <span className="text-sm">AC-KT-2024-157</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -209,146 +400,315 @@ export function ACProfile() {
                 <h3 className="text-lg font-semibold text-gray-900">
                   Cooperative Information
                 </h3>
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  {isEditing ? "Cancel" : "Edit Information"}
-                </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Address */}
-                <div className="md:col-span-2">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Address
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue="Kampong Thom"
-                        disabled={!isEditing}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                        placeholder="Address"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        City
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue="Baray Commune"
-                        disabled={!isEditing}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                        placeholder="City"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Zip
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue="06401"
-                        disabled={!isEditing}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                        placeholder="Zip"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Region
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue="Cambodia"
-                        disabled={!isEditing}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                        placeholder="Region"
-                      />
-                    </div>
+              {isNewRegistration ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Row 1: Address + Country */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="Address"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Country
+                    </label>
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="Country"
+                    />
+                  </div>
+
+                  {/* Row 2: Province + District */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Province
+                    </label>
+                    <input
+                      type="text"
+                      value={province}
+                      onChange={(e) => setProvince(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="Province"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      District
+                    </label>
+                    <input
+                      type="text"
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="District"
+                    />
+                  </div>
+
+                  {/* Row 3: City + Zip */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="City"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Zip
+                    </label>
+                    <input
+                      type="text"
+                      value={zip}
+                      onChange={(e) => setZip(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="Zip"
+                    />
+                  </div>
+
+                  {/* Row 4: Latitude + Longitude (auto-filled from address) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5" />
+                        Latitude
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder={isGeocoding ? "Fetching..." : "e.g., 12.5867"}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <span className="flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5" />
+                        Longitude
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder={isGeocoding ? "Fetching..." : "e.g., 104.8667"}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Establishment Date
+                    </label>
+                    <input
+                      type="date"
+                      defaultValue=""
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Legal Status
+                    </label>
+                    <select
+                      defaultValue=""
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                    >
+                      <option value="" disabled>Select status</option>
+                      <option value="registered">Registered</option>
+                      <option value="pending">Pending Registration</option>
+                      <option value="renewal">Under Renewal</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Primary Contact Name
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue=""
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="Primary Contact Name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Number
+                    </label>
+                    <input
+                      type="tel"
+                      defaultValue=""
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="Contact Number"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      defaultValue=""
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                      placeholder="Enter cooperative email"
+                    />
                   </div>
                 </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Address */}
+                  <div className="md:col-span-2">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Address
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue="Kampong Thom"
+                          disabled={!isEditing}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                          placeholder="Address"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          City
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue="Baray Commune"
+                          disabled={!isEditing}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                          placeholder="City"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Zip
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue="06401"
+                          disabled={!isEditing}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                          placeholder="Zip"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Region
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue="Cambodia"
+                          disabled={!isEditing}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                          placeholder="Region"
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Establishment Date
-                  </label>
-                  <input
-                    type="date"
-                    defaultValue="2015-06-15"
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Establishment Date
+                    </label>
+                    <input
+                      type="date"
+                      defaultValue="2015-06-15"
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Legal Status
-                  </label>
-                  <select
-                    defaultValue="registered"
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  >
-                    <option value="registered">Registered</option>
-                    <option value="pending">Pending Registration</option>
-                    <option value="renewal">Under Renewal</option>
-                  </select>
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Legal Status
+                    </label>
+                    <select
+                      defaultValue="registered"
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                    >
+                      <option value="registered">Registered</option>
+                      <option value="pending">Pending Registration</option>
+                      <option value="renewal">Under Renewal</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Primary Contact Name
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue="Sok Pisey"
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Primary Contact Name
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="Sok Pisey"
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Number
-                  </label>
-                  <input
-                    type="tel"
-                    defaultValue="+855 12 345 678"
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Contact Number
+                    </label>
+                    <input
+                      type="tel"
+                      defaultValue="+855 12 345 678"
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    defaultValue="baray.coop@example.com"
-                    disabled={!isEditing}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
-                    placeholder="Enter cooperative email"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      defaultValue="baray.coop@example.com"
+                      disabled={!isEditing}
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500"
+                      placeholder="Enter cooperative email"
+                    />
+                  </div>
 
-                {/* GPS Location — OpenStreetMap of Cambodia with land pin */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    GPS Location
-                  </label>
-                  <CooperativeLocationMap />
-                  <p className="text-xs text-gray-500 mt-2">
-                    Map data © OpenStreetMap contributors. Pin: Lat 12.5867° N, Lon 104.8667° E
-                    (Kampong Thom area).
-                  </p>
+                  {/* GPS Location — OpenStreetMap of Cambodia with land pin */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      GPS Location
+                    </label>
+                    <CooperativeLocationMap />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Map data © OpenStreetMap contributors. Pin: Lat 12.5867° N, Lon 104.8667° E
+                      (Kampong Thom area).
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {isEditing && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

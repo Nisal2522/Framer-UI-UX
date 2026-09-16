@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import {
   MapPin,
   Users,
@@ -6,12 +7,13 @@ import {
   Search,
   Filter,
   Plus,
-  MoreVertical,
+  Eye,
+  Edit2,
+  Trash2,
   CheckCircle,
-  Clock,
   AlertCircle,
+  MinusCircle,
 } from "lucide-react";
-import { ACProfileForm } from "./ACProfileForm";
 
 const cooperatives = [
   {
@@ -20,6 +22,7 @@ const cooperatives = [
     province: "Kampong Thom",
     district: "Baray",
     members: 234,
+    acType: "AC",
     stage: "Advanced",
     status: "Active",
     registered: "2022-03-15",
@@ -31,6 +34,7 @@ const cooperatives = [
     province: "Siem Reap",
     district: "Angkor Chum",
     members: 156,
+    acType: "PG",
     stage: "Expanding",
     status: "Active",
     registered: "2023-01-20",
@@ -42,8 +46,9 @@ const cooperatives = [
     province: "Battambang",
     district: "Moung Ruessei",
     members: 412,
+    acType: "MAC",
     stage: "Advanced",
-    status: "Verification Pending",
+    status: "Inactive",
     registered: "2021-08-10",
     chairman: "Keo Sophea",
   },
@@ -53,6 +58,7 @@ const cooperatives = [
     province: "Pursat",
     district: "Krakor",
     members: 189,
+    acType: "AC",
     stage: "Developing",
     status: "Active",
     registered: "2023-05-22",
@@ -64,6 +70,7 @@ const cooperatives = [
     province: "Kampong Thom",
     district: "Stoung",
     members: 98,
+    acType: "PG",
     stage: "Startup",
     status: "Active",
     registered: "2024-02-10",
@@ -78,24 +85,49 @@ const stageColors: Record<string, string> = {
   Advanced: "bg-emerald-100 text-emerald-700 border-emerald-200",
 };
 
+const typeLabels: Record<string, string> = {
+  AC: "Agricultural Cooperative",
+  MAC: "Modern Agriculture Community",
+  PG: "Producer Group",
+};
+
+const typeColors: Record<string, string> = {
+  AC: "bg-sky-100 text-sky-700 border-sky-200",
+  MAC: "bg-indigo-100 text-indigo-700 border-indigo-200",
+  PG: "bg-teal-100 text-teal-700 border-teal-200",
+};
+
 const statusIcons: Record<string, any> = {
   Active: { icon: CheckCircle, color: "text-emerald-600" },
-  "Verification Pending": { icon: Clock, color: "text-orange-600" },
+  Inactive: { icon: MinusCircle, color: "text-gray-500" },
   Suspended: { icon: AlertCircle, color: "text-red-600" },
 };
 
 export function ACProfiles() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStage, setSelectedStage] = useState("All");
-  const [showForm, setShowForm] = useState(false);
+  const [selectedType, setSelectedType] = useState("All");
+  const [showStageFilter, setShowStageFilter] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showStageFilter) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setShowStageFilter(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showStageFilter]);
 
   const filteredCooperatives = cooperatives.filter((coop) => {
     const matchesSearch =
       coop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       coop.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStage =
-      selectedStage === "All" || coop.stage === selectedStage;
-    return matchesSearch && matchesStage;
+    const matchesType =
+      selectedType === "All" || coop.acType === selectedType;
+    return matchesSearch && matchesType;
   });
 
   return (
@@ -111,7 +143,7 @@ export function ACProfiles() {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => navigate("/dashboard/admin/ac-profiles/new")}
           className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors shadow-md shrink-0"
         >
           <Plus className="w-5 h-5" />
@@ -134,20 +166,74 @@ export function ACProfiles() {
             />
           </div>
 
-          {/* Stage Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-400" />
-            <select
-              value={selectedStage}
-              onChange={(e) => setSelectedStage(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
+          {/* Filter Icon Button */}
+          <div className="relative" ref={filterRef}>
+            <button
+              type="button"
+              onClick={() => setShowStageFilter(!showStageFilter)}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 border rounded-lg transition-colors ${
+                showStageFilter || selectedType !== "All"
+                  ? "bg-[#032EA1] border-[#032EA1] text-white"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
             >
-              <option value="All">All Stages</option>
-              <option value="Startup">Startup</option>
-              <option value="Developing">Developing</option>
-              <option value="Expanding">Expanding</option>
-              <option value="Advanced">Advanced</option>
-            </select>
+              <Filter className="w-5 h-5" />
+              {selectedType !== "All" && (
+                <span className="text-sm font-medium">{selectedType}</span>
+              )}
+            </button>
+
+            {/* Stage Filter Dropdown */}
+            {showStageFilter && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-10 overflow-hidden">
+                {/* Type Filter */}
+                <div className="p-3 border-b border-gray-100 bg-gray-50">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Filter by Type
+                  </p>
+                </div>
+                <div className="p-2">
+                  {[
+                    { value: "All", label: "All Types" },
+                    { value: "AC", label: "AC" },
+                    { value: "MAC", label: "MAC" },
+                    { value: "PG", label: "PG" },
+                  ].map((type) => (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => setSelectedType(type.value)}
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                        selectedType === type.value
+                          ? "bg-[#032EA1]/10 text-[#032EA1] font-medium"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {selectedType === type.value && (
+                        <CheckCircle className="w-4 h-4 text-[#032EA1]" />
+                      )}
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Clear */}
+                {selectedType !== "All" && (
+                  <div className="p-2 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedType("All");
+                        setShowStageFilter(false);
+                      }}
+                      className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      Clear Filter
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -157,12 +243,12 @@ export function ACProfiles() {
         <div className="w-full min-w-0 overflow-hidden">
           <table className="w-full table-fixed border-collapse text-left">
             <colgroup>
-              <col className="w-[24%]" />
-              <col className="w-[16%]" />
-              <col className="w-[10%]" />
-              <col className="w-[12%]" />
+              <col className="w-[22%]" />
+              <col className="w-[8%]" />
               <col className="w-[14%]" />
-              <col className="w-[12%]" />
+              <col className="w-[8%]" />
+              <col className="w-[14%]" />
+              <col className="w-[14%]" />
               <col className="w-[12%]" />
             </colgroup>
             <thead>
@@ -171,13 +257,13 @@ export function ACProfiles() {
                   AC Information
                 </th>
                 <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
+                  Type
+                </th>
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Location
                 </th>
                 <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Members
-                </th>
-                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
-                  Stage
                 </th>
                 <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Status
@@ -214,11 +300,18 @@ export function ACProfiles() {
                           <span className="inline-flex font-mono text-[10px] sm:text-xs font-semibold text-[#032EA1] bg-[#032EA1]/8 px-2 py-0.5 rounded-md border border-[#032EA1]/10 whitespace-nowrap">
                             {coop.id}
                           </span>
-                          <span className="truncate">
-                            • Chairman: {coop.chairman}
-                          </span>
                         </span>
                       </div>
+                    </td>
+                    <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                      <span
+                        title={typeLabels[coop.acType]}
+                        className={`inline-flex max-w-full items-center px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full border ${
+                          typeColors[coop.acType]
+                        }`}
+                      >
+                        {coop.acType}
+                      </span>
                     </td>
                     <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
                       <div className="flex items-center gap-1.5 text-gray-700 min-w-0">
@@ -242,15 +335,6 @@ export function ACProfiles() {
                       </div>
                     </td>
                     <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
-                      <span
-                        className={`inline-flex max-w-full items-center px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full border ${
-                          stageColors[coop.stage]
-                        }`}
-                      >
-                        {coop.stage}
-                      </span>
-                    </td>
-                    <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <StatusIcon
                           className={`w-3.5 h-3.5 shrink-0 ${statusColor}`}
@@ -269,13 +353,29 @@ export function ACProfiles() {
                       </div>
                     </td>
                     <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
-                      <div className="flex items-center justify-center gap-0.5">
+                      <div className="flex items-center justify-center gap-1">
                         <button
                           type="button"
-                          className="p-1.5 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                          aria-label="More actions"
+                          onClick={() => navigate(`/dashboard/admin/ac-profiles/${coop.id}`)}
+                          className="p-1.5 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                          aria-label="View AC profile"
                         >
-                          <MoreVertical className="w-4 h-4" />
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/dashboard/admin/ac-profiles/${coop.id}`)}
+                          className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-colors"
+                          aria-label="Edit AC profile"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-1.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                          aria-label="Delete AC profile"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -311,9 +411,6 @@ export function ACProfiles() {
           </div>
         </div>
       </div>
-
-      {/* Form Modal */}
-      {showForm && <ACProfileForm onClose={() => setShowForm(false)} />}
     </div>
   );
 }

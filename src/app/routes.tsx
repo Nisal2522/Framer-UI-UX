@@ -49,6 +49,8 @@ const routes = [
       { path: "reports", Component: Reports },
       { path: "admin", Component: NationalDashboard },
       { path: "admin/ac-profiles", Component: ACProfiles },
+      { path: "admin/ac-profiles/new", Component: ACProfile },
+      { path: "admin/ac-profiles/:id", Component: ACProfile },
       { path: "admin/commune-verification", Component: CommuneVerification },
       { path: "admin/business-plans", Component: AdminBusinessPlanWorkflow },
       { path: "admin/progress-reporting", Component: ProgressReportingAdmin },
