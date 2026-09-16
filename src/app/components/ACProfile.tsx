@@ -182,22 +182,22 @@ export function ACProfile() {
         <div className="flex items-center justify-between gap-2">
           <h1 className="text-2xl font-bold text-gray-900">AC Profile</h1>
           <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsEditing(!isEditing)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors shadow-sm"
-          >
-            <Edit2 className="w-4 h-4" />
-            {isEditing ? "Cancel" : "Edit Information"}
-          </button>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsEditing(!isEditing)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors shadow-sm"
+            >
+              <Edit2 className="w-4 h-4" />
+              {isEditing ? "Cancel" : "Edit Information"}
+            </button>
           </div>
         </div>
       )}
