@@ -41,7 +41,9 @@ export function ACProfile() {
    *  cooperative (own profile or admin viewing a specific AC) shows real, disabled-by-default data. */
   const isNewRegistration = location.pathname.endsWith("/ac-profiles/new");
   const [activeTab, setActiveTab] = useState("cooperative-info");
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(
+    () => Boolean((location.state as { autoEdit?: boolean } | null)?.autoEdit)
+  );
   const [pendingVerification, setPendingVerification] = useState(false);
   const [dossierDocs, setDossierDocs] = useState<DossierDocRow[]>(
     isNewRegistration
@@ -66,6 +68,9 @@ export function ACProfile() {
   const [dossierDocName, setDossierDocName] = useState("");
   const [dossierSelectedFile, setDossierSelectedFile] = useState<File | null>(null);
   const dossierFileInputRef = useRef<HTMLInputElement>(null);
+
+  const [regName, setRegName] = useState("");
+  const [regAcType, setRegAcType] = useState("");
 
   const [address, setAddress] = useState(isNewRegistration ? "" : "Kampong Thom");
   const [country, setCountry] = useState(isNewRegistration ? "" : "Cambodia");
@@ -172,7 +177,8 @@ export function ACProfile() {
                 toast.success("Cooperative registered. Sent for Commune Officer verification.");
                 navigate("/dashboard/admin/ac-profiles");
               }}
-              className="px-5 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors shadow-sm"
+              disabled={!regName.trim() || !regAcType}
+              className="px-5 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#032EA1]"
             >
               Save AC Profile
             </button>
@@ -235,6 +241,8 @@ export function ACProfile() {
                     </label>
                     <input
                       type="text"
+                      value={regName}
+                      onChange={(e) => setRegName(e.target.value)}
                       placeholder="Enter cooperative name"
                       className={`${bannerFieldClass} px-3.5 py-2.5`}
                     />
@@ -245,7 +253,8 @@ export function ACProfile() {
                     </label>
                     <div className="relative">
                       <select
-                        defaultValue=""
+                        value={regAcType}
+                        onChange={(e) => setRegAcType(e.target.value)}
                         className={`${bannerFieldClass} appearance-none px-3.5 py-2.5 pr-9 text-sm font-medium cursor-pointer`}
                       >
                         <option value="" disabled className="text-gray-900">Select AC Type</option>

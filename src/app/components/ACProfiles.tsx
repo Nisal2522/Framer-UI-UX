@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import {
   MapPin,
   Users,
@@ -15,7 +16,7 @@ import {
   MinusCircle,
 } from "lucide-react";
 
-const cooperatives = [
+const INITIAL_COOPERATIVES = [
   {
     id: "AC-001",
     name: "Kampong Thom Rice Cooperative",
@@ -103,11 +104,15 @@ const statusIcons: Record<string, any> = {
   Suspended: { icon: AlertCircle, color: "text-red-600" },
 };
 
+const PAGE_SIZE = 10;
+
 export function ACProfiles() {
   const navigate = useNavigate();
+  const [cooperatives, setCooperatives] = useState(INITIAL_COOPERATIVES);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [showStageFilter, setShowStageFilter] = useState(false);
+  const [page, setPage] = useState(1);
   const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -129,6 +134,32 @@ export function ACProfiles() {
       selectedType === "All" || coop.acType === selectedType;
     return matchesSearch && matchesType;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredCooperatives.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedCooperatives = filteredCooperatives.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setPage(1);
+  };
+
+  const handleTypeFilterChange = (value: string) => {
+    setSelectedType(value);
+    setPage(1);
+  };
+
+  const handleDelete = (coop: { id: string; name: string }) => {
+    const confirmed = window.confirm(
+      `Delete ${coop.name} (${coop.id})? This cannot be undone.`
+    );
+    if (!confirmed) return;
+    setCooperatives((prev) => prev.filter((c) => c.id !== coop.id));
+    toast.success(`${coop.name} was deleted.`);
+  };
 
   return (
     <div className="space-y-6">
@@ -160,7 +191,7 @@ export function ACProfiles() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search by name or AC ID..."
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
             />
@@ -202,7 +233,7 @@ export function ACProfiles() {
                     <button
                       key={type.value}
                       type="button"
-                      onClick={() => setSelectedType(type.value)}
+                      onClick={() => handleTypeFilterChange(type.value)}
                       className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                         selectedType === type.value
                           ? "bg-[#032EA1]/10 text-[#032EA1] font-medium"
@@ -223,7 +254,7 @@ export function ACProfiles() {
                     <button
                       type="button"
                       onClick={() => {
-                        setSelectedType("All");
+                        handleTypeFilterChange("All");
                         setShowStageFilter(false);
                       }}
                       className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -277,7 +308,14 @@ export function ACProfiles() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredCooperatives.map((coop, rowIdx) => {
+              {pagedCooperatives.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center text-sm text-gray-400">
+                    No cooperatives match your search or filters.
+                  </td>
+                </tr>
+              ) : (
+              pagedCooperatives.map((coop, rowIdx) => {
                 const StatusIcon = statusIcons[coop.status]?.icon || CheckCircle;
                 const statusColor = statusIcons[coop.status]?.color || "text-gray-600";
 
@@ -364,7 +402,11 @@ export function ACProfiles() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => navigate(`/dashboard/admin/ac-profiles/${coop.id}`)}
+                          onClick={() =>
+                            navigate(`/dashboard/admin/ac-profiles/${coop.id}`, {
+                              state: { autoEdit: true },
+                            })
+                          }
                           className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-colors"
                           aria-label="Edit AC profile"
                         >
@@ -372,6 +414,7 @@ export function ACProfiles() {
                         </button>
                         <button
                           type="button"
+                          onClick={() => handleDelete(coop)}
                           className="p-1.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
                           aria-label="Delete AC profile"
                         >
@@ -381,7 +424,8 @@ export function ACProfiles() {
                     </td>
                   </tr>
                 );
-              })}
+              })
+              )}
             </tbody>
           </table>
         </div>
@@ -389,26 +433,47 @@ export function ACProfiles() {
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
           <p className="text-sm text-gray-600">
-            Showing {filteredCooperatives.length} of {cooperatives.length}{" "}
-            cooperatives
+            {filteredCooperatives.length === 0
+              ? "Showing 0 cooperatives"
+              : `Showing ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(
+                  currentPage * PAGE_SIZE,
+                  filteredCooperatives.length
+                )} of ${filteredCooperatives.length} cooperatives`}
           </p>
-          <div className="flex items-center gap-2">
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-              Previous
-            </button>
-            <button className="px-4 py-2 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors">
-              1
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-              2
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-              3
-            </button>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-              Next
-            </button>
-          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  type="button"
+                  onClick={() => setPage(pageNum)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === pageNum
+                      ? "bg-[#032EA1] text-white"
+                      : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

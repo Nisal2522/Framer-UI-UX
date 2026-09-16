@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   GraduationCap,
   Plus,
@@ -380,6 +381,7 @@ export function TrainingManagement() {
       setTrainings((prev) =>
         prev.map((t) => (t.id === editingId ? { ...t, ...formState, capacity: capacityNum } : t))
       );
+      toast.success("Training updated.");
     } else {
       const newTraining: Training = {
         id: `TR-${Date.now()}`,
@@ -388,13 +390,19 @@ export function TrainingManagement() {
         participants: [],
       };
       setTrainings((prev) => [newTraining, ...prev]);
+      toast.success("Training created.");
     }
     closeForm();
   };
 
-  const deleteTraining = (id: string) => {
-    setTrainings((prev) => prev.filter((t) => t.id !== id));
-    if (participantsDrawerId === id) setParticipantsDrawerId(null);
+  const deleteTraining = (t: Training) => {
+    const confirmed = window.confirm(
+      `Delete "${t.title}"? This will also remove its ${t.participants.length} registered participant(s). This cannot be undone.`
+    );
+    if (!confirmed) return;
+    setTrainings((prev) => prev.filter((tr) => tr.id !== t.id));
+    if (participantsDrawerId === t.id) setParticipantsDrawerId(null);
+    toast.success(`"${t.title}" was deleted.`);
   };
 
   const updateAttendance = (trainingId: string, participantId: string, attendance: Attendance) => {
@@ -648,7 +656,7 @@ export function TrainingManagement() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => deleteTraining(t.id)}
+                            onClick={() => deleteTraining(t)}
                             className="p-1.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
                             aria-label="Delete training"
                           >
