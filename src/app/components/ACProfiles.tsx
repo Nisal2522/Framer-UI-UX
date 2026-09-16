@@ -14,6 +14,7 @@ import {
   CheckCircle,
   AlertCircle,
   MinusCircle,
+  X,
 } from "lucide-react";
 
 const INITIAL_COOPERATIVES = [
@@ -122,8 +123,15 @@ export function ACProfiles() {
         setShowStageFilter(false);
       }
     };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowStageFilter(false);
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [showStageFilter]);
 
   const filteredCooperatives = cooperatives.filter((coop) => {
@@ -164,7 +172,7 @@ export function ACProfiles() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
             AC Profile Management
@@ -193,8 +201,19 @@ export function ACProfiles() {
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search by name or AC ID..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+              aria-label="Search cooperatives by name or AC ID"
+              className="w-full pl-10 pr-9 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange("")}
+                aria-label="Clear search"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           {/* Filter Icon Button */}
@@ -202,9 +221,12 @@ export function ACProfiles() {
             <button
               type="button"
               onClick={() => setShowStageFilter(!showStageFilter)}
+              aria-expanded={showStageFilter}
+              aria-haspopup="true"
+              aria-label="Filter cooperatives by type"
               className={`flex items-center justify-center gap-2 px-4 py-2.5 border rounded-lg transition-colors ${
                 showStageFilter || selectedType !== "All"
-                  ? "bg-[#032EA1] border-[#032EA1] text-white"
+                  ? "bg-[#032EA1] border-[#032EA1] text-white hover:bg-[#0447D4]"
                   : "border-gray-300 text-gray-700 hover:bg-gray-50"
               }`}
             >
@@ -322,7 +344,8 @@ export function ACProfiles() {
                 return (
                   <tr
                     key={coop.id}
-                    className={`group transition-colors ${
+                    onClick={() => navigate(`/dashboard/admin/ac-profiles/${coop.id}`)}
+                    className={`group cursor-pointer transition-colors ${
                       rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60"
                     } hover:bg-[#032EA1]/[0.04]`}
                   >
@@ -394,7 +417,10 @@ export function ACProfiles() {
                       <div className="flex items-center justify-center gap-1">
                         <button
                           type="button"
-                          onClick={() => navigate(`/dashboard/admin/ac-profiles/${coop.id}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/dashboard/admin/ac-profiles/${coop.id}`);
+                          }}
                           className="p-1.5 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
                           aria-label="View AC profile"
                         >
@@ -402,11 +428,12 @@ export function ACProfiles() {
                         </button>
                         <button
                           type="button"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             navigate(`/dashboard/admin/ac-profiles/${coop.id}`, {
                               state: { autoEdit: true },
-                            })
-                          }
+                            });
+                          }}
                           className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 hover:bg-amber-50 transition-colors"
                           aria-label="Edit AC profile"
                         >
@@ -414,7 +441,10 @@ export function ACProfiles() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete(coop)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(coop);
+                          }}
                           className="p-1.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
                           aria-label="Delete AC profile"
                         >

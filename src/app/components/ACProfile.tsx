@@ -16,8 +16,8 @@ import {
   ChevronDown,
   Globe,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
-import { CooperativeLocationMap } from "./CooperativeLocationMap";
 
 /** Public asset; must use Vite base URL so GitHub Pages (`/repo/`) resolves correctly. */
 const COOPERATIVE_LOGO_URL = `${import.meta.env.BASE_URL}cooperative-logo.svg`;
@@ -115,7 +115,14 @@ export function ACProfile() {
   useEffect(() => {
     if (!dossierDrawerOpen) return;
     const frame = requestAnimationFrame(() => setDossierDrawerVisible(true));
-    return () => cancelAnimationFrame(frame);
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeDossierDrawer();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [dossierDrawerOpen]);
 
   const closeDossierDrawer = () => {
@@ -178,6 +185,7 @@ export function ACProfile() {
                 navigate("/dashboard/admin/ac-profiles");
               }}
               disabled={!regName.trim() || !regAcType}
+              title={!regName.trim() || !regAcType ? "Enter the cooperative name and select an AC type to continue" : undefined}
               className="px-5 py-2.5 bg-[#032EA1] text-white rounded-lg text-sm font-medium hover:bg-[#0447D4] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#032EA1]"
             >
               Save AC Profile
@@ -498,7 +506,11 @@ export function ACProfile() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       <span className="flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5" />
+                        {isGeocoding ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <MapPin className="w-3.5 h-3.5" />
+                        )}
                         Latitude
                       </span>
                     </label>
@@ -513,7 +525,11 @@ export function ACProfile() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       <span className="flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5" />
+                        {isGeocoding ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Globe className="w-3.5 h-3.5" />
+                        )}
                         Longitude
                       </span>
                     </label>
@@ -707,18 +723,6 @@ export function ACProfile() {
                       placeholder="Enter cooperative email"
                     />
                   </div>
-
-                  {/* GPS Location — OpenStreetMap of Cambodia with land pin */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      GPS Location
-                    </label>
-                    <CooperativeLocationMap />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Map data © OpenStreetMap contributors. Pin: Lat 12.5867° N, Lon 104.8667° E
-                      (Kampong Thom area).
-                    </p>
-                  </div>
                 </div>
               )}
 
@@ -861,10 +865,10 @@ export function ACProfile() {
                       <td className="px-4 py-3 text-sm text-gray-700">DEED-001-2024</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <button className="p-1 hover:bg-gray-200 rounded">
+                          <button className="p-1 hover:bg-gray-200 rounded-lg">
                             <Edit2 className="w-4 h-4 text-gray-600" />
                           </button>
-                          <button className="p-1 hover:bg-gray-200 rounded">
+                          <button className="p-1 hover:bg-gray-200 rounded-lg">
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
                         </div>
@@ -970,10 +974,10 @@ export function ACProfile() {
                       <td className="px-4 py-3 text-sm text-gray-700">N/A</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <button className="p-1 hover:bg-gray-200 rounded">
+                          <button className="p-1 hover:bg-gray-200 rounded-lg">
                             <Edit2 className="w-4 h-4 text-gray-600" />
                           </button>
-                          <button className="p-1 hover:bg-gray-200 rounded">
+                          <button className="p-1 hover:bg-gray-200 rounded-lg">
                             <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
                         </div>
@@ -1048,7 +1052,7 @@ export function ACProfile() {
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
-                                className="p-1 hover:bg-gray-200 rounded"
+                                className="p-1 hover:bg-gray-200 rounded-lg"
                                 aria-label="View document"
                               >
                                 <FileText className="w-4 h-4 text-gray-600" />
@@ -1058,7 +1062,7 @@ export function ACProfile() {
                                 onClick={() =>
                                   setDossierDocs((prev) => prev.filter((d) => d.id !== doc.id))
                                 }
-                                className="p-1 hover:bg-gray-200 rounded"
+                                className="p-1 hover:bg-gray-200 rounded-lg"
                                 aria-label="Remove document"
                               >
                                 <Trash2 className="w-4 h-4 text-red-600" />

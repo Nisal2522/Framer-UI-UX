@@ -18,6 +18,7 @@ import { AdminBusinessPlanWorkflow } from "./components/admin/AdminBusinessPlanW
 import { ProgressReportingAdmin } from "./components/admin/ProgressReportingAdmin";
 import { AdminReportingDashboard } from "./components/admin/AdminReportingDashboard";
 import { TrainingManagement } from "./components/admin/TrainingManagement";
+import { UserManagement } from "./components/admin/UserManagement";
 import { CalendarHarvestingPlanning } from "./components/CalendarHarvestingPlanning";
 import { CalendarTraining } from "./components/CalendarTraining";
 
@@ -57,6 +58,7 @@ const routes = [
       { path: "admin/knowledge", Component: KnowledgeManagement },
       { path: "admin/training", Component: TrainingManagement },
       { path: "admin/reporting", Component: AdminReportingDashboard },
+      { path: "admin/user-management", Component: UserManagement },
     ],
   },
 ];

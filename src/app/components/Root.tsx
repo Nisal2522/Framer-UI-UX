@@ -22,6 +22,7 @@ import {
   BarChart3,
   Calendar,
   GraduationCap,
+  UserCog,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ChatbotWidget } from "./ChatbotWidget";
@@ -76,6 +77,7 @@ const adminNavigation = [
   { name: "Knowledge Hub", path: "/dashboard/admin/knowledge", icon: BookOpen },
   { name: "Training Management", path: "/dashboard/admin/training", icon: GraduationCap },
   { name: "GESI / Reporting", path: "/dashboard/admin/reporting", icon: BarChart3 },
+  { name: "User Management", path: "/dashboard/admin/user-management", icon: UserCog },
 ];
 
 const profileImageUrl =
