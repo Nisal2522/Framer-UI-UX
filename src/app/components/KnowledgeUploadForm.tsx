@@ -7,7 +7,7 @@ interface KnowledgeUploadFormProps {
 }
 
 // Illustrative option lists (prototype values; large enough to exercise the searchable picker UX)
-const AVAILABLE_TAGS = [
+export const AVAILABLE_TAGS = [
   "Rice", "Maize", "Cassava", "Vegetables", "Fruits", "Coffee", "Rubber", "Cashew", "Pepper",
   "Livestock", "Poultry", "Aquaculture", "Beekeeping", "Organic", "Climate Resilience",
   "Drought Management", "Flood Management", "Pest Management", "Disease Control", "Fertilizer",
@@ -20,7 +20,7 @@ const AVAILABLE_TAGS = [
   "Mechanization",
 ];
 
-const AUDIENCE_OPTIONS = [
+export const AUDIENCE_OPTIONS = [
   "AC Committee Members", "Commune Agricultural Officers", "All Farmer Members",
   "Ministry/FAO Users", "Provincial Officers", "National Admins", "MAC Committee Members",
   "Youth Farmers", "Women Farmers", "Smallholder Farmers", "Cooperative Managers",

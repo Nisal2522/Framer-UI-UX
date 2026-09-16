@@ -21,6 +21,7 @@ import {
   Activity,
   BarChart3,
   Calendar,
+  GraduationCap,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { ChatbotWidget } from "./ChatbotWidget";
@@ -68,10 +69,12 @@ const cooperativeNav: CooperativeNavEntry[] = [
 
 const adminNavigation = [
   { name: "National Dashboard", path: "/dashboard/admin", icon: LayoutDashboard },
+  { name: "AC Profiles", path: "/dashboard/admin/ac-profiles", icon: Building2 },
   { name: "Commune Verification", path: "/dashboard/admin/commune-verification", icon: UserCheck },
   { name: "Business Plan", path: "/dashboard/admin/business-plans", icon: FileText },
   { name: "Progress Reporting", path: "/dashboard/admin/progress-reporting", icon: Activity },
   { name: "Knowledge Hub", path: "/dashboard/admin/knowledge", icon: BookOpen },
+  { name: "Training Management", path: "/dashboard/admin/training", icon: GraduationCap },
   { name: "GESI / Reporting", path: "/dashboard/admin/reporting", icon: BarChart3 },
 ];
 

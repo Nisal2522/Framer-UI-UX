@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Building2,
   MapPin,
   Users,
   Calendar,
@@ -11,7 +10,6 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  TrendingUp,
 } from "lucide-react";
 import { ACProfileForm } from "./ACProfileForm";
 
@@ -114,62 +112,11 @@ export function ACProfiles() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-gradient-to-r from-[#032EA1] to-[#0447D4] text-white px-6 py-3 rounded-lg font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors shadow-md shrink-0"
         >
           <Plus className="w-5 h-5" />
           Register New AC
         </button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total ACs</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">1,430</p>
-            </div>
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
-              <Building2 className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Active Status</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">1,356</p>
-            </div>
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-lg">
-              <CheckCircle className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Members</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">45,682</p>
-            </div>
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-              <Users className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Advanced Stage</p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">342</p>
-            </div>
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg">
-              <TrendingUp className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Filters & Search */}
@@ -205,99 +152,132 @@ export function ACProfiles() {
         </div>
       </div>
 
-      {/* Cooperatives List */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+      {/* Cooperatives List — Asset Management table styles */}
+      <div className="w-full min-w-0 rounded-2xl border border-gray-200/80 bg-white shadow-[0_4px_24px_-4px_rgba(3,46,161,0.08),0_2px_8px_-2px_rgba(0,0,0,0.06)] overflow-hidden">
+        <div className="w-full min-w-0 overflow-hidden">
+          <table className="w-full table-fixed border-collapse text-left">
+            <colgroup>
+              <col className="w-[24%]" />
+              <col className="w-[16%]" />
+              <col className="w-[10%]" />
+              <col className="w-[12%]" />
+              <col className="w-[14%]" />
+              <col className="w-[12%]" />
+              <col className="w-[12%]" />
+            </colgroup>
+            <thead>
+              <tr className="bg-gradient-to-r from-[#032EA1]/[0.07] via-[#032EA1]/[0.04] to-transparent border-b border-[#032EA1]/15">
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   AC Information
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Location
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Members
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Stage
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Status
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1]">
                   Registered
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-2 sm:px-3 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#032EA1] text-center">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredCooperatives.map((coop) => {
+            <tbody className="divide-y divide-gray-100">
+              {filteredCooperatives.map((coop, rowIdx) => {
                 const StatusIcon = statusIcons[coop.status]?.icon || CheckCircle;
                 const statusColor = statusIcons[coop.status]?.color || "text-gray-600";
 
                 return (
                   <tr
                     key={coop.id}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    className={`group transition-colors ${
+                      rowIdx % 2 === 0 ? "bg-white" : "bg-slate-50/60"
+                    } hover:bg-[#032EA1]/[0.04]`}
                   >
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-semibold text-gray-900">
+                    <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                      <div className="min-w-0 flex flex-col gap-1">
+                        <span
+                          className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug line-clamp-2"
+                          title={coop.name}
+                        >
                           {coop.name}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          ID: {coop.id} • Chairman: {coop.chairman}
-                        </p>
+                        </span>
+                        <span className="flex flex-wrap items-center gap-1 text-[11px] text-gray-600">
+                          <span className="inline-flex font-mono text-[10px] sm:text-xs font-semibold text-[#032EA1] bg-[#032EA1]/8 px-2 py-0.5 rounded-md border border-[#032EA1]/10 whitespace-nowrap">
+                            {coop.id}
+                          </span>
+                          <span className="truncate">
+                            • Chairman: {coop.chairman}
+                          </span>
+                        </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <MapPin className="w-4 h-4 text-gray-400" />
-                        <div>
-                          <p className="text-sm font-medium">{coop.province}</p>
-                          <p className="text-xs text-gray-600">
+                    <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                      <div className="flex items-center gap-1.5 text-gray-700 min-w-0">
+                        <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <div className="min-w-0">
+                          <p className="text-xs sm:text-sm font-medium truncate">
+                            {coop.province}
+                          </p>
+                          <p className="text-[11px] text-gray-500 truncate">
                             {coop.district}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Users className="w-4 h-4 text-gray-400" />
-                        <span className="font-medium">{coop.members}</span>
+                    <td className="px-2 sm:px-3 py-2.5 align-middle whitespace-nowrap">
+                      <div className="flex items-center gap-1.5 text-gray-700">
+                        <Users className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span className="text-xs sm:text-sm font-medium tabular-nums">
+                          {coop.members}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                        className={`inline-flex max-w-full items-center px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full border ${
                           stageColors[coop.stage]
                         }`}
                       >
                         {coop.stage}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <StatusIcon className={`w-4 h-4 ${statusColor}`} />
-                        <span className="text-sm text-gray-700">
+                    <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <StatusIcon
+                          className={`w-3.5 h-3.5 shrink-0 ${statusColor}`}
+                        />
+                        <span className="text-xs text-gray-700 truncate">
                           {coop.status}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm">{coop.registered}</span>
+                    <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                      <div className="flex items-center gap-1.5 text-gray-600 min-w-0">
+                        <Calendar className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                        <span className="text-xs tabular-nums truncate">
+                          {coop.registered}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        <MoreVertical className="w-5 h-5 text-gray-600" />
-                      </button>
+                    <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
+                      <div className="flex items-center justify-center gap-0.5">
+                        <button
+                          type="button"
+                          className="p-1.5 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                          aria-label="More actions"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

@@ -12,10 +12,12 @@ import { Reports } from "./components/Reports";
 import { Login } from "./components/Login";
 import { LandingPage } from "./components/LandingPage";
 import { NationalDashboard } from "./components/admin/NationalDashboard";
+import { ACProfiles } from "./components/ACProfiles";
 import { CommuneVerification } from "./components/admin/CommuneVerification";
 import { AdminBusinessPlanWorkflow } from "./components/admin/AdminBusinessPlanWorkflow";
 import { ProgressReportingAdmin } from "./components/admin/ProgressReportingAdmin";
 import { AdminReportingDashboard } from "./components/admin/AdminReportingDashboard";
+import { TrainingManagement } from "./components/admin/TrainingManagement";
 import { CalendarHarvestingPlanning } from "./components/CalendarHarvestingPlanning";
 import { CalendarTraining } from "./components/CalendarTraining";
 
@@ -46,10 +48,12 @@ const routes = [
       { path: "calendar/training", Component: CalendarTraining },
       { path: "reports", Component: Reports },
       { path: "admin", Component: NationalDashboard },
+      { path: "admin/ac-profiles", Component: ACProfiles },
       { path: "admin/commune-verification", Component: CommuneVerification },
       { path: "admin/business-plans", Component: AdminBusinessPlanWorkflow },
       { path: "admin/progress-reporting", Component: ProgressReportingAdmin },
       { path: "admin/knowledge", Component: KnowledgeManagement },
+      { path: "admin/training", Component: TrainingManagement },
       { path: "admin/reporting", Component: AdminReportingDashboard },
     ],
   },
