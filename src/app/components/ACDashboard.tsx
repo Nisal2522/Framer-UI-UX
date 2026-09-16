@@ -653,101 +653,6 @@ export function ACDashboard() {
         </>
       )}
 
-      {/* 3. Business Plan Status Widget - Critical Priority */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-gray-900">
-            Business Plan Status
-          </h3>
-          <FileText className="w-6 h-6 text-[#032EA1]" />
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Status Overview */}
-          <div>
-            <div className="flex items-center justify-between mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <div>
-                <p className="text-sm text-gray-600">Current Status</p>
-                <p className="text-2xl font-bold text-emerald-700 mt-1">Approved</p>
-              </div>
-              <CheckCircle className="w-12 h-12 text-emerald-600" />
-            </div>
-
-            <div className="space-y-3">
-              <div className="p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Implementation Progress
-                  </span>
-                  <span className="text-lg font-bold text-[#032EA1]">73%</span>
-                </div>
-                <div className="bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-gradient-to-r from-[#032EA1] to-[#0447D4] h-3 rounded-full"
-                    style={{ width: "73%" }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="p-4 border border-gray-200 rounded-lg">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Approved Date
-                </p>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">March 15, 2024</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Upcoming Milestones & Alerts */}
-          <div>
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">
-              Upcoming Milestones
-            </h4>
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm text-gray-900">Equipment Purchase</span>
-                </div>
-                <span className="text-xs text-gray-600">Due: Apr 30</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm text-gray-900">Training Session</span>
-                </div>
-                <span className="text-xs text-gray-600">Due: May 15</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm text-gray-900">Crop Expansion</span>
-                </div>
-                <span className="text-xs text-gray-600">Due: Jun 20</span>
-              </div>
-            </div>
-
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-orange-900">
-                    2 Activities Overdue
-                  </p>
-                  <p className="text-xs text-orange-700 mt-1">
-                    Progress report submission and farmer training completion require
-                    immediate attention.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* 2. Member Demographics Visualization - High Priority */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Farmer Member Distribution Map */}
@@ -765,8 +670,8 @@ export function ACDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-            <div className="xl:col-span-3 h-[420px] rounded-xl overflow-hidden border border-[#0F2F8F]/20">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="h-[420px] rounded-xl overflow-hidden border border-[#0F2F8F]/20">
               <MapContainer
                 center={[12.6, 104.2]}
                 zoom={7}
@@ -830,7 +735,7 @@ export function ACDashboard() {
               </MapContainer>
             </div>
 
-            <div className="xl:col-span-1 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-blue-50/40 p-4">
+            {/* <div className="xl:col-span-1 rounded-xl border border-gray-200 bg-gradient-to-b from-white to-blue-50/40 p-4">
               <h4 className="text-sm font-semibold text-gray-800 mb-3">Top Coverage Areas</h4>
               <div className="space-y-2.5">
                 {[...farmerAreaData]
@@ -851,7 +756,7 @@ export function ACDashboard() {
                     </div>
                   ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -943,6 +848,113 @@ export function ACDashboard() {
           </ResponsiveContainer>
         </div>
 
+        {/* Business Plan Status */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-gray-900">
+              Business Plan Status
+            </h3>
+            <FileText className="w-6 h-6 text-[#032EA1]" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Status Overview */}
+            <div>
+              <div className="flex items-center justify-between mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-600">Current Status</p>
+                  <p className="text-2xl font-bold text-emerald-700 mt-1">Approved</p>
+                </div>
+                <CheckCircle className="w-12 h-12 text-emerald-600" />
+              </div>
+
+              <div className="space-y-3">
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">
+                      Implementation Progress
+                    </span>
+                    <span className="text-lg font-bold text-[#032EA1]">73%</span>
+                  </div>
+                  <div className="bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-gradient-to-r from-[#032EA1] to-[#0447D4] h-3 rounded-full"
+                      style={{ width: "73%" }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Approved Date
+                  </p>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm">March 15, 2024</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Upcoming Milestones & Alerts */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                Upcoming Milestones
+              </h4>
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-gray-900">Equipment Purchase</span>
+                  </div>
+                  <span className="text-xs text-gray-600">Due: Apr 30</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-gray-900">Training Session</span>
+                  </div>
+                  <span className="text-xs text-gray-600">Due: May 15</span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-gray-900">Crop Expansion</span>
+                  </div>
+                  <span className="text-xs text-gray-600">Due: Jun 20</span>
+                </div>
+              </div>
+
+              {/* 
+                * Overdue Activities Alert Banner — matches screenshot
+                * Variant: Warning (orange-50 bg, orange-200 border)
+                * Icon: AlertTriangle (orange-600) — indicates urgency/attention required
+                * Content: Displays overdue count (2) + description of pending tasks
+                * Tasks: 1) Progress report submission  2) Farmer training completion
+                * Context: Inside Business Plan Status > Upcoming Milestones section
+                * Purpose: Notify AC user that immediate action is required on overdue activities
+                */}
+              {/* <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-orange-900">
+                      2 Activities Overdue
+                    </p>
+                    <p className="text-xs text-orange-700 mt-1">
+                      Progress report submission and farmer training completion require
+                      immediate attention.
+                    </p>
+                  </div>
+                </div>
+              </div> */}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Crop & Livestock Distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Crop Distribution */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
@@ -1040,7 +1052,7 @@ export function ACDashboard() {
             <p className="text-3xl font-bold text-orange-600 mt-2">3</p>
           </div>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        {/* <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -1053,7 +1065,7 @@ export function ACDashboard() {
               </ul>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* 5. Knowledge & Training Metrics - Medium Priority */}
@@ -1064,24 +1076,18 @@ export function ACDashboard() {
           </h3>
           <BookOpen className="w-6 h-6 text-[#032EA1]" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="p-6 bg-amber-50 border border-amber-200 rounded-lg">
+            <Package className="w-8 h-8 text-amber-600 mb-3" />
+            <p className="text-sm text-gray-600">Total Materials</p>
+            <p className="text-3xl font-bold text-gray-900 mt-2">68</p>
+            <p className="text-xs text-gray-500 mt-2">Available in library</p>
+          </div>
           <div className="p-6 bg-blue-50 border border-blue-200 rounded-lg">
             <BookOpen className="w-8 h-8 text-blue-600 mb-3" />
             <p className="text-sm text-gray-600">Materials Received</p>
             <p className="text-3xl font-bold text-gray-900 mt-2">47</p>
             <p className="text-xs text-gray-500 mt-2">+5 this month</p>
-          </div>
-          <div className="p-6 bg-purple-50 border border-purple-200 rounded-lg">
-            <CheckCircle className="w-8 h-8 text-purple-600 mb-3" />
-            <p className="text-sm text-gray-600">Activity Completion</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">89%</p>
-            <p className="text-xs text-gray-500 mt-2">Above target (75%)</p>
-          </div>
-          <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-lg">
-            <Users className="w-8 h-8 text-emerald-600 mb-3" />
-            <p className="text-sm text-gray-600">Training Participation</p>
-            <p className="text-3xl font-bold text-gray-900 mt-2">342</p>
-            <p className="text-xs text-gray-500 mt-2">Members participated</p>
           </div>
         </div>
       </div>

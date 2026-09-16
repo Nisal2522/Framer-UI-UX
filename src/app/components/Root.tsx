@@ -50,7 +50,7 @@ type CooperativeNavEntry =
 const cooperativeNav: CooperativeNavEntry[] = [
   { kind: "link", name: "AC Dashboard", path: "/dashboard", icon: LayoutDashboard, end: true },
   { kind: "link", name: "AC Profile", path: "/dashboard/ac-profile", icon: Building2 },
-  { kind: "link", name: "Committee Structure", path: "/dashboard/committee-structure", icon: UserCircle },
+  // { kind: "link", name: "Committee Structure", path: "/dashboard/committee-structure", icon: UserCircle },
   { kind: "link", name: "Members", path: "/dashboard/farmer-members", icon: Users },
   { kind: "link", name: "Assets", path: "/dashboard/assets", icon: Package },
   { kind: "link", name: "Business Plans", path: "/dashboard/business-plans", icon: FileText },

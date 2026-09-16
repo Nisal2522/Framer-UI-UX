@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties } from "react";
 import {
   Building2,
   UserRound,
@@ -114,7 +114,7 @@ const cropNat = [
   { crop: "Other", pct: 10 },
 ];
 
-const CROP_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+const CROP_ICONS: Record<string, ComponentType<{ className?: string; style?: CSSProperties }>> = {
   Rice: Wheat,
   Cassava: Carrot,
   Maize: Bean,
@@ -189,7 +189,7 @@ const ASSET_TYPE_META: Record<string, { color: string; bg: string; textColor: st
   Infrastructure: { color: "#059669", bg: "#ecfdf5", textColor: "#047857", pct: 10 },
 };
 
-const ASSET_TYPE_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+const ASSET_TYPE_ICONS: Record<string, ComponentType<{ className?: string; style?: CSSProperties }>> = {
   Equipment: Package,
   Vehicle: Truck,
   Building: Warehouse,
@@ -198,7 +198,7 @@ const ASSET_TYPE_ICONS: Record<string, ComponentType<{ className?: string }>> = 
 
 const ASSET_SUBTYPES: {
   name: string; type: string; baseCount: number; goodPct: number;
-  pearlFunded: boolean; icon: ComponentType<{ className?: string }>;
+  pearlFunded: boolean; icon: ComponentType<{ className?: string; style?: CSSProperties }>;
 }[] = [
     { name: "Water Pump System", type: "Equipment", baseCount: 3240, goodPct: 71, pearlFunded: true, icon: Droplets },
     { name: "Weighing Scale", type: "Equipment", baseCount: 2190, goodPct: 82, pearlFunded: true, icon: Scale },
@@ -1726,7 +1726,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                     <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
                     <Tooltip
                       contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
-                      formatter={(v: number | null, name: string) => v != null ? [`${v} MT/ha`, name] : ["-", name]}
+                      formatter={(v, name) => (typeof v === "number" ? [`${v} MT/ha`, name] : ["-", name])}
                     />
                     <Legend wrapperStyle={{ paddingTop: 12, fontSize: 11 }} />
                     {/* Confidence band — stacked invisible base + visible band */}

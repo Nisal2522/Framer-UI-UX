@@ -674,8 +674,8 @@ export function AssetManagement() {
           <div className="flex overflow-x-auto">
             {[
               { id: "inventory", label: "Asset Inventory" },
-              { id: "usage-log", label: "Usage Log" },
-              { id: "disposal", label: "Disposal Request" },
+              // { id: "usage-log", label: "Usage Log" },
+              // { id: "disposal", label: "Disposal Request" },
             ].map((tab) => (
               <button
                 key={tab.id}
