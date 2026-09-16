@@ -1,28 +1,48 @@
 import { useEffect, useState } from "react";
-import { X, Upload, Tag } from "lucide-react";
+import { X, Upload } from "lucide-react";
+import { MultiSelectCombobox } from "./ui/multi-select";
 
 interface KnowledgeUploadFormProps {
   onClose: () => void;
 }
 
+// Illustrative option lists (prototype values; large enough to exercise the searchable picker UX)
+const AVAILABLE_TAGS = [
+  "Rice", "Maize", "Cassava", "Vegetables", "Fruits", "Coffee", "Rubber", "Cashew", "Pepper",
+  "Livestock", "Poultry", "Aquaculture", "Beekeeping", "Organic", "Climate Resilience",
+  "Drought Management", "Flood Management", "Pest Management", "Disease Control", "Fertilizer",
+  "Composting", "Irrigation", "Water Management", "Soil Health", "Seed Selection",
+  "Post-Harvest Handling", "Storage", "Market Prices", "Value Addition", "Processing",
+  "Packaging", "Export Standards", "Certification", "GLOBAL G.A.P.", "USDA-NOP", "EU Organic",
+  "Food Safety", "Training", "Best Practices", "Financial Literacy", "Microfinance",
+  "Cooperative Governance", "Gender Equity", "Youth Engagement", "Digital Tools",
+  "Mobile Banking", "Supply Chain", "Cold Chain", "Renewable Energy", "Solar Drying",
+  "Mechanization",
+];
+
+const AUDIENCE_OPTIONS = [
+  "AC Committee Members", "Commune Agricultural Officers", "All Farmer Members",
+  "Ministry/FAO Users", "Provincial Officers", "National Admins", "MAC Committee Members",
+  "Youth Farmers", "Women Farmers", "Smallholder Farmers", "Cooperative Managers",
+  "Field Extension Officers", "NGO Partners", "Development Partners",
+  "Private Sector Partners", "Agribusiness Investors", "Input Suppliers",
+  "Financial Institutions", "Microfinance Institutions", "Insurance Providers",
+  "Certification Bodies", "Research Institutions", "Universities", "Students/Trainees",
+  "Media/Communications", "Local Government Officials", "District Agriculture Offices",
+  "Provincial Departments of Agriculture", "Export/Import Agencies", "Logistics Providers",
+  "Cold Storage Operators", "Equipment Vendors", "Seed Companies", "Fertilizer Companies",
+  "Veterinary Services", "Irrigation Authorities", "Water Management Boards",
+  "Climate/Weather Services", "Disaster Management Agencies", "Rural Development Agencies",
+  "Gender Focal Points", "Youth Development Programs", "Community Health Workers",
+  "Nutrition Program Officers", "Market Vendors/Traders", "Transport Cooperatives",
+  "Village Chiefs", "Commune Councils",
+];
+
 export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedAudience, setSelectedAudience] = useState<string[]>([]);
   const [isVisible, setIsVisible] = useState(false);
   const ANIM_MS = 240;
-
-  const availableTags = [
-    "Rice", "Vegetables", "Livestock", "Organic", "Climate Resilience",
-    "Pest Management", "Fertilizer", "Irrigation", "Market Prices",
-    "Training", "Best Practices", "Certification"
-  ];
-
-  const toggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setIsVisible(true));
@@ -124,26 +144,14 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
               <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Tags (Select all that apply)
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      selectedTags.includes(tag)
-                        ? "bg-[#032EA1] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    <Tag className="w-3.5 h-3.5" />
-                    {tag}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-gray-600 mt-2">
-                Selected tags: {selectedTags.length > 0 ? selectedTags.join(", ") : "None"}
-              </p>
+              <MultiSelectCombobox
+                options={AVAILABLE_TAGS}
+                selected={selectedTags}
+                onChange={setSelectedTags}
+                placeholder="Select tags..."
+                searchPlaceholder="Search tags..."
+                emptyText="No matching tags."
+              />
             </div>
 
             {/* Target Audience */}
@@ -151,36 +159,14 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
               <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Target Audience
               </h3>
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-gray-300 text-[#032EA1] focus:ring-[#032EA1]"
-                  />
-                  <span className="text-sm text-gray-700">AC Committee Members</span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-gray-300 text-[#032EA1] focus:ring-[#032EA1]"
-                  />
-                  <span className="text-sm text-gray-700">Commune Agricultural Officers</span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-gray-300 text-[#032EA1] focus:ring-[#032EA1]"
-                  />
-                  <span className="text-sm text-gray-700">All Farmer Members</span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-gray-300 text-[#032EA1] focus:ring-[#032EA1]"
-                  />
-                  <span className="text-sm text-gray-700">Ministry/FAO Users</span>
-                </label>
-              </div>
+              <MultiSelectCombobox
+                options={AUDIENCE_OPTIONS}
+                selected={selectedAudience}
+                onChange={setSelectedAudience}
+                placeholder="Select target audience..."
+                searchPlaceholder="Search audience..."
+                emptyText="No matching audience."
+              />
             </div>
 
             {/* File Upload — 2-box layout matching attachment */}
@@ -229,7 +215,6 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
                     type="date"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                   />
-                  <p className="text-xs text-gray-600 mt-1">Leave blank to publish immediately</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
