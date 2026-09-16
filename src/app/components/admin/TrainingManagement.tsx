@@ -598,7 +598,7 @@ export function TrainingManagement() {
                           <User className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                           <span className="truncate">{t.trainerName}</span>
                         </span>
-                        <span className="block text-[11px] text-gray-400 mt-0.5 truncate">{t.trainerOrg}</span>
+                        <span className="block text-[11px] text-gray-500 mt-0.5 ml-5 truncate">{t.trainerOrg}</span>
                       </td>
                       <td className="px-2 sm:px-3 py-2.5 align-middle max-w-0">
                         <span className="flex items-center gap-1.5 text-xs text-gray-700">
@@ -823,18 +823,6 @@ export function TrainingManagement() {
                       onChange={(e) => setFormState((f) => ({ ...f, endTime: e.target.value }))}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Province</label>
-                    <select
-                      value={formState.province}
-                      onChange={(e) => setFormState((f) => ({ ...f, province: e.target.value }))}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white"
-                    >
-                      {PROVINCE_OPTIONS.map((p) => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
-                    </select>
                   </div>
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">

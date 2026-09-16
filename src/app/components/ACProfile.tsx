@@ -179,7 +179,9 @@ export function ACProfile() {
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold text-gray-900">AC Profile</h1>
+          <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -196,6 +198,7 @@ export function ACProfile() {
             <Edit2 className="w-4 h-4" />
             {isEditing ? "Cancel" : "Edit Information"}
           </button>
+          </div>
         </div>
       )}
 
@@ -398,7 +401,7 @@ export function ACProfile() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Cooperative Information
+                  {isEditing ? "Edit AC Information" : "Cooperative Information"}
                 </h3>
               </div>
 
