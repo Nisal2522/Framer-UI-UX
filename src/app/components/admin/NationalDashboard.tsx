@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties } from "react";
 import {
   Building2,
+  Map,
   UserRound,
+  Users,
   Package,
   BookOpen,
   TrendingUp,
+  BadgeCheck,
+  Waves,
+  BarChart3,
   AlertTriangle,
   Activity,
   Download,
@@ -16,6 +21,7 @@ import {
   X,
   Layers,
   ChevronDown,
+  MapPin,
   Check,
   Truck,
   Droplets,
@@ -105,6 +111,15 @@ const ageNat = [
   { bracket: "45–59", m: 19600, f: 17100 },
   { bracket: "60+", m: 12400, f: 10600 },
 ];
+
+type StatCard = {
+  label: string;
+  value: number;
+  icon: ComponentType<{ className?: string }>;
+  iconColor: string;
+  sub?: string;
+  breakdown?: { label: string; value: number; dot: string }[];
+};
 
 const cropNat = [
   { crop: "Rice", pct: 42 },
@@ -210,13 +225,6 @@ const ASSET_SUBTYPES: {
     { name: "Delivery Truck", type: "Vehicle", baseCount: 980, goodPct: 58, pearlFunded: false, icon: Truck },
   ];
 
-const assetConditions = [
-  { name: "Good", value: 52 },
-  { name: "Fair", value: 31 },
-  { name: "Poor", value: 12 },
-  { name: "Unknown", value: 5 },
-];
-
 const ASSET_USAGE_DATA: Record<string, { utilizationPct: number; avgHoursMonth: number; idlePct: number; overused: boolean }> = {
   "Water Pump System": { utilizationPct: 78, avgHoursMonth: 140, idlePct: 12, overused: false },
   "Weighing Scale": { utilizationPct: 91, avgHoursMonth: 164, idlePct: 5, overused: true },
@@ -250,15 +258,6 @@ const ASSET_DISPOSAL_DATA = {
     { type: "Building", disposed: 117, replaced: 88 },
   ],
 };
-
-/** Navy / slate / green / amber — executive condition palette */
-const ASSET_CONDITION_COLORS: Record<string, string> = {
-  Good: "#0f172a",
-  Fair: "#475569",
-  Poor: "#16a34a",
-  Unknown: "#d97706",
-};
-
 
 const perfHeat = [
   { province: "Battambang", composite: 86, band: "High" },
@@ -470,9 +469,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
   const [yieldRangeFrom, setYieldRangeFrom] = useState(6);
   const [yieldRangeTo, setYieldRangeTo] = useState(11);
   const [assetTab, setAssetTab] = useState<"inventory" | "usage" | "disposal">("inventory");
-  const [harvestCrop, setHarvestCrop] = useState("Rice");
-  const [harvestFromMonth, setHarvestFromMonth] = useState(0);
-  const [harvestToMonth, setHarvestToMonth] = useState(11);
+  const [assetTypeChipFilter, setAssetTypeChipFilter] = useState<string | null>(null);
 
   const acStatsNational = useMemo(
     () => ({
@@ -487,27 +484,22 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
 
   const acStats = acStatsNational;
 
+  const macsStatsNational = useMemo(
+    () => ({
+      active: scale(380, 1),
+      inactive: scale(72, 1),
+      suspended: scale(24, 1),
+      withdrawn: scale(10, 1),
+    }),
+    []
+  );
+
+  const macsStats = macsStatsNational;
+
   useEffect(() => {
     setPerfChartHoverProvince(null);
   }, [selectedProvinces]);
 
-  const assets = useMemo(
-    () => ({
-      count: scale(18420, f),
-      maintenanceCompliance: 81,
-    }),
-    [f]
-  );
-
-  const assetConditionSlices = useMemo(
-    () =>
-      assetConditions.map((row) => ({
-        ...row,
-        fill: ASSET_CONDITION_COLORS[row.name] ?? "#94a3b8",
-        estCount: Math.round(assets.count * (row.value / 100)),
-      })),
-    [assets.count]
-  );
 
   const assetSubtypeRows = useMemo(
     () => ASSET_SUBTYPES.map((s) => ({ ...s, count: Math.round(s.baseCount * f) })),
@@ -523,11 +515,36 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
       const smoothed = startFactor + (1 - startFactor) * (progress * progress * (3 - 2 * progress));
       const variance = Math.sin(i * 1.1) * 0.008;
       const total = Math.round(peakTotal * (smoothed + variance));
-      const male = Math.round(total * 0.578);
-      const female = total - male;
-      return { month, total, male, female };
+      const male = Math.round(total * 0.58);
+      const other = Math.round(total * 0.01);
+      const female = total - male - other;
+      return { month, total, male, female, other };
     });
   }, [f]);
+
+  const [trendGranularity, setTrendGranularity] = useState<"monthly" | "quarterly">("monthly");
+
+  const farmerTrendQuarterly = useMemo(() => {
+    const quarters = [
+      { label: "Q1", months: farmerTrend.slice(0, 3) },
+      { label: "Q2", months: farmerTrend.slice(3, 6) },
+      { label: "Q3", months: farmerTrend.slice(6, 9) },
+      { label: "Q4", months: farmerTrend.slice(9, 12) },
+    ];
+    return quarters.map(({ label, months }) => {
+      const last = months[months.length - 1];
+      return {
+        month: label,
+        total: last?.total ?? 0,
+        male: last?.male ?? 0,
+        female: last?.female ?? 0,
+        other: last?.other ?? 0,
+      };
+    });
+  }, [farmerTrend]);
+
+  const farmerTrendChartData =
+    trendGranularity === "monthly" ? farmerTrend : farmerTrendQuarterly;
 
 
   const perfHeatFiltered = useMemo(() => {
@@ -558,8 +575,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">{title}</h1>
           <p className="mt-1 text-sm text-gray-500">Consolidated analytics for oversight and policy planning</p>
         </div>
-        <div className="flex flex-col gap-1.5 min-w-[240px]">
-          <span className="text-xs font-medium text-gray-500">Province focus</span>
+        <div className="min-w-[200px]">
           <div className="relative">
             {dropdownOpen && (
               <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
@@ -567,9 +583,10 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
             <button
               type="button"
               onClick={() => setDropdownOpen((v) => !v)}
-              className="relative z-50 w-full flex items-center justify-between gap-2 text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white shadow-sm text-left"
+              className="relative z-50 flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm text-left hover:bg-gray-50 transition-colors"
             >
-              <span className="truncate text-gray-800">
+              <MapPin className="h-4 w-4 text-red-500 shrink-0" />
+              <span className="truncate">
                 {isNational
                   ? "All provinces"
                   : selectedProvinces.length === 1
@@ -577,7 +594,7 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                     : `${selectedProvinces.length} provinces selected`}
               </span>
               <ChevronDown
-                className={`h-4 w-4 text-gray-500 shrink-0 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+                className={`h-4 w-4 text-gray-400 shrink-0 ml-auto transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
               />
             </button>
             {dropdownOpen && (
@@ -623,24 +640,34 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
         </div>
       </div>
 
-      {/* 1. Global pulse — Total ACs, Total MACS, Total Hectares */}
+      {/* 1. Global pulse — Total ACs, Total MACS, Total Hectares, Asset Value */}
       <section className="space-y-6">
         <div className="rounded-xl bg-gradient-to-br from-[#032EA1] to-[#021c5e] p-4 text-white shadow-lg ring-1 ring-white/10 sm:p-5">
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
-            {[
+          <div className="grid grid-cols-1 divide-y divide-white/10 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+            {([
               {
                 label: "Total ACs",
                 value: acStats.active + acStats.inactive + acStats.suspended + acStats.withdrawn,
-                sub: `${acStats.active.toLocaleString()} active`,
                 icon: Building2,
                 iconColor: "text-blue-600",
+                breakdown: [
+                  { label: "Active", value: acStats.active, dot: "bg-emerald-400" },
+                  { label: "Inactive", value: acStats.inactive, dot: "bg-amber-400" },
+                  { label: "Suspended", value: acStats.suspended, dot: "bg-orange-400" },
+                  { label: "Withdrawn", value: acStats.withdrawn, dot: "bg-rose-400" },
+                ],
               },
               {
                 label: "Total MACS",
-                value: scale(486, f),
-                sub: "Member cooperatives",
+                value: macsStats.active + macsStats.inactive + macsStats.suspended + macsStats.withdrawn,
                 icon: UserRound,
                 iconColor: "text-emerald-600",
+                breakdown: [
+                  { label: "Active", value: macsStats.active, dot: "bg-emerald-400" },
+                  { label: "Inactive", value: macsStats.inactive, dot: "bg-amber-400" },
+                  { label: "Suspended", value: macsStats.suspended, dot: "bg-orange-400" },
+                  { label: "Withdrawn", value: macsStats.withdrawn, dot: "bg-rose-400" },
+                ],
               },
               {
                 label: "Total Hectares",
@@ -649,159 +676,145 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                 icon: Layers,
                 iconColor: "text-teal-600",
               },
-            ].map((c) => (
-              <div key={c.label} className="min-w-0 rounded-lg bg-white/5 px-2.5 py-2.5 ring-1 ring-white/10">
+              {
+                label: "Asset Value",
+                value: scale(13920, f),
+                sub: "Total registered assets",
+                icon: Package,
+                iconColor: "text-amber-600",
+              },
+            ] satisfies StatCard[]).map((c) => (
+              <div key={c.label} className="min-w-0 px-2.5 py-2.5 first:pt-0 sm:px-4 sm:first:pl-0 sm:py-0">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-[10px] font-medium leading-tight text-white/70 sm:text-[11px]">{c.label}</p>
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-amber-200/70 bg-white shadow-[0_0_0_1px_rgba(251,191,36,0.18),0_0_10px_rgba(251,191,36,0.28)] transition-transform duration-200 hover:scale-110">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white shadow-[0_0_8px_rgba(255,255,255,0.12)]">
                     <c.icon className={`h-3.5 w-3.5 ${c.iconColor}`} />
                   </div>
                 </div>
                 <p className="text-xl font-bold tabular-nums sm:text-2xl">{c.value.toLocaleString()}</p>
-                <p className="mt-1 text-[10px] text-white/55">{c.sub}</p>
+                {c.breakdown ? (
+                  <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1">
+                    {c.breakdown.map((b) => (
+                      <div key={b.label} className="flex items-center gap-1.5 text-[10px] text-white/70">
+                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${b.dot}`} />
+                        <span>
+                          {b.label}: <span className="font-semibold text-white">{b.value.toLocaleString()}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-1 text-[10px] text-white/55">{c.sub}</p>
+                )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Map card — aligned with membership statistics card style */}
+        {/* Map card — 100% like attached National Map Overview */}
         <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
-          <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-gray-200/80 pb-4">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-[#0F2F8F]" />
-                National map overview
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">
-                Click a province pin to filter the dashboard.
-              </p>
-            </div>
+          <div className="mb-5 border-b border-gray-200/80 pb-4">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Map className="h-5 w-5 text-[#0F2F8F]" />
+              National Map Overview
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">Geographic distribution of farmers and agricultural cooperatives</p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:gap-6">
-            <div className="h-[min(420px,55vh)] min-h-[280px] rounded-xl overflow-hidden border border-gray-100 bg-white ring-1 ring-black/[0.04]">
-              <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom>
-                <MapViewController selected={selectedProvinces} />
-                <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {/* AC pins — red */}
-                {showAcPins && provinceGeo.map((p) => {
-                  const isSelected = selectedProvinces.includes(p.province);
-                  const perfHover = perfChartHoverProvince === p.province;
-                  const iconSize = Math.round(24 + Math.min(20, p.acs / 6));
-                  const fill = isSelected ? "#032EA1" : perfHover ? "#10b981" : "#E00025";
-                  const stroke = isSelected ? "#001a6e" : perfHover ? "#059669" : "#9b0018";
-                  const acIcon = L.divIcon({
-                    html: `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.38));display:block">
-                      <path fill="${fill}" stroke="${stroke}" stroke-width="1.4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                      <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.88)"/>
-                    </svg>`,
-                    className: "",
-                    iconSize: [iconSize, iconSize],
-                    iconAnchor: [iconSize / 2, iconSize],
-                    tooltipAnchor: [0, -iconSize + 4],
-                  });
-                  return (
-                    <Marker
-                      key={`ac-${p.province}`}
-                      position={[p.lat, p.lon]}
-                      icon={acIcon}
-                      eventHandlers={{
-                        click: () =>
-                          setSelectedProvinces((prev) =>
-                            prev.includes(p.province) ? prev.filter((x) => x !== p.province) : [...prev, p.province]
-                          ),
-                      }}
-                    >
-                      <LeafletTooltip direction="top" offset={[0, -iconSize + 4]} opacity={0.95}>
-                        <div className="text-xs font-medium space-y-0.5">
-                          <div className="font-bold text-gray-900">{p.province}</div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="inline-block w-2 h-2 rounded-full bg-[#E00025]" />
-                            <span className="text-gray-700">Agricultural Cooperative (AC)</span>
-                          </div>
-                          <div className="text-gray-600">ACs: {p.acs} · Members: {p.members.toLocaleString()}</div>
-                          <div className="text-[10px] text-gray-400 mt-1">Click to filter dashboard</div>
+          <div className="relative h-[420px] min-h-[320px] rounded-xl overflow-hidden border border-gray-100 bg-white ring-1 ring-black/[0.04]">
+            <MapContainer center={[12.65, 104.9]} zoom={6.6} className="h-full w-full z-0" scrollWheelZoom>
+              <MapViewController selected={selectedProvinces} />
+              <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {/* Farmer pins — red — increased size */}
+              {provinceGeo.map((p) => {
+                const iconSize = 28;
+                const farmerIcon = L.divIcon({
+                  html: `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 1.5px 4px rgba(0,0,0,0.32));display:block"><path fill="#E00025" stroke="#9b0018" stroke-width="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.6" fill="rgba(255,255,255,0.96)"/></svg>`,
+                  className: "",
+                  iconSize: [iconSize, iconSize],
+                  iconAnchor: [iconSize / 2, iconSize],
+                  tooltipAnchor: [0, -iconSize + 4],
+                });
+                return (
+                  <Marker
+                    key={`farmer-${p.province}`}
+                    position={[p.lat - 0.07, p.lon - 0.09]}
+                    icon={farmerIcon}
+                    eventHandlers={{
+                      click: () =>
+                        setSelectedProvinces((prev) =>
+                          prev.includes(p.province) ? prev.filter((x) => x !== p.province) : [...prev, p.province]
+                        ),
+                    }}
+                  >
+                    <LeafletTooltip direction="top" offset={[0, -iconSize + 4]} opacity={0.95}>
+                      <div className="text-xs font-medium space-y-0.5">
+                        <div className="font-bold text-gray-900">{p.province}</div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="inline-block w-2 h-2 rounded-full bg-[#E00025]" />
+                          <span className="text-gray-700">Farmer</span>
                         </div>
-                      </LeafletTooltip>
-                    </Marker>
-                  );
-                })}
-
-                {/* MAC pins — blue, offset NE so they sit next to AC pins */}
-                {showMacPins && provinceGeo.map((p) => {
-                  const macSize = Math.round(26 + Math.min(14, p.macs / 2));
-                  const macIcon = L.divIcon({
-                    html: `<svg xmlns="http://www.w3.org/2000/svg" width="${macSize}" height="${macSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.38));display:block">
-                      <path fill="#032EA1" stroke="#001a6e" stroke-width="1.4" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                      <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.88)"/>
-                    </svg>`,
-                    className: "",
-                    iconSize: [macSize, macSize],
-                    iconAnchor: [macSize / 2, macSize],
-                    tooltipAnchor: [0, -macSize + 4],
-                  });
-                  return (
-                    <Marker
-                      key={`mac-${p.province}`}
-                      position={[p.lat + 0.18, p.lon + 0.22]}
-                      icon={macIcon}
-                      eventHandlers={{
-                        click: () =>
-                          setSelectedProvinces((prev) =>
-                            prev.includes(p.province) ? prev.filter((x) => x !== p.province) : [...prev, p.province]
-                          ),
-                      }}
-                    >
-                      <LeafletTooltip direction="top" offset={[0, -macSize + 4]} opacity={0.95}>
-                        <div className="text-xs font-medium space-y-0.5">
-                          <div className="font-bold text-gray-900">{p.province}</div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="inline-block w-2 h-2 rounded-full bg-[#032EA1]" />
-                            <span className="text-gray-700">Model Agricultural Cooperative (MAC)</span>
-                          </div>
-                          <div className="text-gray-600">MACs: {p.macs} · Members: {p.members.toLocaleString()}</div>
-                          <div className="text-[10px] text-gray-400 mt-1">Click to filter dashboard</div>
+                        <div className="text-gray-600">Farmers in ACs: {p.members.toLocaleString()}</div>
+                      </div>
+                    </LeafletTooltip>
+                  </Marker>
+                );
+              })}
+              {/* Cooperative pins — blue — increased size */}
+              {provinceGeo.map((p) => {
+                const iconSize = 28;
+                const coopIcon = L.divIcon({
+                  html: `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 1.5px 4px rgba(0,0,0,0.32));display:block"><path fill="#032EA1" stroke="#001a6e" stroke-width="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.6" fill="rgba(255,255,255,0.96)"/></svg>`,
+                  className: "",
+                  iconSize: [iconSize, iconSize],
+                  iconAnchor: [iconSize / 2, iconSize],
+                  tooltipAnchor: [0, -iconSize + 4],
+                });
+                return (
+                  <Marker
+                    key={`coop-${p.province}`}
+                    position={[p.lat + 0.12, p.lon + 0.14]}
+                    icon={coopIcon}
+                    eventHandlers={{
+                      click: () =>
+                        setSelectedProvinces((prev) =>
+                          prev.includes(p.province) ? prev.filter((x) => x !== p.province) : [...prev, p.province]
+                        ),
+                    }}
+                  >
+                    <LeafletTooltip direction="top" offset={[0, -iconSize + 4]} opacity={0.95}>
+                      <div className="text-xs font-medium space-y-0.5">
+                        <div className="font-bold text-gray-900">{p.province}</div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="inline-block w-2 h-2 rounded-full bg-[#032EA1]" />
+                          <span className="text-gray-700">Cooperative</span>
                         </div>
-                      </LeafletTooltip>
-                    </Marker>
-                  );
-                })}
-              </MapContainer>
-            </div>{/* end map container div */}
-          </div>{/* end grid div */}
+                        <div className="text-gray-600">Cooperatives: {p.acs} · Members: {p.members.toLocaleString()}</div>
+                      </div>
+                    </LeafletTooltip>
+                  </Marker>
+                );
+              })}
+            </MapContainer>
 
-          {/* AC / MAC toggle tiles */}
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            {/* AC toggle */}
+            {/* Legend inside map — bottom-left like attached */}
+            <div className="absolute bottom-3 left-3 z-[400] rounded-lg bg-white/95 backdrop-blur-sm px-3 py-2 shadow-md border border-gray-200">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Legend</p>
+              <div className="flex flex-col gap-1.5 text-xs font-medium text-gray-700">
+                <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#E00025] border border-white shadow-sm" /> Farmer</span>
+                <span className="inline-flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#032EA1] border border-white shadow-sm" /> Cooperative</span>
+              </div>
+            </div>
+
+            {/* Fullscreen button — bottom-right like attached/Google */}
             <button
               type="button"
-              onClick={() => setShowAcPins((v) => !v)}
-              className={`flex items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 ${showAcPins
-                  ? "border-red-100 bg-red-50/60 opacity-100"
-                  : "border-gray-200 bg-gray-100/60 opacity-50 grayscale"
-                }`}
+              className="absolute bottom-3 right-3 z-[400] flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 hover:bg-gray-50"
+              aria-label="Fullscreen"
             >
-              <svg width="28" height="36" viewBox="0 0 24 24" className="shrink-0">
-                <path fill="#E00025" stroke="#9b0018" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)" />
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8">
+                <path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M8 21H5a2 2 0 01-2-2v-3M16 21h3a2 2 0 002-2v-3" />
               </svg>
-              <p className="text-sm font-semibold text-red-600">Agricultural Cooperatives</p>
-            </button>
-
-            {/* MAC toggle */}
-            <button
-              type="button"
-              onClick={() => setShowMacPins((v) => !v)}
-              className={`flex items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-200 ${showMacPins
-                  ? "border-blue-100 bg-blue-50/60 opacity-100"
-                  : "border-gray-200 bg-gray-100/60 opacity-50 grayscale"
-                }`}
-            >
-              <svg width="28" height="36" viewBox="0 0 24 24" className="shrink-0">
-                <path fill="#032EA1" stroke="#001a6e" strokeWidth="1.2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                <circle cx="12" cy="9" r="2.8" fill="rgba(255,255,255,0.9)" />
-              </svg>
-              <p className="text-sm font-semibold text-[#032EA1]">Model Agricultural Cooperatives</p>
             </button>
           </div>
         </section>
@@ -916,12 +929,13 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
           </div>
         </div>
 
-        {/* Tab 1: Regional Crop Distribution */}
+        {/* Tab 1: National Crop Distribution — 100% like attached */}
         {cropSectionTab === "distribution" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Map — left 2 cols */}
             <div className="lg:col-span-2">
-              <div className="h-[min(400px,52vh)] min-h-[260px] rounded-xl overflow-hidden border border-gray-100 ring-1 ring-black/[0.04]">
-                <MapContainer center={[12.7, 104.9]} zoom={6.3} className="h-full w-full z-0" scrollWheelZoom={false}>
+              <div className="h-[420px] min-h-[340px] rounded-xl overflow-hidden border border-gray-100 ring-1 ring-black/[0.04] relative">
+                <MapContainer center={[12.7, 104.9]} zoom={6.2} className="h-full w-full z-0" scrollWheelZoom={false}>
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -929,138 +943,130 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                   {provinceGeo.map((p) => {
                     const info = provinceCrops[p.province];
                     const dominant = info?.dominant ?? "Other";
-                    const color = CROP_COLORS[dominant] ?? "#94a3b8";
+                    const color = CROP_COLORS[dominant] ?? "#9ca3af";
                     const dimmed = cropFilters.length > 0 && !cropFilters.includes(dominant);
-                    const r = 7 + Math.min(14, p.acs / 9);
+                    const iconSize = dimmed ? 24 : 30 + Math.min(6, Math.round(p.acs / 15));
+                    const pinIcon = L.divIcon({
+                      html: `<svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" style="filter:drop-shadow(0 1.5px 4px rgba(0,0,0,0.35));display:block"><path fill="${dimmed ? "#d1d5db" : color}" stroke="${dimmed ? "#9ca3af" : color}" stroke-width="1.1" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.7" fill="rgba(255,255,255,0.96)"/></svg>`,
+                      className: "",
+                      iconSize: [iconSize, iconSize],
+                      iconAnchor: [iconSize / 2, iconSize],
+                      tooltipAnchor: [0, -iconSize + 4],
+                    });
                     return (
-                      <CircleMarker
-                        key={p.province}
-                        center={[p.lat, p.lon]}
-                        radius={dimmed ? r * 0.55 : r}
-                        pathOptions={{
-                          color: "#fff",
-                          fillColor: dimmed ? "#d1d5db" : color,
-                          fillOpacity: dimmed ? 0.35 : 0.88,
-                          weight: dimmed ? 1 : 2,
-                        }}
-                      >
-                        <LeafletTooltip direction="top" offset={[0, -4]} opacity={0.97}>
+                      <Marker key={p.province} position={[p.lat, p.lon]} icon={pinIcon}>
+                        <LeafletTooltip direction="top" offset={[0, -iconSize + 4]} opacity={0.97}>
                           <div className="text-xs font-medium space-y-0.5">
                             <div className="font-bold text-gray-900">{p.province}</div>
                             <div className="flex items-center gap-1.5">
                               <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
                               <span>Dominant: <strong>{dominant}</strong> ({info?.pct ?? "—"}%)</span>
                             </div>
-                            <div className="text-gray-500">Secondary: {info?.secondary ?? "—"}</div>
                             <div className="text-gray-500">ACs: {p.acs} · Members: {p.members.toLocaleString()}</div>
                           </div>
                         </LeafletTooltip>
-                      </CircleMarker>
+                      </Marker>
                     );
                   })}
                 </MapContainer>
+                <button
+                  type="button"
+                  className="absolute bottom-3 right-3 z-[400] flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-md border border-gray-200 hover:bg-gray-50"
+                  aria-label="Fullscreen"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8">
+                    <path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M8 21H5a2 2 0 01-2-2v-3M16 21h3a2 2 0 002-2v-3" />
+                  </svg>
+                </button>
               </div>
-              <div className="mt-3 flex flex-wrap gap-4">
-                {Object.entries(CROP_COLORS).map(([crop, color]) => {
-                  const count = Object.values(provinceCrops).filter((v) => v.dominant === crop).length;
-                  return (
-                    <div key={crop} className="flex items-center gap-1.5 text-xs text-gray-600">
-                      <span className="inline-block w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: color }} />
-                      <span className="font-medium">{crop}</span>
-                      <span className="text-gray-400">({count} prov.)</span>
-                    </div>
-                  );
-                })}
+              <div className="mt-3 flex flex-wrap gap-4 text-xs">
+                {[
+                  { label: "Rice", color: CROP_COLORS.Rice },
+                  { label: "Cassava", color: CROP_COLORS.Cassava },
+                  { label: "Maize", color: CROP_COLORS.Maize },
+                  { label: "Vegetables", color: CROP_COLORS.Vegetables },
+                  { label: "Other", color: CROP_COLORS.Other },
+                ].map(({ label, color }) => (
+                  <span key={label} className="inline-flex items-center gap-1.5 text-gray-600">
+                    <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} /> {label}
+                  </span>
+                ))}
               </div>
             </div>
 
+            {/* Right cards — 4 crops like attached */}
             <div className="lg:col-span-1 flex flex-col gap-3">
-              {(() => {
-                const CROP_INITIAL = 4;
-                const allCropEntries = Object.entries(CROP_COLORS);
-                const visibleEntries = showAllCrops ? allCropEntries : allCropEntries.slice(0, CROP_INITIAL);
+              {[
+                { crop: "Rice", farmers: 16, ha: 213, names: "Sok Dara, Pich Visal +14", barPct: 86, color: CROP_COLORS.Rice, bg: "bg-amber-50", icon: Wheat },
+                { crop: "Cassava", farmers: 7, ha: 83, names: "Sok Dara, Keo Sreymom +5", barPct: 62, color: CROP_COLORS.Cassava, bg: "bg-amber-50", icon: Carrot },
+                { crop: "Maize", farmers: 9, ha: 120, names: "Chea Sopheak, Heng Samnang +7", barPct: 74, color: CROP_COLORS.Maize, bg: "bg-red-50", icon: Bean },
+                { crop: "Vegetables", farmers: 10, ha: 93, names: "Chea Sopheak, Neang Bopha +8", barPct: 58, color: CROP_COLORS.Vegetables, bg: "bg-emerald-50", icon: Salad },
+              ].map(({ crop, farmers, ha, names, barPct, color, bg, icon: Icon }) => {
+                const isActive = cropFilters.includes(crop);
                 return (
-                  <>
-                    <div className="grid grid-cols-1 gap-2">
-                      {visibleEntries.map(([crop, color]) => {
-                        const Icon = CROP_ICONS[crop] ?? CircleDot;
-                        const provinces = Object.entries(provinceCrops)
-                          .filter(([, v]) => v.dominant === crop)
-                          .map(([name]) => name);
-                        const totalAcs = provinces.reduce((s, name) => {
-                          const geo = provinceGeo.find((p) => p.province === name);
-                          return s + (geo?.acs ?? 0);
-                        }, 0);
-                        const isActive = cropFilters.includes(crop);
-                        return (
-                          <button
-                            key={crop}
-                            type="button"
-                            onClick={() =>
-                              setCropFilters((prev) =>
-                                isActive ? prev.filter((c) => c !== crop) : [...prev, crop]
-                              )
-                            }
-                            className={`w-full rounded-xl border p-3 text-left transition-all ${isActive ? "ring-2" : "hover:border-gray-300"
-                              }`}
-                            style={
-                              isActive
-                                ? { backgroundColor: `${color}12`, borderColor: color }
-                                : { borderColor: "#e5e7eb", backgroundColor: "#fafafa" }
-                            }
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-                                  style={{ backgroundColor: `${color}22` }}
-                                >
-                                  <Icon className="h-4 w-4" style={{ color }} />
-                                </div>
-                                <span className="text-sm font-semibold text-gray-800">{crop}</span>
-                              </div>
-                              <span className="text-xs font-bold tabular-nums" style={{ color }}>
-                                {provinces.length} prov.
-                              </span>
-                            </div>
-                            <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
-                              <span>{totalAcs} ACs</span>
-                              <span className="text-gray-300">·</span>
-                              <span className="truncate text-[11px]">
-                                {provinces.slice(0, 2).join(", ")}
-                                {provinces.length > 2 ? ` +${provinces.length - 2}` : ""}
-                              </span>
-                            </div>
-                            <div className="mt-2 h-1 w-full rounded-full bg-gray-200">
-                              <div
-                                className="h-full rounded-full"
-                                style={{
-                                  width: `${Math.round((provinces.length / 25) * 100)}%`,
-                                  backgroundColor: color,
-                                }}
-                              />
-                            </div>
-                          </button>
-                        );
-                      })}
+                  <button
+                    key={crop}
+                    type="button"
+                    onClick={() => setCropFilters((prev) => (isActive ? prev.filter((c) => c !== crop) : [...prev, crop]))}
+                    className={`w-full rounded-xl border p-3 text-left shadow-sm transition-all ${isActive ? "ring-2 bg-white" : "bg-white hover:border-gray-300"}`}
+                    style={{ borderColor: isActive ? color : "#e5e7eb" }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${bg}`}>
+                          <Icon className="h-4 w-4" style={{ color }} />
+                        </div>
+                        <span className="text-sm font-semibold text-gray-800">{crop}</span>
+                      </div>
+                      <span className="text-xs font-bold tabular-nums" style={{ color }}>{farmers} farmers</span>
                     </div>
-                    {allCropEntries.length > CROP_INITIAL && (
-                      <button
-                        type="button"
-                        onClick={() => setShowAllCrops((v) => !v)}
-                        className="text-sm font-medium text-[#032EA1] hover:text-[#0447D4] transition-colors text-left"
-                      >
-                        {showAllCrops ? "Show less" : `Show more (${allCropEntries.length - CROP_INITIAL} more)`}
-                      </button>
-                    )}
-                  </>
+                    <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
+                      <span className="tabular-nums">{farmers} farmers</span>
+                      <span className="text-gray-300">·</span>
+                      <span className="tabular-nums">{ha} ha</span>
+                      <span className="text-gray-300">·</span>
+                      <span className="truncate">{names}</span>
+                    </div>
+                    <div className="mt-2 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                      <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: color }} />
+                    </div>
+                  </button>
                 );
-              })()}
+              })}
+              <button
+                type="button"
+                onClick={() => setShowAllCrops((v) => !v)}
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-[#0F2F8F] hover:bg-gray-50 shadow-sm"
+              >
+                {showAllCrops ? "Show less" : "Show more (1 more)"}
+              </button>
+              {showAllCrops && (
+                <div className="rounded-xl border bg-white p-3 shadow-sm" style={{ borderColor: CROP_COLORS.Other }}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100">
+                        <CircleDot className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-800">Other</span>
+                    </div>
+                    <span className="text-xs font-bold tabular-nums text-gray-500">6 farmers</span>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2 text-[11px] text-gray-500">
+                    <span>6 farmers</span>
+                    <span className="text-gray-300">·</span>
+                    <span>42 ha</span>
+                    <span className="text-gray-300">·</span>
+                    <span className="truncate">Khan Dina +5</span>
+                  </div>
+                  <div className="mt-2 h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                    <div className="h-full rounded-full bg-gray-400" style={{ width: "38%" }} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Tab 2: Annual Yield Prediction */}
         {cropSectionTab === "yield" && (() => {
           const crops = Object.keys(YIELD_3Y);
           const pKey = "annual" as const;
@@ -1513,364 +1519,97 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
         })()}
       </section>
 
-      {/* Harvest Forecasting */}
-      {(() => {
-        const HARVEST_LAST_ACTUAL = 5;
-        const hd = YIELD_3Y[harvestCrop];
-        const idxArr = YIELD_MONTHLY_IDX[harvestCrop] ?? [];
-
-        const allMonthData = MONTHS_SHORT.map((m, i) => {
-          const idx = idxArr[i] ?? 0;
-          const isAct = i <= HARVEST_LAST_ACTUAL;
-          const v26 = +(hd.y2026.annual * idx).toFixed(3);
-          const v25 = +(hd.y2025.annual * idx).toFixed(3);
-          const v24 = +(hd.y2024.annual * idx).toFixed(3);
-          const variance = v25 > 0 ? +((v26 - v25) / v25 * 100).toFixed(1) : 0;
-          const confFactor = isAct ? 0 : (1 - hd.confidence / 100) * 0.9;
-          return {
-            month: m,
-            actual: isAct ? v26 : null,
-            forecast: !isAct ? v26 : null,
-            ly2025: v25,
-            ly2024: v24,
-            variance,
-            lowerBound: isAct ? v26 : +(v26 * (1 - confFactor)).toFixed(3),
-            bandWidth: isAct ? 0 : +(v26 * confFactor * 2).toFixed(3),
-            isAct,
-          };
-        });
-
-        const rangeData = allMonthData.slice(harvestFromMonth, harvestToMonth + 1);
-        const totalActual = rangeData.reduce((s, d) => s + (d.actual ?? 0), 0);
-        const totalForecast = rangeData.reduce((s, d) => s + (d.forecast ?? 0), 0);
-        const total2025 = rangeData.reduce((s, d) => s + d.ly2025, 0);
-        const totalYield = +(totalActual + totalForecast).toFixed(2);
-        const growthVsLy = total2025 > 0 ? +((totalYield - total2025) / total2025 * 100).toFixed(1) : 0;
-        const atRiskMonths = rangeData.filter((d) => d.variance < -5);
-        const peakEntry = rangeData.length > 0
-          ? rangeData.reduce((mx, d) => (d.actual ?? d.forecast ?? 0) > (mx.actual ?? mx.forecast ?? 0) ? d : mx, rangeData[0])
-          : null;
-
-        const insights: { level: "warn" | "success" | "info"; title: string; body: string }[] = [];
-        if (atRiskMonths.length > 0) {
-          insights.push({
-            level: "warn",
-            title: `${atRiskMonths.length} month${atRiskMonths.length > 1 ? "s" : ""} below 2025 baseline`,
-            body: `${atRiskMonths.map((d) => d.month).join(", ")} — projected below target. Consider field intervention or resource reallocation.`,
-          });
-        }
-        if (growthVsLy >= 0) {
-          insights.push({
-            level: "success",
-            title: `${harvestCrop} on track · +${growthVsLy}% vs 2025`,
-            body: "Period forecast outperforms last year. Maintain input supply levels and pre-position logistics for peak collection.",
-          });
-        } else {
-          insights.push({
-            level: "warn",
-            title: `${harvestCrop} behind target · ${growthVsLy}% vs 2025`,
-            body: "Period total below last year's harvest. Review input supply, weather impact, and cooperative field reports.",
-          });
-        }
-        if (peakEntry) {
-          insights.push({
-            level: "info",
-            title: `Peak harvest expected: ${peakEntry.month} 2026`,
-            body: "Pre-position storage capacity, transport, and market linkages at least 3 weeks before peak collection.",
-          });
-        }
-        insights.push({
-          level: hd.confidence >= 80 ? "success" : hd.confidence >= 65 ? "info" : "warn",
-          title: `${hd.confidence}% forecast confidence`,
-          body: hd.confidence >= 80
-            ? "High confidence — model supported by field data. Suitable for policy decisions."
-            : hd.confidence >= 65
-              ? "Moderate confidence — include contingency plans when allocating resources."
-              : "Low confidence — additional ground-truth verification recommended.",
-        });
-
-        return (
-          <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
-
-            {/* Header */}
-            <div className="flex flex-wrap items-start justify-between gap-4 mb-6 border-b border-gray-200/80 pb-5">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="inline-flex items-center rounded-md bg-[#032EA1] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
-                    MAFF · Official
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    Live Forecast
-                  </span>
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-[#0F2F8F]" />
-                  Harvest Forecasting
-                </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  Predictive harvest analytics — 2026 projections based on seasonal indices and cooperative field baselines
-                </p>
-              </div>
-              {/* Crop selector */}
-              <div className="flex flex-wrap gap-2">
-                {Object.keys(YIELD_3Y).map((crop) => {
-                  const Icon = CROP_ICONS[crop] ?? CircleDot;
-                  const active = harvestCrop === crop;
-                  const cd = YIELD_3Y[crop];
-                  return (
-                    <button
-                      key={crop}
-                      type="button"
-                      onClick={() => setHarvestCrop(crop)}
-                      className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-all ${active ? "border-transparent text-white shadow-sm" : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
-                        }`}
-                      style={active ? { backgroundColor: cd.color } : {}}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {crop}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* KPI row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Period Yield</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">
-                  {totalYield} <span className="text-xs font-normal text-gray-400">MT/ha</span>
-                </p>
-                <p className="text-[11px] text-gray-400 mt-0.5">{MONTHS_SHORT[harvestFromMonth]}–{MONTHS_SHORT[harvestToMonth]} 2026</p>
-              </div>
-              <div className={`rounded-xl border px-4 py-3 ${growthVsLy >= 0 ? "border-emerald-200 bg-emerald-50" : "border-red-200 bg-red-50"}`}>
-                <p className={`text-[10px] font-semibold uppercase tracking-wide ${growthVsLy >= 0 ? "text-emerald-500" : "text-red-400"}`}>vs 2025</p>
-                <p className={`mt-1 text-2xl font-bold tabular-nums ${growthVsLy >= 0 ? "text-emerald-700" : "text-red-600"}`}>
-                  {growthVsLy >= 0 ? "+" : ""}{growthVsLy}%
-                </p>
-                <p className={`text-[11px] mt-0.5 ${growthVsLy >= 0 ? "text-emerald-500" : "text-red-400"}`}>
-                  {growthVsLy >= 0 ? "Outperforming" : "Below target"}
-                </p>
-              </div>
-              <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-400">Forecast Confidence</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums text-blue-700">{hd.confidence}%</p>
-                <div className="mt-1.5 h-1 w-full rounded-full bg-blue-200">
-                  <div className="h-full rounded-full bg-blue-500" style={{ width: `${hd.confidence}%` }} />
-                </div>
-              </div>
-              <div className={`rounded-xl border px-4 py-3 ${atRiskMonths.length === 0 ? "border-gray-200 bg-gray-50" : "border-amber-200 bg-amber-50"}`}>
-                <p className={`text-[10px] font-semibold uppercase tracking-wide ${atRiskMonths.length === 0 ? "text-gray-400" : "text-amber-500"}`}>
-                  At-Risk Months
-                </p>
-                <p className={`mt-1 text-2xl font-bold tabular-nums ${atRiskMonths.length === 0 ? "text-gray-600" : "text-amber-700"}`}>
-                  {atRiskMonths.length}
-                </p>
-                <p className={`text-[11px] mt-0.5 truncate ${atRiskMonths.length === 0 ? "text-gray-400" : "text-amber-500"}`}>
-                  {atRiskMonths.length === 0 ? "All months on track" : atRiskMonths.map((d) => d.month).join(", ")}
-                </p>
-              </div>
-            </div>
-
-            {/* Month range picker */}
-            <div className="mb-6">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Select Forecast Period</p>
-              <div className="flex rounded-xl overflow-hidden border border-gray-200">
-                {MONTHS_SHORT.map((m, i) => {
-                  const inRange = i >= harvestFromMonth && i <= harvestToMonth;
-                  const isAct2 = i <= HARVEST_LAST_ACTUAL;
-                  const isFrom = i === harvestFromMonth;
-                  const isTo = i === harvestToMonth && harvestToMonth !== harvestFromMonth;
-                  return (
-                    <button
-                      key={m}
-                      type="button"
-                      title={`${m} — ${isAct2 ? "Actual" : "Forecast"}`}
-                      onClick={() => {
-                        if (i <= harvestFromMonth) { setHarvestFromMonth(i); setHarvestToMonth(i); }
-                        else { setHarvestToMonth(i); }
-                      }}
-                      className={`flex-1 py-2.5 border-r last:border-r-0 border-gray-200 transition-colors ${inRange
-                          ? isAct2 ? "bg-[#032EA1] text-white" : "bg-slate-500 text-white"
-                          : isAct2 ? "bg-blue-50 text-blue-400 hover:bg-blue-100" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
-                        }`}
-                    >
-                      <span className="block text-[11px] font-semibold">{m}</span>
-                      <span className="block text-[8px] mt-0.5 opacity-70">
-                        {isFrom ? "from" : isTo ? "to" : isAct2 ? "act" : "est"}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="flex flex-wrap items-center gap-4 mt-2 text-[10px] text-gray-400">
-                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-[#032EA1]" />Jan–Jun confirmed actual</span>
-                <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-slate-500" />Jul–Dec forecast</span>
-                <span className="ml-auto font-medium text-gray-500">
-                  {MONTHS_SHORT[harvestFromMonth]}–{MONTHS_SHORT[harvestToMonth]} 2026 · {harvestToMonth - harvestFromMonth + 1} month{harvestToMonth - harvestFromMonth !== 0 ? "s" : ""}
-                </span>
-              </div>
-            </div>
-
-            {/* Main forecast chart */}
-            <div className="mb-6">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">
-                {harvestCrop} — Monthly Harvest: Actual vs Forecast with Confidence Band (MT/ha)
-              </p>
-              <div style={{ height: 270 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={rangeData} margin={{ top: 8, right: 16, left: -12, bottom: 4 }} barCategoryGap="28%">
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
-                    <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
-                      formatter={(v, name) => (typeof v === "number" ? [`${v} MT/ha`, name] : ["-", name])}
-                    />
-                    <Legend wrapperStyle={{ paddingTop: 12, fontSize: 11 }} />
-                    {/* Confidence band — stacked invisible base + visible band */}
-                    <Area type="monotone" dataKey="lowerBound" stackId="ci" fill="transparent" stroke="none" legendType="none" tooltipType="none" />
-                    <Area type="monotone" dataKey="bandWidth" stackId="ci" fill="#dbeafe" fillOpacity={0.55} stroke="none" name="Confidence band" legendType="square" />
-                    {/* Historical baselines */}
-                    <Line type="monotone" dataKey="ly2025" name="2025 Actual" stroke="#f59e0b" strokeDasharray="5 3" strokeWidth={1.5} dot={false} />
-                    <Line type="monotone" dataKey="ly2024" name="2024 Actual" stroke="#cbd5e1" strokeDasharray="3 2" strokeWidth={1.2} dot={false} />
-                    {/* Current year bars */}
-                    <Bar dataKey="actual" name="2026 Actual" fill="#032EA1" radius={[3, 3, 0, 0]} maxBarSize={20} />
-                    <Bar dataKey="forecast" name="2026 Forecast" fill="#94a3b8" radius={[3, 3, 0, 0]} maxBarSize={20} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Bottom 3-col: Variance | YoY | Insights */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-              {/* Variance analysis */}
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Variance vs 2025 (%)</p>
-                <div style={{ height: 210 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={rangeData} margin={{ top: 4, right: 8, left: -22, bottom: 4 }} barCategoryGap="30%">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 11 }}
-                        formatter={(v: number) => [`${v > 0 ? "+" : ""}${v}%`, "vs 2025"]}
-                      />
-                      <ReferenceLine y={0} stroke="#e2e8f0" strokeWidth={1.5} />
-                      <Bar dataKey="variance" radius={[3, 3, 0, 0]} maxBarSize={16}>
-                        {rangeData.map((entry, idx) => (
-                          <Cell key={idx} fill={entry.variance >= 0 ? "#22c55e" : "#ef4444"} fillOpacity={Math.abs(entry.variance) > 10 ? 1 : 0.65} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex gap-4 mt-1.5 text-[10px] text-gray-400">
-                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-emerald-400" />Above 2025</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-red-400" />Below 2025</span>
-                </div>
-              </div>
-
-              {/* YoY Comparison */}
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Year-over-Year Comparison</p>
-                <div style={{ height: 210 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={rangeData} margin={{ top: 4, right: 8, left: -22, bottom: 4 }} barCategoryGap="20%" barGap={1}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                      <Tooltip
-                        contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 11 }}
-                        formatter={(v: number, name: string) => [`${v} MT/ha`, name]}
-                      />
-                      <Legend wrapperStyle={{ paddingTop: 8, fontSize: 10 }} />
-                      <Bar dataKey="ly2024" name="2024" fill="#e2e8f0" radius={[2, 2, 0, 0]} maxBarSize={10} />
-                      <Bar dataKey="ly2025" name="2025" fill="#6b9bda" radius={[2, 2, 0, 0]} maxBarSize={10} />
-                      <Bar dataKey="actual" name="2026 Actual" fill="#032EA1" radius={[2, 2, 0, 0]} maxBarSize={10} />
-                      <Bar dataKey="forecast" name="2026 Forecast" fill="#94a3b8" radius={[2, 2, 0, 0]} maxBarSize={10} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* Decision support insights */}
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Decision Support</p>
-                <div className="flex flex-col gap-2.5">
-                  {insights.map((ins, idx) => {
-                    const s = ins.level === "warn"
-                      ? { bg: "bg-amber-50", border: "border-l-amber-400", title: "text-amber-700", dot: "bg-amber-400" }
-                      : ins.level === "success"
-                        ? { bg: "bg-emerald-50", border: "border-l-emerald-400", title: "text-emerald-700", dot: "bg-emerald-400" }
-                        : { bg: "bg-blue-50", border: "border-l-[#032EA1]", title: "text-[#032EA1]", dot: "bg-[#032EA1]" };
-                    return (
-                      <div key={idx} className={`rounded-lg border-l-4 p-3 ${s.bg} ${s.border}`}>
-                        <div className="flex items-start gap-2">
-                          <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${s.dot}`} />
-                          <div>
-                            <p className={`text-[11px] font-semibold leading-snug ${s.title}`}>{ins.title}</p>
-                            <p className="text-[10px] leading-relaxed text-gray-500 mt-0.5">{ins.body}</p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-            </div>
-
-            <p className="mt-5 text-[10px] text-gray-400 border-t border-gray-100 pt-4">
-              Forecast derived from 2-year (2024–2025) seasonal harvest indices applied to cooperative field-reported annual projections.
-              Confidence band represents ±{Math.round((1 - hd.confidence / 100) * 90)}% forecast uncertainty.
-              MAFF Provincial Extension data integrated. Projections reviewed quarterly.
-            </p>
-          </section>
-        );
-      })()}
-
-      {/* 2. Geographic Distribution */}
+      {/* 2. Geographic Distribution — redesigned as Gender Distribution by Province */}
       <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
-        <div className="mb-5 border-b border-gray-200/80 pb-4">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <UserRound className="h-5 w-5 text-[#0F2F8F]" />
-            Geographic Distribution
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">Agricultural cooperatives and farmer members by province</p>
+        <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-gray-200/80 pb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <Users className="h-5 w-5 text-[#0F2F8F]" />
+              Gender Distribution by Province
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">Male and female farmer members per province</p>
+          </div>
+          <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#1e3a8a]" /> Male
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#E00025]" /> Female
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-gray-400" /> Other
+            </span>
+          </div>
         </div>
 
         {(() => {
-          const sorted = [...provinceGeo].sort((a, b) => b.acs - a.acs);
-          const maxAcs = sorted[0]?.acs ?? 1;
+          const sorted = [...provinceGeo].sort((a, b) => b.members - a.members);
+          const exactMap: Record<string, { male: number; female: number }> = {
+            "Phnom Penh": { male: 8360, female: 6688 },
+            Battambang: { male: 7316, female: 4960 },
+            "Siem Reap": { male: 5656, female: 4343 },
+            Kandal: { male: 5488, female: 4214 },
+            "Kampong Thom": { male: 5162, female: 3649 },
+            "Kampong Cham": { male: 4674, female: 3444 },
+            Takeo: { male: 3520, female: 2816 },
+            "Tboung Khmum": { male: 3538, female: 2501 },
+            Kampot: { male: 3306, female: 2436 },
+            "Prey Veng": { male: 2968, female: 2279 },
+          };
+          const getGender = (p: (typeof provinceGeo)[0]) => {
+            const exact = exactMap[p.province];
+            if (exact) {
+              const other = p.members - exact.male - exact.female;
+              const malePct = Math.round((exact.male / p.members) * 100);
+              const femalePct = Math.round((exact.female / p.members) * 100);
+              const otherPct = Math.max(0, 100 - malePct - femalePct);
+              return { male: exact.male, female: exact.female, other, malePct, femalePct, otherPct };
+            }
+            const malePct = 55 + (p.acs % 5);
+            const femalePct = 99 - malePct;
+            const otherPct = 1;
+            const male = Math.round((p.members * malePct) / 100);
+            const female = Math.round((p.members * femalePct) / 100);
+            let other = p.members - male - female;
+            if (other < 0) other = 0;
+            return { male, female, other, malePct, femalePct, otherPct };
+          };
           const visible = showAllGeo ? sorted : sorted.slice(0, 10);
           return (
             <>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {visible.map((p) => {
-                  const pct = (p.acs / maxAcs) * 100;
-                  const isHighlighted = selectedProvinces.length === 0 || selectedProvinces.includes(p.province);
+                  const { male, female, malePct, femalePct, otherPct } = getGender(p);
                   return (
                     <div key={p.province} className="flex items-center gap-3">
-                      <div className="w-36 shrink-0 text-sm font-semibold text-gray-700 text-right truncate">
+                      <div className="w-28 sm:w-36 shrink-0 text-xs sm:text-sm font-medium text-gray-700 text-right truncate">
                         {p.province}
                       </div>
-                      <div className="flex-1 h-8 bg-gray-200/60 rounded-lg overflow-hidden">
+                      <div className="flex-1 h-7 rounded-lg overflow-hidden flex bg-gray-100">
                         <div
-                          className="h-full rounded-lg flex items-center justify-end pr-3 transition-all duration-500"
-                          style={{
-                            width: `${pct}%`,
-                            backgroundColor: isHighlighted ? "#032EA1" : "#cbd5e1",
-                          }}
+                          className="h-full flex items-center justify-end pr-1.5 text-[10px] font-bold text-white"
+                          style={{ width: `${malePct}%`, backgroundColor: "#1e3a8a" }}
                         >
-                          <span className="text-xs font-bold text-white whitespace-nowrap">{p.acs}</span>
+                          {malePct >= 14 ? `${malePct}%` : ""}
                         </div>
+                        <div
+                          className="h-full flex items-center justify-start pl-1.5 text-[10px] font-bold text-white"
+                          style={{ width: `${femalePct}%`, backgroundColor: "#E00025" }}
+                        >
+                          {femalePct >= 14 ? `${femalePct}%` : ""}
+                        </div>
+                        {otherPct > 0 && (
+                          <div className="h-full bg-gray-400 flex-1 min-w-[6px]" style={{ maxWidth: `${otherPct}%` }} />
+                        )}
                       </div>
-                      <div className="w-24 shrink-0 text-sm tabular-nums text-right" style={{ color: isHighlighted ? "#6b7280" : "#d1d5db" }}>
-                        {p.members.toLocaleString()} mbrs
+                      <div className="w-24 sm:w-[110px] shrink-0 text-right">
+                        <div className="flex justify-end gap-1.5 text-xs font-semibold tabular-nums leading-none">
+                          <span className="text-[#1e3a8a]">{male.toLocaleString()}</span>
+                          <span className="text-[#E00025]">{female.toLocaleString()}</span>
+                        </div>
+                        <div className="text-[11px] text-gray-400 tabular-nums leading-none mt-1">
+                          {p.members.toLocaleString()} mbrs
+                        </div>
                       </div>
                     </div>
                   );
@@ -1880,9 +1619,9 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                 <button
                   type="button"
                   onClick={() => setShowAllGeo((v) => !v)}
-                  className="mt-4 text-sm font-medium text-[#032EA1] hover:text-[#0447D4] transition-colors"
+                  className="mt-5 inline-flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-[#1e3a8a] shadow-sm hover:bg-gray-50 transition-colors"
                 >
-                  {showAllGeo ? `Show less` : `Show more (${sorted.length - 10} more)`}
+                  {showAllGeo ? "Show less" : `Show more (${sorted.length - 10} more)`}
                 </button>
               )}
             </>
@@ -1893,13 +1632,8 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
 
       {/* 4. Farmer Membership Trend */}
       {(() => {
-        const ytdGrowth =
-          farmerTrend.length >= 2
-            ? Math.round(((farmerTrend[farmerTrend.length - 1].total / farmerTrend[0].total) - 1) * 1000) / 10
-            : 0;
-        const latestTotal = farmerTrend[farmerTrend.length - 1]?.total ?? 0;
-        const latestFemale = farmerTrend[farmerTrend.length - 1]?.female ?? 0;
-        const femalePct = latestTotal > 0 ? Math.round((latestFemale / latestTotal) * 100) : 0;
+        const latest = farmerTrend[farmerTrend.length - 1];
+        const first = farmerTrend[0];
         return (
           <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
             {/* Header */}
@@ -1913,26 +1647,38 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                   12-month enrollment — {isNational ? "all 25 provinces" : provinceDisplayLabel}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-center min-w-[100px]">
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">Total Members</p>
-                  <p className="text-xl font-bold tabular-nums text-gray-900 mt-0.5">{latestTotal.toLocaleString()}</p>
-                </div>
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-center min-w-[100px]">
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-emerald-500">YTD Growth</p>
-                  <p className="text-xl font-bold tabular-nums text-emerald-700 mt-0.5">+{ytdGrowth}%</p>
-                </div>
-                <div className="rounded-xl border border-pink-200 bg-pink-50 px-4 py-2 text-center min-w-[100px]">
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-pink-400">Female Share</p>
-                  <p className="text-xl font-bold tabular-nums text-pink-700 mt-0.5">{femalePct}%</p>
-                </div>
+              <div className="flex items-center gap-1 rounded-xl bg-gray-100 p-1">
+                {(["monthly", "quarterly"] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setTrendGranularity(g)}
+                    className={`rounded-lg px-4 py-1.5 text-sm font-medium capitalize transition-colors ${
+                      trendGranularity === g
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    {g}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Line chart */}
+            {/* Chart */}
             <div style={{ height: 260 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={farmerTrend} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
+                <ComposedChart data={farmerTrendChartData} margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
+                  <defs>
+                    <linearGradient id="farmerTrendMaleFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#032EA1" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#032EA1" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="farmerTrendFemaleFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#E00025" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="#E00025" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis
                     dataKey="month"
@@ -1950,22 +1696,24 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
                     contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
                     formatter={(value: number, name: string) => [value.toLocaleString(), name]}
                   />
-                  <Legend wrapperStyle={{ paddingTop: 14, fontSize: 12 }} />
+                  <Legend wrapperStyle={{ paddingTop: 14, fontSize: 12 }} iconType="circle" />
+                  <Area type="monotone" dataKey="male" name="Male" stroke="#032EA1" strokeWidth={2.5} fill="url(#farmerTrendMaleFill)" dot={false} activeDot={{ r: 4 }} />
+                  <Area type="monotone" dataKey="female" name="Female" stroke="#E00025" strokeWidth={2.5} fill="url(#farmerTrendFemaleFill)" dot={false} activeDot={{ r: 4 }} />
                   <Line type="monotone" dataKey="total" name="Total" stroke="#10b981" strokeWidth={2} strokeDasharray="6 4" dot={false} />
-                  <Line type="monotone" dataKey="male" name="Male" stroke="#032EA1" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
-                  <Line type="monotone" dataKey="female" name="Female" stroke="#E00025" strokeWidth={2.5} dot={false} activeDot={{ r: 4 }} />
-                </LineChart>
+                  <Line type="monotone" dataKey="other" name="Other" stroke="#94a3b8" strokeWidth={2} strokeDasharray="4 3" dot={false} />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
 
             {/* Gender insight strip */}
-            <div className="mt-5 grid grid-cols-3 gap-3">
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: "Male farmers", value: farmerTrend[farmerTrend.length - 1]?.male.toLocaleString() ?? "—", color: "#032EA1", bg: "#eff6ff", border: "#bfdbfe" },
-                { label: "Female farmers", value: farmerTrend[farmerTrend.length - 1]?.female.toLocaleString() ?? "—", color: "#E00025", bg: "#fff1f2", border: "#fecdd3" },
-                { label: "New this year", value: `+${(farmerTrend[farmerTrend.length - 1]?.total - farmerTrend[0]?.total).toLocaleString()}`, color: "#059669", bg: "#f0fdf4", border: "#bbf7d0" },
+                { label: "Male farmers", value: latest?.male.toLocaleString() ?? "—", color: "#032EA1", bg: "#eff6ff" },
+                { label: "Female farmers", value: latest?.female.toLocaleString() ?? "—", color: "#E00025", bg: "#fff1f2" },
+                { label: "Other / prefer not", value: latest?.other.toLocaleString() ?? "—", color: "#475569", bg: "#f1f5f9" },
+                { label: "New this year", value: `+${((latest?.total ?? 0) - (first?.total ?? 0)).toLocaleString()}`, color: "#059669", bg: "#ecfdf5" },
               ].map((s) => (
-                <div key={s.label} className="rounded-xl p-3 border" style={{ backgroundColor: s.bg, borderColor: s.border }}>
+                <div key={s.label} className="rounded-xl p-3" style={{ backgroundColor: s.bg }}>
                   <p className="text-lg font-bold tabular-nums" style={{ color: s.color }}>{s.value}</p>
                   <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
                 </div>
@@ -1976,543 +1724,209 @@ export function NationalDashboard({ scope = "national", provinceLabel = "Battamb
       })()}
 
 
-      {/* Asset Management Overview */}
+      {/* Knowledge Material Dissemination — redesigned 100% like attached */}
       <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
-        <div className="flex items-center gap-2">
-          <Package className="h-5 w-5 text-[#0F2F8F]" />
-          <h2 className="text-lg font-semibold text-gray-900">Asset Management Overview</h2>
-        </div>
-        <p className="mt-1 text-sm text-slate-500">
-          Reported assets across all cooperatives{isNational ? "" : ` (${provinceDisplayLabel})`}
-        </p>
-
-        {/* Stat tiles — single row */}
-        <div className="mt-5 grid grid-cols-3 gap-3">
-          <div className="rounded-xl bg-[#032EA1] p-4 text-white">
-            <p className="text-xs font-medium opacity-75">Total Assets</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums tracking-tight">{assets.count.toLocaleString()}</p>
-            <p className="mt-1 text-xs opacity-60">Across {isNational ? 25 : selectedProvinces.length} province(s)</p>
-          </div>
-          <div className="flex items-center gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-              <Activity className="h-4 w-4 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-emerald-700 tabular-nums">{assets.maintenanceCompliance}%</p>
-              <p className="text-xs text-emerald-600">Maintenance compliance</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 rounded-xl bg-red-50 border border-red-100 px-4 py-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100">
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-red-600 tabular-nums">
-                {assetConditionSlices
-                  .filter((s) => s.name === "Poor" || s.name === "Unknown")
-                  .reduce((sum, s) => sum + s.estCount, 0)
-                  .toLocaleString()}
-              </p>
-              <p className="text-xs text-red-500">Assets at risk</p>
-            </div>
-          </div>
+        <div className="mb-5 border-b border-gray-200/80 pb-4">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-[#0F2F8F]" />
+            Knowledge Material Dissemination
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">Materials uploaded, AC access rates, and adoption by province</p>
         </div>
 
-        {/* Condition breakdown */}
-        <div className="mt-6">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-3">Condition Breakdown</p>
-          {(() => {
-            const condMap: Record<string, { bar: string; bg: string }> = {
-              Good: { bar: "#22c55e", bg: "#dcfce7" },
-              Fair: { bar: "#f59e0b", bg: "#fef3c7" },
-              Poor: { bar: "#ef4444", bg: "#fee2e2" },
-              Unknown: { bar: "#94a3b8", bg: "#f1f5f9" },
-            };
-            return (
-              <>
-                <div className="space-y-2.5">
-                  {assetConditionSlices.map((row) => {
-                    const c = condMap[row.name] ?? { bar: "#94a3b8", bg: "#f1f5f9" };
-                    const label = row.name === "Unknown" ? "Under Repair" : row.name;
-                    return (
-                      <div key={row.name} className="flex items-center gap-3">
-                        <span className="w-24 shrink-0 text-sm font-medium text-gray-600">{label}</span>
-                        <div className="flex-1 h-4 rounded-full overflow-hidden" style={{ backgroundColor: c.bg }}>
-                          <div
-                            className="h-full rounded-full transition-[width] duration-700"
-                            style={{ width: `${row.value}%`, backgroundColor: c.bar }}
-                          />
-                        </div>
-                        <span className="w-9 shrink-0 text-right text-sm font-bold tabular-nums" style={{ color: c.bar }}>
-                          {row.value}%
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            );
-          })()}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Materials */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0F2F8F] to-[#1a2d5a] p-5 text-white shadow-md">
+            <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/[0.08]" />
+            <div className="absolute top-6 right-6 h-16 w-16 rounded-full bg-white/[0.05]" />
+            <div className="relative flex items-start justify-between">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm">
+                <BookOpen className="h-5 w-5 text-[#0F2F8F]" />
+              </div>
+              <span className="text-[10px] font-semibold tracking-widest text-white/60 uppercase mt-2">Materials</span>
+            </div>
+            <p className="relative mt-5 text-2xl font-bold tracking-tight">248</p>
+            <p className="relative text-sm font-medium text-white/95">Total Materials Uploaded</p>
+            <p className="relative mt-1 text-[11px] text-white/55">6 categories</p>
+          </div>
+
+          {/* Downloads */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1c2545] to-[#2a3350] p-5 text-white shadow-md">
+            <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/[0.08]" />
+            <div className="absolute top-6 right-6 h-16 w-16 rounded-full bg-white/[0.05]" />
+            <div className="relative flex items-start justify-between">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm">
+                <Download className="h-4 w-4 text-[#1e40af]" />
+              </div>
+              <span className="text-[10px] font-semibold tracking-widest text-white/60 uppercase mt-2">Downloads</span>
+            </div>
+            <p className="relative mt-5 text-2xl font-bold tracking-tight">1,842</p>
+            <p className="relative text-sm font-medium text-white/95">Total Downloads</p>
+            <p className="relative mt-1 text-[11px] text-white/55">across all materials</p>
+          </div>
+
+          {/* 63% ACs accessed */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#5aa9d6] via-[#3a7ab8] to-[#1e3a5a] p-5 text-white shadow-md">
+            <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/[0.12]" />
+            <div className="absolute top-6 right-6 h-16 w-16 rounded-full bg-white/[0.06]" />
+            <div className="relative flex items-start justify-between">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm">
+                <BarChart3 className="h-5 w-5 text-[#1e5a8a]" />
+              </div>
+              <span className="text-2xl font-bold tracking-tight">63%</span>
+            </div>
+            <div className="relative mt-6">
+              <div className="h-1.5 w-full rounded-full bg-white/25 overflow-hidden">
+                <div className="h-full rounded-full bg-white" style={{ width: "63%" }} />
+              </div>
+              <p className="mt-2 text-xs font-medium text-white/90">676 of 1,256 ACs accessed materials</p>
+            </div>
+          </div>
         </div>
       </section>
 
-
-      {/* Asset Type Overview */}
-      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.08)] ring-1 ring-black/[0.04]">
-
+      {/* Asset Management Metrics — 100% like attached */}
+      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-4 mb-5 border-b border-gray-200/80 pb-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <Package className="h-5 w-5 text-[#0F2F8F]" />
-              Asset Type Overview
+              Asset Management Metrics
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              {assetTab === "inventory"
-                ? `Equipment count by category across all cooperatives${isNational ? "" : ` · ${provinceDisplayLabel}`}`
-                : assetTab === "usage"
-                  ? "Utilization rates and operational hours per asset category"
-                  : "Disposed and retired assets — reasons, trends, and replacement status"}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">Total reported assets across all ACs — condition, type, and PEARL funding</p>
           </div>
-          {/* Tab switcher */}
-          <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
-            {(["inventory", "usage", "disposal"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setAssetTab(t)}
-                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap capitalize ${assetTab === t ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                  }`}
-              >
-                {t === "inventory" ? "Asset Inventory" : t === "usage" ? "Usage Summary" : "Disposal Summary"}
-              </button>
-            ))}
+          <div className="flex items-center gap-3 text-xs font-medium text-gray-500">
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" /> Good</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]" /> Fair</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#ef4444]" /> Poor</span>
+            <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#94a3b8]" /> Unknown</span>
           </div>
         </div>
 
-        {/* ── Tab 1: Asset Inventory ── */}
-        {assetTab === "inventory" && (
-          <>
-            {/* Type category tiles */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {Object.entries(ASSET_TYPE_META).map(([type, meta]) => {
-                const Icon = ASSET_TYPE_ICONS[type] ?? Package;
-                const typeCount = Math.round(assets.count * (meta.pct / 100));
-                return (
-                  <div key={type} className="rounded-xl border p-4 flex flex-col gap-2"
-                    style={{ backgroundColor: meta.bg, borderColor: `${meta.color}22` }}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg"
-                        style={{ backgroundColor: `${meta.color}18` }}>
-                        <Icon className="h-4 w-4" style={{ color: meta.color }} />
-                      </div>
-                      <span className="text-[11px] font-bold tabular-nums" style={{ color: meta.color }}>{meta.pct}%</span>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold tabular-nums tracking-tight" style={{ color: meta.textColor }}>
-                        {typeCount.toLocaleString()}
-                      </p>
-                      <p className="text-xs font-medium text-gray-500 mt-0.5">{type}</p>
-                    </div>
-                    <div className="h-1 w-full rounded-full bg-gray-200/60">
-                      <div className="h-full rounded-full" style={{ width: `${meta.pct}%`, backgroundColor: meta.color }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Key asset subtypes grid */}
-            <div className="mt-7">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-4">Key Asset Categories</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {assetSubtypeRows.map((row) => {
-                  const Icon = row.icon;
-                  const meta = ASSET_TYPE_META[row.type] ?? ASSET_TYPE_META["Equipment"];
-                  const atRisk = Math.round(row.count * ((100 - row.goodPct) / 100));
-                  return (
-                    <div key={row.name} className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 flex flex-col gap-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: meta.bg }}>
-                          <Icon className="h-[18px] w-[18px]" style={{ color: meta.color }} />
-                        </div>
-                        {row.pearlFunded && (
-                          <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-blue-600 border border-blue-100">
-                            PEARL
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold tabular-nums tracking-tight text-gray-900">{row.count.toLocaleString()}</p>
-                        <p className="text-xs font-medium text-gray-500 mt-0.5 leading-snug">{row.name}</p>
-                        <p className="text-[10px] mt-0.5 font-medium" style={{ color: meta.color }}>{row.type}</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
-                          <span>Good condition</span>
-                          <span className="font-semibold text-gray-600">{row.goodPct}%</span>
-                        </div>
-                        <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
-                          <div className="h-full rounded-full" style={{
-                            width: `${row.goodPct}%`,
-                            backgroundColor: row.goodPct >= 75 ? "#22c55e" : row.goodPct >= 60 ? "#f59e0b" : "#ef4444",
-                          }} />
-                        </div>
-                        <p className="text-[10px] text-red-400 mt-1">{atRisk.toLocaleString()} need attention</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* ── Tab 2: Asset Usage Summary ── */}
-        {assetTab === "usage" && (() => {
-          const usageRows = assetSubtypeRows.map((r) => ({
-            ...r,
-            ...(ASSET_USAGE_DATA[r.name] ?? { utilizationPct: 70, avgHoursMonth: 126, idlePct: 15, overused: false }),
-          }));
-          const avgUtil = Math.round(usageRows.reduce((s, r) => s + r.utilizationPct, 0) / usageRows.length);
-          const overusedCount = usageRows.filter((r) => r.overused).length;
-          const underusedCount = usageRows.filter((r) => r.utilizationPct < 55).length;
-          const chartData = usageRows.map((r) => ({
-            name: r.name.replace(" System", "").replace(" Machine", ""),
-            utilization: r.utilizationPct,
-            idle: r.idlePct,
-          }));
-          return (
-            <>
-              {/* KPIs */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Avg Utilization</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">{avgUtil}%</p>
-                  <div className="mt-1.5 h-1 w-full rounded-full bg-gray-200">
-                    <div className="h-full rounded-full bg-[#032EA1]" style={{ width: `${avgUtil}%` }} />
-                  </div>
-                </div>
-                <div className={`rounded-xl border px-4 py-3 ${overusedCount > 0 ? "border-amber-200 bg-amber-50" : "border-gray-200 bg-gray-50"}`}>
-                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${overusedCount > 0 ? "text-amber-500" : "text-gray-400"}`}>Overutilized</p>
-                  <p className={`mt-1 text-2xl font-bold tabular-nums ${overusedCount > 0 ? "text-amber-700" : "text-gray-600"}`}>{overusedCount}</p>
-                  <p className="text-[11px] mt-0.5 text-gray-400">asset types</p>
-                </div>
-                <div className={`rounded-xl border px-4 py-3 ${underusedCount > 0 ? "border-red-100 bg-red-50" : "border-gray-200 bg-gray-50"}`}>
-                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${underusedCount > 0 ? "text-red-400" : "text-gray-400"}`}>Underutilized</p>
-                  <p className={`mt-1 text-2xl font-bold tabular-nums ${underusedCount > 0 ? "text-red-600" : "text-gray-600"}`}>{underusedCount}</p>
-                  <p className="text-[11px] mt-0.5 text-gray-400">below 55% target</p>
-                </div>
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-500">Total Hours/Month</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-emerald-700">
-                    {usageRows.reduce((s, r) => s + r.avgHoursMonth * r.count, 0).toLocaleString()}
-                  </p>
-                  <p className="text-[11px] mt-0.5 text-emerald-500">across all assets</p>
-                </div>
-              </div>
-
-              {/* Utilization chart */}
-              <div className="mb-6">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Utilization & Idle Rate by Asset Type (%)</p>
-                <div style={{ height: 220 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} margin={{ top: 4, right: 16, left: -12, bottom: 4 }} barCategoryGap="25%" barGap={2}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#64748b" }} tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} domain={[0, 100]} />
-                      <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 11 }}
-                        formatter={(v: number, name: string) => [`${v}%`, name]} />
-                      <Legend wrapperStyle={{ paddingTop: 10, fontSize: 11 }} />
-                      <ReferenceLine y={75} stroke="#22c55e" strokeDasharray="4 3" strokeWidth={1.2} label={{ value: "75% target", fontSize: 9, fill: "#22c55e", position: "insideTopRight" }} />
-                      <Bar dataKey="utilization" name="Utilization %" radius={[3, 3, 0, 0]} maxBarSize={22}>
-                        {chartData.map((entry, idx) => (
-                          <Cell key={idx} fill={entry.utilization >= 75 ? "#032EA1" : entry.utilization >= 55 ? "#f59e0b" : "#ef4444"} />
-                        ))}
-                      </Bar>
-                      <Bar dataKey="idle" name="Idle %" fill="#e2e8f0" radius={[3, 3, 0, 0]} maxBarSize={22} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* Per-asset detail rows */}
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Per-Asset Breakdown</p>
-              <div className="space-y-2.5">
-                {usageRows.map((row) => {
-                  const Icon = row.icon;
-                  const meta = ASSET_TYPE_META[row.type] ?? ASSET_TYPE_META["Equipment"];
-                  const utilColor = row.utilizationPct >= 75 ? "#22c55e" : row.utilizationPct >= 55 ? "#f59e0b" : "#ef4444";
-                  return (
-                    <div key={row.name} className="flex items-center gap-4 rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: meta.bg }}>
-                        <Icon className="h-4 w-4" style={{ color: meta.color }} />
-                      </div>
-                      <div className="w-40 shrink-0">
-                        <p className="text-xs font-semibold text-gray-800 leading-snug">{row.name}</p>
-                        <p className="text-[10px] text-gray-400">{row.avgHoursMonth} hrs/month avg</p>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between text-[10px] mb-1">
-                          <span className="font-semibold" style={{ color: utilColor }}>{row.utilizationPct}% utilized</span>
-                          <span className="text-gray-400">{row.idlePct}% idle</span>
-                        </div>
-                        <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden flex">
-                          <div className="h-full rounded-l-full" style={{ width: `${row.utilizationPct}%`, backgroundColor: utilColor }} />
-                          <div className="h-full bg-gray-300" style={{ width: `${row.idlePct}%` }} />
-                        </div>
-                      </div>
-                      <div className="shrink-0 flex gap-2">
-                        {row.overused && (
-                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-bold uppercase text-amber-700">Overused</span>
-                        )}
-                        {row.utilizationPct < 55 && (
-                          <span className="rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase text-red-600">Underused</span>
-                        )}
-                        {row.pearlFunded && (
-                          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold uppercase text-blue-600 border border-blue-100">PEARL</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          );
-        })()}
-
-        {/* ── Tab 3: Disposal Summary ── */}
-        {assetTab === "disposal" && (() => {
-          const totalDisposed = ASSET_DISPOSAL_DATA.byType.reduce((s, r) => s + r.disposed, 0);
-          const totalReplaced = ASSET_DISPOSAL_DATA.byType.reduce((s, r) => s + r.replaced, 0);
-          const replacementRate = Math.round((totalReplaced / totalDisposed) * 100);
-          const ytdDisposed = ASSET_DISPOSAL_DATA.yearly[4].count;
-          const ytdValue = ASSET_DISPOSAL_DATA.yearly[4].valueK;
-          return (
-            <>
-              {/* KPIs */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Total Disposed</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-gray-900">{totalDisposed.toLocaleString()}</p>
-                  <p className="text-[11px] mt-0.5 text-gray-400">all-time records</p>
-                </div>
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-500">YTD 2026</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-amber-700">{ytdDisposed}</p>
-                  <p className="text-[11px] mt-0.5 text-amber-500">Jan–Jun 2026</p>
-                </div>
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-500">Replacement Rate</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-emerald-700">{replacementRate}%</p>
-                  <p className="text-[11px] mt-0.5 text-emerald-500">{totalReplaced.toLocaleString()} replaced</p>
-                </div>
-                <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-400">Value Recovered YTD</p>
-                  <p className="mt-1 text-2xl font-bold tabular-nums text-blue-700">USD {ytdValue}K</p>
-                  <p className="text-[11px] mt-0.5 text-blue-400">from disposal/salvage</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Yearly trend chart */}
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Annual Disposal Trend</p>
-                  <div style={{ height: 200 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={ASSET_DISPOSAL_DATA.yearly} margin={{ top: 4, right: 8, left: -12, bottom: 4 }} barCategoryGap="35%">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                        <XAxis dataKey="year" tick={{ fontSize: 11, fill: "#64748b" }} tickLine={false} axisLine={false} />
-                        <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 12 }}
-                          formatter={(v: number, name: string) => [name === "valueK" ? `USD ${v}K` : v, name === "valueK" ? "Value Recovered" : "Assets Disposed"]} />
-                        <Legend wrapperStyle={{ paddingTop: 10, fontSize: 11 }} />
-                        <Bar dataKey="count" name="Assets Disposed" fill="#032EA1" radius={[3, 3, 0, 0]} maxBarSize={28} />
-                        <Bar dataKey="valueK" name="Value (USD K)" fill="#6b9bda" radius={[3, 3, 0, 0]} maxBarSize={28} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                {/* By reason + by type */}
-                <div className="flex flex-col gap-5">
-                  {/* Disposal by reason */}
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">By Disposal Reason</p>
-                    <div className="space-y-2">
-                      {ASSET_DISPOSAL_DATA.byReason.map((row) => (
-                        <div key={row.reason} className="flex items-center gap-3">
-                          <span className="w-36 shrink-0 text-xs text-gray-600 truncate">{row.reason}</span>
-                          <div className="flex-1 h-5 rounded-lg bg-gray-100 overflow-hidden">
-                            <div className="h-full rounded-lg flex items-center justify-end pr-2 transition-all duration-500"
-                              style={{ width: `${row.pct}%`, backgroundColor: row.pct >= 30 ? "#032EA1" : row.pct >= 15 ? "#6b9bda" : "#cbd5e1" }}>
-                              <span className="text-[10px] font-bold text-white">{row.pct}%</span>
-                            </div>
-                          </div>
-                          <span className="w-12 shrink-0 text-right text-xs tabular-nums text-gray-500">{row.count}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* By asset type — replacement status */}
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">Disposed vs Replaced by Type</p>
-                    <div className="space-y-2">
-                      {ASSET_DISPOSAL_DATA.byType.map((row) => {
-                        const Icon = ASSET_TYPE_ICONS[row.type] ?? Package;
-                        const meta = ASSET_TYPE_META[row.type] ?? ASSET_TYPE_META["Equipment"];
-                        const repRate = Math.round((row.replaced / row.disposed) * 100);
-                        return (
-                          <div key={row.type} className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/50 px-3 py-2">
-                            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: meta.bg }}>
-                              <Icon className="h-3.5 w-3.5" style={{ color: meta.color }} />
-                            </div>
-                            <span className="w-28 shrink-0 text-xs font-semibold text-gray-700">{row.type}</span>
-                            <div className="flex-1 flex items-center gap-2 text-[10px] text-gray-500">
-                              <span className="tabular-nums text-gray-700 font-medium">{row.disposed} disposed</span>
-                              <span className="text-gray-300">·</span>
-                              <span className="tabular-nums text-emerald-600 font-medium">{row.replaced} replaced</span>
-                            </div>
-                            <span className={`shrink-0 text-[11px] font-bold tabular-nums ${repRate >= 80 ? "text-emerald-600" : repRate >= 60 ? "text-amber-600" : "text-red-500"}`}>
-                              {repRate}%
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          );
-        })()}
-
-      </section>
-
-      {/* Knowledge Management Stats */}
-      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
-        <h2 className="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-[#0F2F8F]" />
-          Knowledge Management
-        </h2>
-
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { icon: BookOpen, iconBg: "bg-blue-100", iconColor: "text-blue-600", value: "127", label: "Total Materials" },
-            { icon: Download, iconBg: "bg-violet-100", iconColor: "text-violet-600", value: "3,972", label: "Total Downloads" },
-          ].map(({ icon: Icon, iconBg, iconColor, value, label }) => (
-            <div key={label} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4">
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
-                <Icon className={`h-5 w-5 ${iconColor}`} />
+        {/* Top 3 summary cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Total Reported Assets — pixel match attached */}
+          <div className="relative overflow-hidden rounded-xl bg-[#2563eb] p-5 text-white shadow-md flex items-center">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                <Package className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-xl font-bold tabular-nums text-gray-900">{value}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+                <p className="text-2xl font-bold leading-none tabular-nums tracking-tight">13,920</p>
+                <p className="text-xs font-medium text-white mt-1">Total Reported Assets</p>
+                <p className="text-[11px] text-white/70 leading-none mt-0.5">across 8 asset types</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Condition Overview */}
+          <div className="rounded-xl bg-[#1e293b] p-5 text-white shadow-md flex flex-col justify-center">
+            <p className="text-xs font-semibold text-center text-white mb-3">Condition Overview</p>
+            <div className="h-3 w-full rounded-full overflow-hidden flex">
+              <div className="h-full bg-[#22c55e]" style={{ width: "52%" }} />
+              <div className="h-full bg-[#f59e0b]" style={{ width: "31%" }} />
+              <div className="h-full bg-[#ef4444]" style={{ width: "12%" }} />
+              <div className="h-full bg-[#94a3b8]" style={{ width: "5%" }} />
+            </div>
+            <div className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1 text-[10px] font-medium">
+              <span className="text-[#22c55e]">52% Good</span>
+              <span className="text-[#fbbf24]">31% Fair</span>
+              <span className="text-[#f87171]">12% Poor</span>
+              <span className="text-[#94a3b8]">5% Unknown</span>
+            </div>
+          </div>
+
+          {/* 58% Funded */}
+          <div className="relative overflow-hidden rounded-xl bg-[#1e3a8a] p-5 text-white shadow-md">
+            <div className="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-white/10" />
+            <div className="flex items-start justify-between">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
+                <BadgeCheck className="h-5 w-5 text-[#1e3a8a]" />
+              </div>
+              <span className="text-[10px] font-semibold tracking-widest text-white/50 uppercase mt-1.5">Funded</span>
+            </div>
+            <p className="mt-3 text-2xl font-bold leading-none tabular-nums">58%</p>
+            <div className="mt-3 h-1.5 w-full rounded-full bg-white/20 overflow-hidden">
+              <div className="h-full rounded-full bg-white" style={{ width: "58%" }} />
+            </div>
+            <p className="mt-1.5 text-[11px] text-white/70">8,120 of 13,920 assets are funded</p>
+          </div>
+        </div>
+
+        {/* Type filter chips */}
+        <div className="mt-6 flex flex-wrap gap-2">
+          {[
+            { label: "Equipment", count: "8,710", sub: "4", icon: Wrench, color: "#2563eb", bg: "bg-blue-50", border: "border-blue-100" },
+            { label: "Vehicle", count: "2,820", sub: "2", icon: Truck, color: "#7c3aed", bg: "bg-violet-50", border: "border-violet-100" },
+            { label: "Infrastructure", count: "1,270", sub: "1", icon: Waves, color: "#e11d48", bg: "bg-rose-50", border: "border-rose-100" },
+            { label: "Building", count: "1,120", sub: "1", icon: Warehouse, color: "#d97706", bg: "bg-amber-50", border: "border-amber-100" },
+          ].map(({ label, count, sub, icon: Icon, color, bg, border }) => {
+            const active = assetTypeChipFilter === label;
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setAssetTypeChipFilter((prev) => (prev === label ? null : label))}
+                className={`inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1.5 shadow-sm transition-all ${
+                  active ? "ring-2 ring-offset-1" : border
+                }`}
+                style={active ? { borderColor: color, ["--tw-ring-color" as string]: color } : undefined}
+              >
+                <div className={`flex h-6 w-6 items-center justify-center rounded-full ${bg}`}>
+                  <Icon className="h-3.5 w-3.5" style={{ color }} />
+                </div>
+                <span className="text-xs font-medium text-gray-700">{label}</span>
+                <span className="text-xs font-bold tabular-nums text-gray-900">· {count}</span>
+                <span className="text-[11px] text-gray-400">({sub})</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Asset subtype grid — 2 columns like attached */}
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {[
+            { name: "Water Pump System", type: "Equipment", count: 3240, goodPct: 71, pearl: true, icon: Wrench, color: "#2563eb", typeColor: "#2563eb" },
+            { name: "Weighing Scale", type: "Equipment", count: 2190, goodPct: 82, pearl: true, icon: Wrench, color: "#2563eb", typeColor: "#2563eb" },
+            { name: "Rice Mill Machine", type: "Equipment", count: 1860, goodPct: 68, pearl: false, icon: Wrench, color: "#2563eb", typeColor: "#0ea5e9" },
+            { name: "Solar Drying System", type: "Equipment", count: 1420, goodPct: 79, pearl: true, icon: Wrench, color: "#2563eb", typeColor: "#2563eb" },
+            { name: "Tractor", type: "Vehicle", count: 1840, goodPct: 62, pearl: false, icon: Truck, color: "#7c3aed", typeColor: "#7c3aed" },
+            { name: "Irrigation Pipeline", type: "Infrastructure", count: 1270, goodPct: 75, pearl: true, icon: Waves, color: "#e11d48", typeColor: "#e11d48" },
+            { name: "Seed Storage Warehouse", type: "Building", count: 1120, goodPct: 71, pearl: false, icon: Warehouse, color: "#d97706", typeColor: "#d97706" },
+            { name: "Delivery Truck", type: "Vehicle", count: 980, goodPct: 58, pearl: false, icon: Truck, color: "#7c3aed", typeColor: "#7c3aed" },
+          ]
+            .filter((row) => !assetTypeChipFilter || row.type === assetTypeChipFilter)
+            .map((row) => (
+            <div key={row.name} className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${row.type === "Equipment" ? "bg-blue-50" : row.type === "Vehicle" ? "bg-violet-50" : row.type === "Infrastructure" ? "bg-rose-50" : "bg-amber-50"}`}>
+                <row.icon className="h-4 w-4" style={{ color: row.color }} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-xs font-semibold text-gray-900 truncate">{row.name}</p>
+                  {row.pearl && (
+                    <span className="shrink-0 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-600 border border-emerald-100">
+                      PEARL
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] font-medium" style={{ color: row.typeColor === "#0ea5e9" ? "#0ea5e9" : row.typeColor }}>{row.type}</p>
+              </div>
+              <div className="shrink-0 text-right w-[120px]">
+                <p className="text-sm font-bold tabular-nums text-gray-900 leading-none">{row.count.toLocaleString()} <span className="text-[10px] font-normal text-gray-400">units</span></p>
+                <div className="mt-1.5 text-right">
+                  <div className="flex justify-between text-[10px] leading-none mb-1">
+                    <span className="text-gray-400">Condition</span>
+                    <span className="font-semibold text-emerald-500">{row.goodPct}% good</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                    <div className="h-full rounded-full bg-emerald-400" style={{ width: `${row.goodPct}%` }} />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
-        </div>
-
-      </section>
-
-      {/* 5. Performance heatmap — lollipop + band shading + national avg */}
-      <section className="rounded-2xl bg-white p-6 sm:p-8 font-sans shadow-[0_10px_15px_-3px_rgb(0_0_0/0.06)] ring-1 ring-black/[0.04]">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <Activity className="h-5 w-5 text-[#0F2F8F]" />
-          Performance heatmap (province / district lens)
-        </h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Composite score (leaderboard). Shaded bands: intervention (0–50), medium (50–75), high (75–100). Hover a row to
-          highlight the province on the map. Dashed line: national average ({NATIONAL_COMPOSITE_AVG}).
-        </p>
-        <div
-          className="mt-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500"
-          key={selectedProvinces.join(",")}
-          onMouseLeave={() => setPerfChartHoverProvince(null)}
-          style={{ height: Math.max(300, perfHeatSorted.length * 56 + 80) }}
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              layout="vertical"
-              data={perfHeatSorted}
-              margin={{ left: 4, right: 28, top: 28, bottom: 8 }}
-            >
-              <ReferenceArea x1={0} x2={50} fill="#fecaca" fillOpacity={0.35} ifOverflow="visible" />
-              <ReferenceArea x1={50} x2={75} fill="#fde68a" fillOpacity={0.3} ifOverflow="visible" />
-              <ReferenceArea x1={75} x2={100} fill="#bbf7d0" fillOpacity={0.35} ifOverflow="visible" />
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" horizontal={false} />
-              <XAxis
-                type="number"
-                domain={[0, 100]}
-                tick={{ fontSize: 11, fill: "#475569", fontFamily: "ui-monospace, monospace" }}
-                tickFormatter={(v) => `${v}`}
-              />
-              <YAxis
-                type="category"
-                dataKey="province"
-                width={136}
-                interval={0}
-                tickLine={false}
-                axisLine={false}
-                tick={(props) => <PerfHeatYAxisTick {...props} rows={perfHeatSorted} />}
-              />
-              <Tooltip
-                formatter={(v: number) => [`${v}`, "Composite score"]}
-                labelFormatter={(_, p) => (p?.[0]?.payload?.province as string) ?? ""}
-              />
-              <ReferenceLine
-                x={NATIONAL_COMPOSITE_AVG}
-                stroke="#64748b"
-                strokeWidth={1.5}
-                strokeDasharray="5 5"
-                label={{
-                  value: `National avg ${NATIONAL_COMPOSITE_AVG}`,
-                  position: "top",
-                  fill: "#64748b",
-                  fontSize: 10,
-                  fontWeight: 600,
-                }}
-              />
-              <Bar
-                dataKey="composite"
-                name="Score"
-                shape={(shapeProps: unknown) => (
-                  <PerfLollipopBarShape
-                    {...(shapeProps as {
-                      x?: number | string;
-                      y?: number | string;
-                      width?: number | string;
-                      height?: number | string;
-                      fill?: string;
-                      payload?: { province: string; composite: number; band: string };
-                    })}
-                    onProvinceHover={setPerfChartHoverProvince}
-                  />
-                )}
-                isAnimationActive={false}
-              >
-                {perfHeatSorted.map((e, i) => (
-                  <Cell key={i} fill={perfBandFill(e.band)} />
-                ))}
-              </Bar>
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-gray-600">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" /> High (75+)
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-600" /> Medium (50–75)
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-red-600" /> Intervention (&lt;50)
-          </span>
-          <span className="flex items-center gap-1.5 text-slate-500">
-            <span className="h-0 w-6 border-t-2 border-dashed border-slate-500" /> National average
-          </span>
         </div>
       </section>
 
