@@ -1,9 +1,46 @@
 import { useEffect, useState } from "react";
-import { X, Upload } from "lucide-react";
+import { X, Upload, Save } from "lucide-react";
 import { MultiSelectCombobox } from "./ui/multi-select";
+import { SingleSelectCombobox } from "./ui/single-select";
+import {
+  RESOURCE_TYPE_OPTIONS,
+  TOPIC_OPTIONS,
+  CROP_GROUPS,
+  PROVINCE_OPTIONS,
+  LANGUAGE_OPTIONS,
+  type ResourceType,
+  type ResourceLanguage,
+} from "./KnowledgeManagement";
+
+export type KnowledgeResourceFormData = {
+  title: string;
+  description: string;
+  resourceType: ResourceType;
+  topic: string;
+  cropCommodity: string[];
+  province: string[];
+  language: ResourceLanguage;
+  organizationSource: string;
+  year: number;
+  /** Only set when resourceType is Video. */
+  videoType?: string;
+};
+
+export const VIDEO_TYPE_OPTIONS = [
+  "Training/Tutorial",
+  "Field Demonstration",
+  "Farmer Story/Testimonial",
+  "Project Activity/Event",
+  "Interview",
+  "Technical Lecture",
+  "Other",
+];
 
 interface KnowledgeUploadFormProps {
   onClose: () => void;
+  onSave: (data: KnowledgeResourceFormData) => void;
+  /** When present, the form opens pre-filled for editing an existing resource. */
+  initialData?: KnowledgeResourceFormData;
 }
 
 // Illustrative option lists (prototype values; large enough to exercise the searchable picker UX)
@@ -38,11 +75,41 @@ export const AUDIENCE_OPTIONS = [
   "Village Chiefs", "Commune Councils",
 ];
 
-export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+/** Which crop group a crop belongs to, so editing a resource can pre-select the right group. */
+function groupForCrop(crop: string): string {
+  return CROP_GROUPS.find((g) => g.crops.includes(crop))?.name ?? "";
+}
+
+export function KnowledgeUploadForm({ onClose, onSave, initialData }: KnowledgeUploadFormProps) {
+  const isEditing = Boolean(initialData);
+
+  const [title, setTitle] = useState(initialData?.title ?? "");
+  const [description, setDescription] = useState(initialData?.description ?? "");
+  const [resourceType, setResourceType] = useState<string>(initialData?.resourceType ?? "");
+  const [videoType, setVideoType] = useState(initialData?.videoType ?? "");
+  const [topic, setTopic] = useState(initialData?.topic ?? "");
+  const [selectedProvinces, setSelectedProvinces] = useState<string[]>(initialData?.province ?? []);
+  const [language, setLanguage] = useState<string>(initialData?.language ?? "");
+  const [organizationSource, setOrganizationSource] = useState(initialData?.organizationSource ?? "");
+  const [publishDate, setPublishDate] = useState(
+    initialData ? `${initialData.year}-01-01` : ""
+  );
+  const [externalUrl, setExternalUrl] = useState("");
   const [selectedAudience, setSelectedAudience] = useState<string[]>([]);
+  const [cropGroup, setCropGroup] = useState(
+    initialData && initialData.cropCommodity.length > 0
+      ? groupForCrop(initialData.cropCommodity[0])
+      : ""
+  );
+  const [selectedCrops, setSelectedCrops] = useState<string[]>(initialData?.cropCommodity ?? []);
   const [isVisible, setIsVisible] = useState(false);
   const ANIM_MS = 240;
+
+  const cropGroupOptions = CROP_GROUPS.map((g) => g.name);
+
+  const cropOptionsForGroup =
+    CROP_GROUPS.find((g) => g.name === cropGroup)?.crops ??
+    Array.from(new Set(CROP_GROUPS.flatMap((g) => g.crops))).sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setIsVisible(true));
@@ -52,6 +119,40 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
   const handleClose = () => {
     setIsVisible(false);
     window.setTimeout(() => onClose(), ANIM_MS);
+  };
+
+  const handleResourceTypeChange = (next: string) => {
+    setResourceType(next);
+    if (next !== "Video") setVideoType("");
+  };
+
+  const isValid =
+    title.trim() &&
+    description.trim() &&
+    resourceType &&
+    (resourceType !== "Video" || videoType) &&
+    topic &&
+    selectedProvinces.length > 0 &&
+    language &&
+    organizationSource.trim() &&
+    (resourceType !== "Link" || externalUrl.trim());
+
+  const handleSubmit = () => {
+    if (!isValid) return;
+    const year = publishDate ? new Date(publishDate).getFullYear() : new Date().getFullYear();
+    onSave({
+      title: title.trim(),
+      description: description.trim(),
+      resourceType: resourceType as ResourceType,
+      topic,
+      cropCommodity: selectedCrops,
+      province: selectedProvinces,
+      language: language as ResourceLanguage,
+      organizationSource: organizationSource.trim(),
+      year,
+      videoType: resourceType === "Video" ? videoType || undefined : undefined,
+    });
+    handleClose();
   };
 
   return (
@@ -74,7 +175,7 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-gradient-to-br from-[#032EA1] to-[#021c5e] shrink-0">
           <h2 id="km-upload-drawer-title" className="text-sm font-semibold text-white">
-            Upload Knowledge Material
+            {isEditing ? "Edit Knowledge Material" : "Upload Knowledge Material"}
           </h2>
           <button
             type="button"
@@ -100,6 +201,8 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
                   </label>
                   <input
                     type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                     placeholder="Enter a descriptive title for the knowledge material"
                   />
@@ -110,6 +213,8 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
                   </label>
                   <textarea
                     rows={4}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none resize-none"
                     placeholder="Provide a detailed description of the content and its purpose"
                   ></textarea>
@@ -125,33 +230,119 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Document Type <span className="text-red-500">*</span>
+                    Resource Type <span className="text-red-500">*</span>
                   </label>
-                  <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white">
-                    <option value="">Select Document Type</option>
-                    <option value="pdf">PDF Document</option>
-                    <option value="video">Video</option>
-                    <option value="image">Image/Infographic</option>
-                    <option value="word">Word Document</option>
-                    <option value="presentation">Presentation</option>
-                  </select>
+                  <SingleSelectCombobox
+                    options={[...RESOURCE_TYPE_OPTIONS]}
+                    value={resourceType}
+                    onChange={handleResourceTypeChange}
+                    placeholder="Select Resource Type"
+                    searchPlaceholder="Search resource types..."
+                    emptyText="No matching resource types."
+                    allowClear={false}
+                  />
+                </div>
+                {resourceType === "Video" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Video Type <span className="text-red-500">*</span>
+                    </label>
+                    <SingleSelectCombobox
+                      options={VIDEO_TYPE_OPTIONS}
+                      value={videoType}
+                      onChange={setVideoType}
+                      placeholder="Select Video Type"
+                      searchPlaceholder="Search video types..."
+                      emptyText="No matching video types."
+                      allowClear={false}
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Topic <span className="text-red-500">*</span>
+                  </label>
+                  <SingleSelectCombobox
+                    options={[...TOPIC_OPTIONS]}
+                    value={topic}
+                    onChange={setTopic}
+                    placeholder="Select Topic"
+                    searchPlaceholder="Search topics..."
+                    emptyText="No matching topics."
+                    allowClear={false}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Province / Coverage <span className="text-red-500">*</span>
+                  </label>
+                  <MultiSelectCombobox
+                    options={[...PROVINCE_OPTIONS]}
+                    selected={selectedProvinces}
+                    onChange={setSelectedProvinces}
+                    placeholder="Select provinces..."
+                    searchPlaceholder="Search provinces..."
+                    emptyText="No matching provinces."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Language <span className="text-red-500">*</span>
+                  </label>
+                  <SingleSelectCombobox
+                    options={[...LANGUAGE_OPTIONS]}
+                    value={language}
+                    onChange={setLanguage}
+                    placeholder="Select Language"
+                    searchPlaceholder="Search languages..."
+                    emptyText="No matching languages."
+                    allowClear={false}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Organization / Source <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={organizationSource}
+                    onChange={(e) => setOrganizationSource(e.target.value)}
+                    placeholder="e.g., FAO/PEARL, MAFF, GDA"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                  />
                 </div>
               </div>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Tags (Select all that apply)
-              </h3>
-              <MultiSelectCombobox
-                options={AVAILABLE_TAGS}
-                selected={selectedTags}
-                onChange={setSelectedTags}
-                placeholder="Select tags..."
-                searchPlaceholder="Search tags..."
-                emptyText="No matching tags."
-              />
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Crop Group
+                  </label>
+                  <SingleSelectCombobox
+                    options={cropGroupOptions}
+                    value={cropGroup}
+                    onChange={(next) => {
+                      setCropGroup(next);
+                      setSelectedCrops([]);
+                    }}
+                    placeholder="All groups"
+                    searchPlaceholder="Search crop groups..."
+                    emptyText="No matching crop groups."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Crop / Commodity
+                  </label>
+                  <MultiSelectCombobox
+                    options={cropOptionsForGroup}
+                    selected={selectedCrops}
+                    onChange={setSelectedCrops}
+                    placeholder="Select crops/commodities..."
+                    searchPlaceholder="Search crops..."
+                    emptyText="No matching crops."
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Target Audience */}
@@ -172,23 +363,47 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
             {/* File Upload — 2-box layout matching attachment */}
             <div>
               <h3 className="text-sm font-medium text-gray-900 mb-2">
-                Upload file<span className="text-red-500">*</span>
+                {resourceType === "Link" ? "Resource URL" : "Upload file"}
+                <span className="text-red-500">*</span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-[1.9fr_1fr] gap-4">
-                {/* Main file drop zone */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#032EA1] transition-colors cursor-pointer bg-white flex flex-col items-center justify-center min-h-[148px]">
-                  <p className="text-sm text-gray-600 font-medium">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1 leading-snug">
-                    Supported formats: PDF, Word (DOC/DOCX), Video (MP4,
-                    <br className="hidden sm:block" />
-                    AVI), Images (JPG, PNG)
-                  </p>
-                  <p className="text-xs text-gray-400 leading-snug">
-                    Maximum file size: 500MB For vedios, 50MB For documents
-                  </p>
-                </div>
+                {resourceType === "Link" ? (
+                  <div className="border border-gray-300 rounded-lg p-4 bg-white flex flex-col justify-center min-h-[148px]">
+                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                      Approved external URL
+                    </label>
+                    <input
+                      type="url"
+                      value={externalUrl}
+                      onChange={(e) => setExternalUrl(e.target.value)}
+                      placeholder="https://example.gov.kh/policy-document"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
+                    />
+                    <p className="text-xs text-gray-400 mt-2">
+                      Must be an approved HTTP/HTTPS link to an official or external resource.
+                    </p>
+                  </div>
+                ) : (
+                  /* Main file drop zone */
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-[#032EA1] transition-colors cursor-pointer bg-white flex flex-col items-center justify-center min-h-[148px]">
+                    <p className="text-sm text-gray-600 font-medium">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1 leading-snug">
+                      Supported formats: PDF, Word (DOC/DOCX), Video (MP4,
+                      <br className="hidden sm:block" />
+                      AVI), Images (JPG, PNG)
+                    </p>
+                    <p className="text-xs text-gray-400 leading-snug">
+                      Maximum file size: 500MB For vedios, 50MB For documents
+                    </p>
+                    {isEditing && (
+                      <p className="text-xs text-[#032EA1] mt-2 font-medium">
+                        Leave empty to keep the currently published file.
+                      </p>
+                    )}
+                  </div>
+                )}
                 {/* Thumbnail upload */}
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:border-[#032EA1] transition-colors cursor-pointer bg-white min-h-[148px]">
                   <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center mb-2">
@@ -206,46 +421,40 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
               <h3 className="text-base font-semibold text-gray-900 mb-4">
                 Publishing Options
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Publish Date
                   </label>
                   <input
                     type="date"
+                    value={publishDate}
+                    onChange={(e) => setPublishDate(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Visibility
-                  </label>
-                  <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#032EA1] focus:border-transparent outline-none bg-white">
-                    <option value="public">Public (All Users)</option>
-                    <option value="restricted">Restricted (Selected Roles)</option>
-                    <option value="province">Province Specific</option>
-                  </select>
                 </div>
               </div>
             </div>
 
-            {/* Notification */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 mt-1 rounded border-gray-300 text-[#032EA1] focus:ring-[#032EA1]"
-                />
-                <div>
-                  <p className="text-sm font-medium text-green-900">
-                    Send notification to target audience
-                  </p>
-                  <p className="text-xs text-green-700 mt-1">
-                    Users will receive an email and in-app notification about this new material
-                  </p>
+            {/* Notification — only relevant when publishing something new */}
+            {!isEditing && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 mt-1 rounded border-gray-300 text-[#032EA1] focus:ring-[#032EA1]"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-green-900">
+                      Send notification to target audience
+                    </p>
+                    <p className="text-xs text-green-700 mt-1">
+                      Users will receive an email and in-app notification about this new material
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -258,18 +467,22 @@ export function KnowledgeUploadForm({ onClose }: KnowledgeUploadFormProps) {
             Cancel
           </button>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            {!isEditing && (
+              <button
+                type="button"
+                className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+              >
+                Save as Draft
+              </button>
+            )}
             <button
               type="button"
-              className="px-4 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+              onClick={handleSubmit}
+              disabled={!isValid}
+              className="flex items-center gap-2 px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save as Draft
-            </button>
-            <button
-              type="button"
-              className="flex items-center gap-2 px-4 py-1.5 text-sm bg-[#032EA1] text-white rounded-lg hover:bg-[#0447D4] transition-colors font-medium"
-            >
-              <Upload className="w-4 h-4" />
-              Publish Material
+              {isEditing ? <Save className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
+              {isEditing ? "Save Changes" : "Publish Material"}
             </button>
           </div>
         </div>
