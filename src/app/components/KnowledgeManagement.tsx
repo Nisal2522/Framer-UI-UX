@@ -19,6 +19,7 @@ import {
   Trash2,
   Archive,
   ArchiveRestore,
+  Sprout,
   X,
 } from "lucide-react";
 import { KnowledgeUploadForm, type KnowledgeResourceFormData } from "./KnowledgeUploadForm";
@@ -353,6 +354,19 @@ const RESOURCE_TYPE_META: Record<
   Map: { icon: Map, badgeClass: "bg-purple-50 text-purple-700 border-purple-200" },
   Link: { icon: Link2, badgeClass: "bg-amber-50 text-amber-700 border-amber-200" },
 };
+
+/** Which crop group a crop belongs to (PEARL Priority takes precedence, since a crop
+ *  like Rice sits in both PEARL Priority and Cereals). */
+function cropGroupForCommodity(crop: string): string {
+  const priorityGroup = CROP_GROUPS.find((g) => g.name === "PEARL Priority");
+  if (priorityGroup?.crops.includes(crop)) return "PEARL Priority";
+  return CROP_GROUPS.find((g) => g.name !== "PEARL Priority" && g.crops.includes(crop))?.name ?? "";
+}
+
+/** Cards show the crop GROUP(s) a resource belongs to, not the individual crop values. */
+function formatCropGroups(crops: string[]): string {
+  return Array.from(new Set(crops.map(cropGroupForCommodity).filter(Boolean))).join(", ");
+}
 
 type SortOption = "newest" | "oldest" | "title";
 
@@ -847,12 +861,19 @@ export function KnowledgeManagement() {
                       </span>
                     </div>
 
-                    <p className="text-[11px] text-gray-400 mt-1.5">
-                      {resource.topic}
-                      {resource.cropCommodity.length > 0 && (
-                        <span className="text-gray-300"> • {resource.cropCommodity.join(", ")}</span>
-                      )}
-                    </p>
+                    {resource.cropCommodity.length > 0 && (
+                      <p className="inline-flex items-center gap-1 text-[11px] text-gray-400 mt-1.5">
+                        <Sprout className="w-3 h-3 text-gray-400 shrink-0" />
+                        {formatCropGroups(resource.cropCommodity)}
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-500">
+                      <span className="inline-flex items-center gap-1">
+                        <Eye className="w-3 h-3 text-gray-400" />
+                        Views: <span className="font-semibold text-gray-700 tabular-nums">{resource.views.toLocaleString()}</span>
+                      </span>
+                    </div>
 
                     <div className="mt-auto pt-3 flex items-center justify-between gap-2">
                       <p className="text-[11px] text-gray-500 truncate">
