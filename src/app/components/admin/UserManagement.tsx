@@ -19,6 +19,10 @@ import {
 
 type UserStatus = "Active" | "Inactive";
 
+/** Read/Write access for one module (or sub-item). */
+type PermissionLevel = { read: boolean; write: boolean };
+type PermissionsMap = Record<string, PermissionLevel>;
+
 type ManagedUser = {
   id: string;
   name: string;
@@ -27,7 +31,7 @@ type ManagedUser = {
   country: string;
   province: string;
   status: UserStatus;
-  permissions: string[];
+  permissions: PermissionsMap;
 };
 
 const PROVINCE_OPTIONS = [
@@ -43,20 +47,60 @@ const PROVINCE_OPTIONS = [
   "Pursat",
 ];
 
-/** Mirrors the admin sidebar sections in Root.tsx — the real modules a Government Admin account can be granted. */
-const PERMISSION_MODULES = [
+type PermissionSubItem = {
+  key: string;
+  label: string;
+  /** When set, this sub-item is a single on/off grant instead of a two-toggle pair. */
+  singleLabel?: string;
+};
+
+type PermissionModule = {
+  key: string;
+  label: string;
+  /** Text for the two toggle pills; defaults to ["Read", "Write"]. */
+  toggleLabels?: [string, string];
+  subItems?: PermissionSubItem[];
+};
+
+/** Mirrors the admin sidebar sections in Root.tsx — the real modules a Government Admin account
+ *  can be granted, each with independent access toggles. Some modules carry sub-items for
+ *  finer-grained control (e.g. Knowledge Hub's taxonomy/administration settings). */
+const PERMISSION_MODULES: PermissionModule[] = [
   { key: "national-dashboard", label: "National Dashboard" },
   { key: "ac-profiles", label: "AC Profiles" },
   { key: "commune-verification", label: "Commune Verification" },
   { key: "business-plan", label: "Business Plan" },
   { key: "progress-reporting", label: "Progress Reporting" },
-  { key: "knowledge-hub", label: "Knowledge Hub" },
+  {
+    key: "knowledge-hub",
+    label: "Knowledge Hub",
+    toggleLabels: ["Contributor", "Publisher"],
+    subItems: [
+      { key: "knowledge-hub-configuration", label: "Knowledge Hub Configuration", singleLabel: "Grant" },
+    ],
+  },
   { key: "training-management", label: "Training Management" },
   { key: "gesi-reporting", label: "GESI / Reporting" },
   { key: "user-management", label: "User Management" },
 ];
 
-const ALL_PERMISSION_KEYS = PERMISSION_MODULES.map((m) => m.key);
+/** Every module key plus every sub-item key, flattened — the full set of permission rows. */
+const ALL_PERMISSION_KEYS = PERMISSION_MODULES.flatMap((m) => [
+  m.key,
+  ...(m.subItems?.map((s) => s.key) ?? []),
+]);
+
+function fullAccessPermissions(): PermissionsMap {
+  return Object.fromEntries(ALL_PERMISSION_KEYS.map((key) => [key, { read: true, write: true }]));
+}
+
+function permissionsFromKeys(keys: string[]): PermissionsMap {
+  return Object.fromEntries(keys.map((key) => [key, { read: true, write: true }]));
+}
+
+function grantedCount(permissions: PermissionsMap): number {
+  return Object.values(permissions).filter((p) => p.read || p.write).length;
+}
 
 const SEED_USERS: ManagedUser[] = [
   {
@@ -67,7 +111,7 @@ const SEED_USERS: ManagedUser[] = [
     country: "Cambodia",
     province: "Phnom Penh",
     status: "Active",
-    permissions: ALL_PERMISSION_KEYS,
+    permissions: fullAccessPermissions(),
   },
   {
     id: "U-002",
@@ -77,7 +121,7 @@ const SEED_USERS: ManagedUser[] = [
     country: "Cambodia",
     province: "Phnom Penh",
     status: "Active",
-    permissions: ["training-management", "knowledge-hub", "national-dashboard"],
+    permissions: permissionsFromKeys(["training-management", "knowledge-hub", "national-dashboard"]),
   },
   {
     id: "U-003",
@@ -87,7 +131,7 @@ const SEED_USERS: ManagedUser[] = [
     country: "Cambodia",
     province: "Kampong Cham",
     status: "Active",
-    permissions: ALL_PERMISSION_KEYS,
+    permissions: fullAccessPermissions(),
   },
   {
     id: "U-004",
@@ -97,7 +141,7 @@ const SEED_USERS: ManagedUser[] = [
     country: "Cambodia",
     province: "Phnom Penh",
     status: "Inactive",
-    permissions: ["business-plan", "progress-reporting"],
+    permissions: permissionsFromKeys(["business-plan", "progress-reporting"]),
   },
   {
     id: "U-005",
@@ -107,7 +151,11 @@ const SEED_USERS: ManagedUser[] = [
     country: "Cambodia",
     province: "Battambang",
     status: "Active",
-    permissions: ["ac-profiles", "commune-verification", "gesi-reporting"],
+    permissions: {
+      "ac-profiles": { read: true, write: true },
+      "commune-verification": { read: true, write: false },
+      "gesi-reporting": { read: true, write: false },
+    },
   },
 ];
 
@@ -118,7 +166,7 @@ type UserFormState = {
   country: string;
   province: string;
   active: boolean;
-  permissions: string[];
+  permissions: PermissionsMap;
 };
 
 const EMPTY_FORM: UserFormState = {
@@ -128,10 +176,47 @@ const EMPTY_FORM: UserFormState = {
   country: "Cambodia",
   province: "",
   active: true,
-  permissions: [],
+  permissions: {},
 };
 
 const PAGE_SIZE = 10;
+
+/** Labeled Read/Write toggle pill — the circle and its "Read"/"Write" text live inside
+ *  one pill (same shape as the Active Status pill), instead of a bare switch under a
+ *  column header. */
+function RWSwitch({
+  checked,
+  onClick,
+  text,
+  ariaLabel,
+}: {
+  checked: boolean;
+  onClick: () => void;
+  text: string;
+  ariaLabel: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      onClick={onClick}
+      className={`inline-flex shrink-0 items-center justify-center gap-1.5 w-[104px] rounded-full border pl-0.5 pr-2.5 py-1 transition-colors ${
+        checked
+          ? "bg-[#032EA1] border-[#032EA1] text-white"
+          : "bg-white border-gray-300 text-gray-500"
+      }`}
+    >
+      <span
+        className={`inline-flex items-center justify-center h-4 w-4 rounded-full transition-colors ${
+          checked ? "bg-white" : "bg-gray-300"
+        }`}
+      />
+      <span className="text-xs font-medium">{text}</span>
+    </button>
+  );
+}
 
 export function UserManagement() {
   const [users, setUsers] = useState<ManagedUser[]>(SEED_USERS);
@@ -201,19 +286,23 @@ export function UserManagement() {
     formState.country.trim() &&
     formState.province.trim();
 
-  const togglePermission = (key: string) => {
-    setFormState((f) => ({
-      ...f,
-      permissions: f.permissions.includes(key)
-        ? f.permissions.filter((p) => p !== key)
-        : [...f.permissions, key],
-    }));
+  const togglePermission = (key: string, field: "read" | "write") => {
+    setFormState((f) => {
+      const current = f.permissions[key] ?? { read: false, write: false };
+      return {
+        ...f,
+        permissions: {
+          ...f.permissions,
+          [key]: { ...current, [field]: !current[field] },
+        },
+      };
+    });
     setPermissionError(false);
   };
 
   const handleSubmitUser = () => {
     if (!detailsValid) return;
-    if (formState.permissions.length === 0) {
+    if (grantedCount(formState.permissions) === 0) {
       setPermissionError(true);
       return;
     }
@@ -393,7 +482,8 @@ export function UserManagement() {
                 pagedUsers.map((u, rowIdx) => {
                   const StatusIcon = u.status === "Active" ? CheckCircle : MinusCircle;
                   const statusColor = u.status === "Active" ? "text-emerald-600" : "text-gray-500";
-                  const fullAccess = u.permissions.length === PERMISSION_MODULES.length;
+                  const grantedForUser = grantedCount(u.permissions);
+                  const fullAccess = grantedForUser === ALL_PERMISSION_KEYS.length;
                   return (
                     <tr
                       key={u.id}
@@ -420,7 +510,7 @@ export function UserManagement() {
                         <div className="flex items-center gap-1.5 min-w-0">
                           <ShieldCheck className="w-3.5 h-3.5 shrink-0 text-gray-400" />
                           <span className="text-xs sm:text-sm text-gray-700 truncate">
-                            {fullAccess ? "Full access" : `${u.permissions.length} module${u.permissions.length === 1 ? "" : "s"}`}
+                            {fullAccess ? "Full access" : `${grantedForUser} item${grantedForUser === 1 ? "" : "s"}`}
                           </span>
                         </div>
                       </td>
@@ -651,41 +741,81 @@ export function UserManagement() {
 
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Permissions</h3>
-                <div className="space-y-3">
-                  {PERMISSION_MODULES.map((mod) => {
-                    const enabled = formState.permissions.includes(mod.key);
-                    return (
-                      <button
-                        key={mod.key}
-                        type="button"
-                        role="switch"
-                        aria-checked={enabled}
-                        onClick={() => togglePermission(mod.key)}
-                        className="w-full flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-                      >
-                        <span className="text-sm font-semibold text-gray-900">{mod.label}</span>
-                        <span
-                          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                            enabled ? "bg-[#032EA1]" : "bg-gray-300"
-                          }`}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                              enabled ? "translate-x-6" : "translate-x-1"
-                            }`}
-                          />
-                        </span>
-                      </button>
-                    );
-                  })}
-
-                  {permissionError && (
-                    <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                      At least one permission must be selected.
-                    </div>
-                  )}
+                <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+                  <div className="divide-y divide-gray-100">
+                    {PERMISSION_MODULES.map((mod) => {
+                      const level = formState.permissions[mod.key] ?? { read: false, write: false };
+                      const [readLabel, writeLabel] = mod.toggleLabels ?? ["Read", "Write"];
+                      return (
+                        <div key={mod.key}>
+                          <div className="flex items-center justify-between gap-3 pl-4 pr-3 py-2.5">
+                            <span className="text-sm font-semibold text-gray-900">{mod.label}</span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <RWSwitch
+                                checked={level.read}
+                                onClick={() => togglePermission(mod.key, "read")}
+                                text={readLabel}
+                                ariaLabel={`${mod.label} ${readLabel}`}
+                              />
+                              <RWSwitch
+                                checked={level.write}
+                                onClick={() => togglePermission(mod.key, "write")}
+                                text={writeLabel}
+                                ariaLabel={`${mod.label} ${writeLabel}`}
+                              />
+                            </div>
+                          </div>
+                          {mod.subItems?.map((sub) => {
+                            const subLevel = formState.permissions[sub.key] ?? { read: false, write: false };
+                            return (
+                              <div
+                                key={sub.key}
+                                className="flex items-center justify-between gap-3 pl-8 pr-3 py-2 bg-gray-50/60 border-t border-gray-100"
+                              >
+                                <span className="text-xs text-gray-600">{sub.label}</span>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {sub.singleLabel ? (
+                                    <>
+                                      <RWSwitch
+                                        checked={subLevel.read}
+                                        onClick={() => togglePermission(sub.key, "read")}
+                                        text={sub.singleLabel}
+                                        ariaLabel={`${sub.label} ${sub.singleLabel}`}
+                                      />
+                                      <div className="w-[104px]" aria-hidden="true" />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <RWSwitch
+                                        checked={subLevel.read}
+                                        onClick={() => togglePermission(sub.key, "read")}
+                                        text="Read"
+                                        ariaLabel={`${sub.label} read access`}
+                                      />
+                                      <RWSwitch
+                                        checked={subLevel.write}
+                                        onClick={() => togglePermission(sub.key, "write")}
+                                        text="Write"
+                                        ariaLabel={`${sub.label} write access`}
+                                      />
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                {permissionError && (
+                  <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700 mt-3">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    At least one permission must be selected.
+                  </div>
+                )}
               </div>
             </div>
 
